@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {% if message_success %}
+        {%include 'homepage\success_msg.html'%}
+        {% endif %}
+        <div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 550px;">
+            <div class="card-header">
+                <div class="card-tools" style="margin-right: -0.8rem;" >
+                    <form method="POST" action="{% url 'ofpastdetails' %}">
+                        {% csrf_token %}
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" download fas fa-download"></i></button></li>
+                    </form>
+                    <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+                    </ul>
+                </div>
+                <h5 class="m-0">WO PAST details</h5>
+            </div>
+            <div class="card-body">
+                <!-- Pagination -->
+                {% if data.has_other_pages %}
+                <ul class="pagination justify-content-end">
+                    {% if data.has_previous %}
+                        <li class="page-item">
+                                <a class="page-link" href="?page={{ data.previous_page_number }}">
+                                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                    {% endif %}
+                    {% if data.number|add:'-5' > 1 %}
+                        <li class="page-item" >
+                            <a class="page-link" href="?page={{ data.number|add:'-5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% for i in data.paginator.page_range %}
+                        {% if data.number == i %}
+                            <li class="page-link">
+                                <span>{{ i }} 
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% elif i > data.number|add:'-5' and i < data.number|add:'5' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %} 
+                    {% if data.paginator.num_pages > data.number|add:'5' %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.number|add:'5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% if data.has_next %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.next_page_number }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+                        </li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+                <!-- End Pagination -->
+                <table class='table table-sm table-bordered table-hover table-head-fixed table-responsive-sm table-condensed '  >
+                    <thead class="table-light" style="white-space: nowrap">
+                            <tr>
+                                <th>Year </th>
+                                <th>Week </th>
+                                <th>Root Cause </th> 
+                                <th>Profit Centre</th>
+                                <th>Order</th>
+                                <th>Division</th>
+                                <th>Material</th>
+                                <th>Designation </th>
+                                <th>Order type</th>
+                                <th>Otp element </th>
+                                <th>Manufacturing version</th>
+                                <th>System_status </th>
+                                <th>Customer order</th>
+                                <th>Range operations number</th>
+                                <th>Entered by</th>
+                                <th>Nomenclature status</th>
+                                <th>Fixation</th>
+                                <th>Order_quantity </th>
+                                <th>Delivered quantity </th>
+                                <th>Confirmed scrapmodels</th>
+                                <th>Date end real</th>
+                                <th>Date end plan</th>
+                                <th>Date start plan</th>
+                                <th>Date plan opening</th> 
+                                <th>Date requesth </th>
+                                <th>Date entry</th>
+                            </tr>
+                    </thead>    
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{row.year}} </td>
+                            <td>{{row.week}} </td>
+                            <td style="white-space: nowrap;">{{row.RootCause}} </td>
+                            <td>{{row.profit_centre}} </td>
+                            <td>{{row.order}} </td>
+                            <td>{{row.division}} </td>
+                            <td>{{row.material}}</td>
+                            <td>{{row.designation }}</td>
+                            <td>{{row.order_type}}</td>
+                            <td>{{row.otp_elemend }}</td>
+                            <td>{{row.manufacturing_version}}</td>
+                            <td>{{row.system_status }}</td>
+                            <td>{{row.customer_order}}</td>
+                            <td>{{row.range_operations_number}}</td>
+                            <td>{{row.entered_by}}</td>
+                            <td>{{row.nomenclature_status}}</td>
+                            <td>{{row.fixation}}</td>
+                            <td>{{row.order_quantity }}</td>
+                            <td>{{row.delivered_quantity }}</td>
+                            <td>{{row.confirmed_scrapmodels}}</td>
+                            <td>{{row.date_end_real}}</td>
+                            <td>{{row.date_end_plan}}</td>
+                            <td>{{row.date_start_plan}}</td>
+                            <td>{{row.date_plan_opening}}</td> 
+                            <td>{{row.date_requesedd }}</td>
+                            <td>{{row.date_entry}}</td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{%endblock%}

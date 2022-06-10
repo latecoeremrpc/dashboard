@@ -1,0 +1,142 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block children %}
+<!-- Info Modal -->
+<div class="modal fade " id="cogi_count_per_accountability_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Informations</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <ul class="list-group list-group-flush">
+            <li class="list-group-item"><b>Documentation</b> : IN_MRPC_014 </li>
+            <li class="list-group-item"><b>Input</b> : Tcode : COGI variant MRPC_IS</li>
+            <li class="list-group-item"><b>Filter</b> : N/A</li>
+            <li class="list-group-item"><b>Rules</b>: COGI departement distribution logistique (018, 021, 667), MRPC (other)</li>
+            </ul>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+        </div>
+    </div>
+</div>
+<!-- End Info Modal -->
+
+<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 600px !important; ">
+                    
+    <div class="card-header">
+        <div class="card-tools" style="margin-right: -0.8rem;" >
+            <form action={%url 'homesettings' %} method='POST'>
+                {% csrf_token %}
+                <input name="kpi" type="hidden" value="cogi\count_per_accountability"> 
+                <input name="col" type="hidden" value="6"> 
+            <ul class="list-group list-group-horizontal" style="height: 35px;">
+                <li class="list-group-item" style="padding:7px;"><i type="button"  data-toggle="modal" data-target="#cogi_count_per_accountability_modal" class="info fas fa-info-circle"></i></li>
+                <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" favorite fas fa-heart" {%if 'cogi\\count_per_accountability.html' in homekpi %} style="color:red;" {%endif%} ></i></button></li>
+            </form>
+            <li class="list-group-item" style="padding:7px;"><i type="button" class="download fas fa-download" id="btn-download-cogi_count_per_accountability"></i></li>
+            <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+            </ul>
+        </div>
+        <h5 class="m-0">Cogi Count per accountability</h5>
+
+    </div>
+    <div class="card-body" style="display: block;">
+        <h6 class="card-title ">Week(s):
+            <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
+                {%for w in weeks %} 
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">{{w}}</li>
+                {%empty%}
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">{{current_week}}</li>
+                {%endfor%}
+            </ul> 
+        </h6> 
+        {% if cogi_count_per_accountability.iterrows %}
+        <div style="height: 400px" >
+            <canvas id="cogi_count_per_accountability" ></canvas>
+
+            <script>
+                var xValues = [{% for index, data in cogi_count_per_accountability.iterrows %}  '{{data.accountability}} '+'('+(({{data.id}}*100)/{{cogi_count}}).toFixed(2)+'%)', {% endfor %}];
+                var data = [{% for index, data in cogi_count_per_accountability.iterrows %} {{data.id}}, {% endfor %}];
+                
+                const cogi_count_per_accountability=new Chart("cogi_count_per_accountability", {
+                    // plugins: [ChartDataLabels],
+                    type: "pie",
+                    data: {
+                            labels: xValues,
+                            datasets: [
+                                {
+                                label: 'Message Code',
+                                backgroundColor:  ['#048ba8','#f4a259'],
+                                borderColor:  ['#048ba8','#f4a259'],
+                                borderWidth: 1,
+                                data: data
+                                }
+                            ]
+                            },
+                    options: {
+                        plugins: {
+                                datalabels: {
+                                    // anchor: 'end',
+                                    clamp: true,
+                                    color: 'white',
+                                    backgroundColor: '#404040',
+                                    formatter: (val, ctx) => {
+                                    return ctx.chart.data.labels[ctx.dataIndex];
+                                    },
+                                    
+                                },
+                                legend: {
+                                display: true,
+                                position:'left',
+                                align:'middle',
+                                labels: {
+                                usePointStyle: true,
+                                boxWidth: 6,
+
+                                },
+                                },
+
+                                title: {
+                                    display: false,
+                                    text: "tile"
+                                },
+                            },
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio:false, 
+                    }
+
+                });
+            </script>
+        </div>
+        {% else %}
+        <center style="margin-top: 15%;"><img src="{% static 'img/nodatafound.png' %}" alt="">
+            <p class="card-text text-center">
+                No Data available for this selection
+            </p>
+            <a class="btn btn-primary" href="{% url 'cogicalcul' %}" role="button">Calculate now</a>
+        </center>
+        {% endif %}
+    </div>
+
+    <script>
+        var image = cogi_count_per_accountability.toBase64Image();
+        document.getElementById('btn-download-cogi_count_per_accountability').onclick = function() {
+        var a = document.createElement('a');
+        a.href = cogi_count_per_accountability.toBase64Image();
+        a.download = 'Cogi count per accountability.png';
+        a.click();
+        }
+    </script>
+</div>
+
+
+{% endblock children%}

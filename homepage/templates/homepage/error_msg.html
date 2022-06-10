@@ -1,0 +1,17 @@
+<style>
+    .toasts-top-right{
+        right: 40% !important;
+        top: 60px  !important;
+        width: 350px;
+    }
+</style>
+<script> 
+$(document).Toasts('create', 
+{ 
+    title: 'Error', 
+    autohide: false, 
+    delay: 750, 
+    body: '{{message_error}}', 
+    class:"toast bg-danger fade" 
+}) ; 
+</script>

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {% if message_success %}
+        {%include 'homepage\success_msg.html'%}
+        {% endif %}
+        <div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 550px;">
+            <div class="card-header">
+                <div class="card-tools" style="margin-right: -0.8rem;" >
+                    <form method="POST" action="{% url 'PurchasePastdetails' %}">
+                        {% csrf_token %}
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" download fas fa-download"></i></button></li>
+                    </form>
+                    <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+                    </ul>
+                </div>
+                <h5 class="m-0">PR past details</h5>
+            </div>
+            <div class="card-body">
+                <!-- Pagination -->
+                {% if data.has_other_pages %}
+                <ul class="pagination justify-content-end">
+                    {% if data.has_previous %}
+                        <li class="page-item">
+                                <a class="page-link" href="?page={{ data.previous_page_number }}">
+                                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                    {% endif %}
+                    {% if data.number|add:'-5' > 1 %}
+                        <li class="page-item" >
+                            <a class="page-link" href="?page={{ data.number|add:'-5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% for i in data.paginator.page_range %}
+                        {% if data.number == i %}
+                            <li class="page-link">
+                                <span>{{ i }} 
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% elif i > data.number|add:'-5' and i < data.number|add:'5' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %} 
+                    {% if data.paginator.num_pages > data.number|add:'5' %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.number|add:'5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% if data.has_next %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.next_page_number }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+                        </li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+                <!-- End Pagination -->
+                <table class='table table-sm table-bordered table-hover table-head-fixed table-responsive-sm table-condensed '  >
+                    <thead class="table-light" style="white-space: nowrap">
+                            <tr>
+                                <th>Year</th>  
+                                <th>Week</th>
+                                <th>Purchase requisition</th>
+                                <th>Item of requisition</th>
+                                <th>Deletion indicator</th>
+                                <th>Purchasing group</th>
+                                <th>Material</th>
+                                <th>Division</th>
+                                <th>Transferring division</th>
+                                <th>Requisition date</th>
+                                <th>Release date</th>
+                                <th>Valuation price</th>
+                                <th>Supplier</th>
+                                <th>Outline agreement</th>
+                                <th>Principal agmt item</th>
+                                <th>Purchase order</th>
+                                <th>Purchase order item</th>
+                            </tr>
+                    </thead>    
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{row.year}} </td>
+                            <td>{{row.week}} </td>
+                            <td style="white-space: nowrap;">{{row.purchase_requisition}} </td>
+                            <td>{{row.item_of_requisition}} </td>
+                            <td>{{row.deletion_indicator}} </td>
+                            <td>{{row.purchasing_group}} </td>
+                            <td>{{row.material}} </td>
+                            <td>{{row.division}} </td>
+                            <td>{{row.transferring_division}} </td>
+                            <td>{{row.requisition_date}} </td>
+                            <td>{{row.release_date}} </td>
+                            <td>{{row.valuation_price}} </td>
+                            <td>{{row.supplier}} </td>
+                            <td>{{row.outline_agreement}} </td>
+                            <td>{{row.principal_agmt_item}} </td>
+                            <td>{{row.purchase_order}} </td>
+                            <td>{{row.purchase_order_item}} </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{%endblock%}

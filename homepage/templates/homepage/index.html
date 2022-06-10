@@ -1,0 +1,91 @@
+{%extends 'base.html'%}
+{% block content%}
+<div class="content">
+    <div class="container-fluid">
+        <!-- filter -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">  
+                    <div class="card-header">
+                    <h3 class="card-title">Filter</h3>
+                    </div>
+                    <form action={% url 'homepage' %} method="post">
+                        {%include 'homepage/filter.html' %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {%if kpis%}
+                {% for k in kpis %}
+                <div class="col-{{k.col}}" style="margin: 5px 0 5px 0 !important;">
+                    {% include k.kpi %}
+                </div>
+                {%endfor%}
+            {%else%}
+            <div class="col-12">
+                <div class="card card-warning card-outline">
+                    <div class="card-header">
+                        <div class="text-muted mt-3" style="margin-left: 35%;">
+                            There are no KPIs on your home yet, add via <a href="{% url 'homesettings' %}">Setting home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {%endif%}
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function selectAllDivision(){
+        var items=document.getElementsByName('division');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=true;
+        }
+        document.getElementById('selectdivision').style.display = "none";
+        document.getElementById('unselectdivision').style.display = "block";
+    }
+    
+    function UnSelectAllDivision(){
+        var items=document.getElementsByName('division');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=false;
+        }
+        document.getElementById('selectdivision').style.display = "block";
+        document.getElementById('unselectdivision').style.display = "none";
+    }			
+</script>
+
+
+<script type="text/javascript">
+    function selectAllWeek(){
+        var items=document.getElementsByName('week');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=true;
+        }
+        document.getElementById('selectweek').style.display = "none";
+        document.getElementById('unselectweek').style.display = "block";
+    }
+    
+    function UnSelectAllWeek(){
+        var items=document.getElementsByName('week');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=false;
+        }
+        document.getElementById('selectweek').style.display = "block";
+        document.getElementById('unselectweek').style.display = "none";
+    }			
+</script>
+
+
+
+
+
+
+{%endblock%}

@@ -1,0 +1,415 @@
+<!-- Error msg style  -->
+<style>
+    .toasts-top-right{
+        right: 40% !important;
+        top: 60px  !important;
+        width: 350px;
+    }
+</style>
+
+<div class="card-body">
+    <div class="row">
+        {% csrf_token %}
+            <div class="col-lg-4 col-3">
+                <label for=" inputEmail4">Divisions:</label>
+                <div class="col-lg-5 col-3">
+                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectdivision' style="width: 100px !important;border-radius: 10px;" onclick='selectAllDivision()' value="Select All"/>
+                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectdivision' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllDivision()' value="Unselect All"/>
+                </div>
+                <br>
+                <!--To Edit => Loop for division-->
+                <ul class="ks-cboxtags">
+                    <li><input type="checkbox" id="checkbox1" value="2000" name="division" '{% if "2000" in divisions %} checked {% endif %}'><label for="checkbox1">2000</label></li>
+                    <li><input type="checkbox" id="checkbox2" value="2010" name="division" '{% if "2010" in divisions %} checked {% endif %}'><label for="checkbox2">2010</label></li>
+                    <li><input type="checkbox" id="checkbox3" value="2020" name="division" '{% if "2020" in divisions %} checked {% endif %}'><label for="checkbox3">2020</label></li>
+                    <li><input type="checkbox" id="checkbox10" value="2030" name="division" '{% if "2030" in divisions %} checked {% endif %}'><label for="checkbox10">2030</label></li>
+                    <li><input type="checkbox" id="checkbox9" value="2110" name="division" '{% if "2110" in divisions %} checked {% endif %}'><label for="checkbox9">2110</label></li><br>
+                    <li><input type="checkbox" id="checkbox4" value="2200" name="division" '{% if "2200" in divisions %} checked {% endif %}'><label for="checkbox4">2200</label></li>
+                    <li><input type="checkbox" id="checkbox5" value="2300" name="division" '{% if "2300" in divisions %} checked {% endif %}'><label for="checkbox5">2300</label></li>
+                    <li><input type="checkbox" id="checkbox6" value="2400" name="division" '{% if "2400" in divisions %} checked {% endif %}'><label for="checkbox6">2400</label></li>
+                    <li><input type="checkbox" id="checkbox7" value="2500" name="division" '{% if "2500" in divisions %} checked {% endif %}'><label for="checkbox7">2500</label></li>
+                    <li><input type="checkbox" id="checkbox8" value="2600" name="division" '{% if "2600" in divisions %} checked {% endif %}'><label for="checkbox8">2600</label></li>
+                </ul> 
+            </div>
+            <div class="col-lg-4 col-3">
+                <label>Profit Center:</label>
+                        <div class="col-lg-5 col-3">
+                            <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectcp' style="width: 100px !important;border-radius: 10px;"value="Select All" onclick='selectAllCp()'/>
+                            <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectcp' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllCp()' value="Unselect All"/>
+                        </div>
+                        <br>
+                        <div class="select2-primary" style="width: 80%;height: 90px;overflow-y: auto;">
+                            <select name='profit_center' id='cp' class="select2 select2-hidden-accessible" multiple="" data-placeholder="Select a Profit center" data-dropdown-css-class="select2-primary" style="width: 100%;" data-select2-id="15" tabindex="-1" aria-hidden="true">
+                                <option value='100' '{%  if "100" in profit_center %} selected {% endif %}'>100_A320 20VU - RC</option>
+                                <option value='101' '{%  if "101" in profit_center %} selected {% endif %}'>101_A320 CCP - RC</option>
+                                <option value='102' '{%  if "102" in profit_center %} selected {% endif %}'>102_A320 106VU - RC</option>
+                                <option value='103' '{%  if "103" in profit_center %} selected {% endif %}'>103_A320 107VU - RC</option>
+                                <option value='104' '{%  if "104" in profit_center %} selected {% endif %}'>104_A320 109VU - RC</option>
+                                <option value='105' '{%  if "105" in profit_center %} selected {% endif %}'>105_A320 90VU - RC</option>
+                                <option value='106' '{%  if "106" in profit_center %} selected {% endif %}'>106_A330 800VU - OSW/OLW</option>
+                                <option value='107' '{%  if "107" in profit_center %} selected {% endif %}'>107_A330 800VU - RC</option>
+                                <option value='108' '{%  if "108" in profit_center %} selected {% endif %}'>108_A330 WINGS - NRC</option>
+                                <option value='109' '{%  if "109" in profit_center %} selected {% endif %}'>109_A330 WINGS WP1 - RC</option>
+                                <option value='110' '{%  if "110" in profit_center %} selected {% endif %}'>110_A330 WINGS WP2 - RC</option>
+                                <option value='111' '{%  if "111" in profit_center %} selected {% endif %}'>111_A330 WINGS WP3 - RC</option>
+                                <option value='112' '{%  if "112" in profit_center %} selected {% endif %}'>112_A330 WINGS WP4 - RC</option>
+                                <option value='113' '{%  if "113" in profit_center %} selected {% endif %}'>113_A330 WINGS - OSW CEO</option>
+                                <option value='114' '{%  if "114" in profit_center %} selected {% endif %}'>114_A330 WINGS - OSW NEO</option>
+                                <option value='115' '{%  if "115" in profit_center %} selected {% endif %}'>115_A350 RACKS - NRC</option>
+                                <option value='116' '{%  if "116" in profit_center %} selected {% endif %}'>116_A350 RACKS - RC</option>
+                                <option value='117' '{%  if "117" in profit_center %} selected {% endif %}'>117_A350 RACKS - OLW</option>
+                                <option value='118' '{%  if "118" in profit_center %} selected {% endif %}'>118_A350 WINGS - NRC</option>
+                                <option value='119' '{%  if "119" in profit_center %} selected {% endif %}'>119_A350 WINGS</option>
+                                <option value='120' '{%  if "120" in profit_center %} selected {% endif %}'>120_A350 WINGS - OSW/OLW</option>
+                                <option value='121' '{%  if "121" in profit_center %} selected {% endif %}'>121_A380 CUSTO HAR NRC</option>
+                                <option value='122' '{%  if "122" in profit_center %} selected {% endif %}'>122_A380 CUSTO HAR DESI.</option>
+                                <option value='123' '{%  if "123" in profit_center %} selected {% endif %}'>123_A380 CUSTO HAR MANUF</option>
+                                <option value='124' '{%  if "124" in profit_center %} selected {% endif %}'>124_A380 RACKS - NRC</option>
+                                <option value='125' '{%  if "125" in profit_center %} selected {% endif %}'>125_A380 RACKS - RC</option>
+                                <option value='126' '{%  if "126" in profit_center %} selected {% endif %}'>126_A400M RACKS - NRC</option>
+                                <option value='127' '{%  if "127" in profit_center %} selected {% endif %}'>127_A400M RACKS - RC</option>
+                                <option value='128' '{%  if "128" in profit_center %} selected {% endif %}'>128_ATR 120VU - RC</option>
+                                <option value='129' '{%  if "129" in profit_center %} selected {% endif %}'>129_ATR 80VU - RC</option>
+                                <option value='130' '{%  if "130" in profit_center %} selected {% endif %}'>130_ATR 90VU - RC</option>
+                                <option value='131' '{%  if "131" in profit_center %} selected {% endif %}'>131_ATR CCP - RC</option>
+                                <option value='132' '{%  if "132" in profit_center %} selected {% endif %}'>132_TENDER - BENCH</option>
+                                <option value='133' '{%  if "133" in profit_center %} selected {% endif %}'>133_TEST BENCH RC</option>
+                                <option value='134' '{%  if "134" in profit_center %} selected {% endif %}'>134_A330 WINGS NEO</option>
+                                <option value='135' '{%  if "135" in profit_center %} selected {% endif %}'>135_INTER-BRANCH PROJ.</option>
+                                <option value='136' '{%  if "136" in profit_center %} selected {% endif %}'>136_INSTAL DESIGN ACTIVI</option>
+                                <option value='137' '{%  if "137" in profit_center %} selected {% endif %}'>137_TENDER - ENG</option>
+                                <option value='138' '{%  if "138" in profit_center %} selected {% endif %}'>138_SCHEMATIC DESIGN ACT</option>
+                                <option value='140' '{%  if "140" in profit_center %} selected {% endif %}'>140_F8X - NRC</option>
+                                <option value='141' '{%  if "141" in profit_center %} selected {% endif %}'>141_F8X - RC</option>
+                                <option value='142' '{%  if "142" in profit_center %} selected {% endif %}'>142_F8X - OSW/OLW</option>
+                                <option value='143' '{%  if "143" in profit_center %} selected {% endif %}'>143_F2000 RN - RC</option>
+                                <option value='144' '{%  if "144" in profit_center %} selected {% endif %}'>144_F900 EASY - RC</option>
+                                <option value='145' '{%  if "145" in profit_center %} selected {% endif %}'>145_MANUF. ENG. FAL</option>
+                                <option value='146' '{%  if "146" in profit_center %} selected {% endif %}'>146_A350 - 1000 WP9 FTI</option>
+                                <option value='147' '{%  if "147" in profit_center %} selected {% endif %}'>147_A350 WINGS FTI</option>
+                                <option value='148' '{%  if "148" in profit_center %} selected {% endif %}'>148_BELUGA XL CABIN</option>
+                                <option value='149' '{%  if "149" in profit_center %} selected {% endif %}'>149_BELUGA XL ESI</option>
+                                <option value='150' '{%  if "150" in profit_center %} selected {% endif %}'>150_DRONE U200 HAR.</option>
+                                <option value='151' '{%  if "151" in profit_center %} selected {% endif %}'>151_MRO OTHER</option>
+                                <option value='152' '{%  if "152" in profit_center %} selected {% endif %}'>152_FAL AIRBUS</option>
+                                <option value='153' '{%  if "153" in profit_center %} selected {% endif %}'>153_AIRBUS FTI</option>
+                                <option value='154' '{%  if "154" in profit_center %} selected {% endif %}'>154_FAL IBERIA</option>
+                                <option value='155' '{%  if "155" in profit_center %} selected {% endif %}'>155_MILITARY ACTIVITIES</option>
+                                <option value='156' '{%  if "156" in profit_center %} selected {% endif %}'>156_KIT A320 LOUXOR</option>
+                                <option value='157' '{%  if "157" in profit_center %} selected {% endif %}'>157_KIT AIRBUS</option>
+                                <option value='158' '{%  if "158" in profit_center %} selected {% endif %}'>158_KIT HELICOPTERS AIA</option>
+                                <option value='159' '{%  if "159" in profit_center %} selected {% endif %}'>159_KIT WIFI</option>
+                                <option value='160' '{%  if "160" in profit_center %} selected {% endif %}'>160_KITTING DASSAULT</option>
+                                <option value='161' '{%  if "161" in profit_center %} selected {% endif %}'>161_TENDER - KITTING</option>
+                                <option value='162' '{%  if "162" in profit_center %} selected {% endif %}'>162_RADAR GM400</option>
+                                <option value='163' '{%  if "163" in profit_center %} selected {% endif %}'>163_RAFALE FUEL TANK HAR</option>
+                                <option value='164' '{%  if "164" in profit_center %} selected {% endif %}'>164_SPARE PARTS A300</option>
+                                <option value='165' '{%  if "165" in profit_center %} selected {% endif %}'>165_AIRBUS SP W/A300</option>
+                                <option value='166' '{%  if "166" in profit_center %} selected {% endif %}'>166_SP LATÉCOÈRE</option>
+                                <option value='167' '{%  if "167" in profit_center %} selected {% endif %}'>167_MATERIAL BILLING DEU</option>
+                                <option value='168' '{%  if "168" in profit_center %} selected {% endif %}'>168_MERIGNAC</option>
+                                <option value='169' '{%  if "169" in profit_center %} selected {% endif %}'>169_ETRAS A380 - NRC</option>
+                                <option value='170' '{%  if "170" in profit_center %} selected {% endif %}'>170_ETRAS A380 - RC</option>
+                                <option value='171' '{%  if "171" in profit_center %} selected {% endif %}'>171_SAM 146 - RC</option>
+                                <option value='172' '{%  if "172" in profit_center %} selected {% endif %}'>172_INTRA-BRANCH SUBCO</option>
+                                <option value='173' '{%  if "173" in profit_center %} selected {% endif %}'>173_ERP IS PROJECT</option>
+                                <option value='174' '{%  if "174" in profit_center %} selected {% endif %}'>174_R&T</option>
+                                <option value='175' '{%  if "175" in profit_center %} selected {% endif %}'>175_A320 FLAP - RC</option>
+                                <option value='176' '{%  if "176" in profit_center %} selected {% endif %}'>176_A320 WRE - RC</option>
+                                <option value='177' '{%  if "177" in profit_center %} selected {% endif %}'>177_A330 915VU - RC</option>
+                                <option value='178' '{%  if "178" in profit_center %} selected {% endif %}'>178_A350 CCP - NRC</option>
+                                <option value='179' '{%  if "179" in profit_center %} selected {% endif %}'>179_A350 CCP - RC</option>
+                                <option value='180' '{%  if "180" in profit_center %} selected {% endif %}'>180_A350 TAIL CONE HARN.</option>
+                                <option value='181' '{%  if "181" in profit_center %} selected {% endif %}'>181_A350 VE - RC</option>
+                                <option value='182' '{%  if "182" in profit_center %} selected {% endif %}'>182_A350 VERTICAL TP</option>
+                                <option value='183' '{%  if "183" in profit_center %} selected {% endif %}'>183_A380 BOXES - NRC</option>
+                                <option value='184' '{%  if "184" in profit_center %} selected {% endif %}'>184_A380 BOXES</option>
+                                <option value='185' '{%  if "185" in profit_center %} selected {% endif %}'>185_A380 HARN. SENSORS</option>
+                                <option value='186' '{%  if "186" in profit_center %} selected {% endif %}'>186_A400M CCP - RC</option>
+                                <option value='187' '{%  if "187" in profit_center %} selected {% endif %}'>187_A400M FOH - NRC</option>
+                                <option value='188' '{%  if "188" in profit_center %} selected {% endif %}'>188_A400M FOH</option>
+                                <option value='189' '{%  if "189" in profit_center %} selected {% endif %}'>189_A400M VTP - NRC</option>
+                                <option value='190' '{%  if "190" in profit_center %} selected {% endif %}'>190_A400M VTP</option>
+                                <option value='191' '{%  if "191" in profit_center %} selected {% endif %}'>191_A400M VTP - OLW</option>
+                                <option value='192' '{%  if "192" in profit_center %} selected {% endif %}'>192_ATR DIVERS</option>
+                                <option value='193' '{%  if "193" in profit_center %} selected {% endif %}'>193_ATR OLW</option>
+                                <option value='194' '{%  if "194" in profit_center %} selected {% endif %}'>194_B737 WINGLET</option>
+                                <option value='195' '{%  if "195" in profit_center %} selected {% endif %}'>195_BOEING 7XX CCP</option>
+                                <option value='196' '{%  if "196" in profit_center %} selected {% endif %}'>196_DOORS  - A320</option>
+                                <option value='197' '{%  if "197" in profit_center %} selected {% endif %}'>197_DOORS  - A380</option>
+                                <option value='198' '{%  if "198" in profit_center %} selected {% endif %}'>198_DOORS  - CRJ</option>
+                                <option value='199' '{%  if "199" in profit_center %} selected {% endif %}'>199_DOORS  - ERJ E1</option>
+                                <option value='200' '{%  if "200" in profit_center %} selected {% endif %}'>200_DOORS  - ERJ E2</option>
+                                <option value='201' '{%  if "201" in profit_center %} selected {% endif %}'>201_DOORS  - LEGACY</option>
+                                <option value='202' '{%  if "202" in profit_center %} selected {% endif %}'>202_F6X - RC</option>
+                                <option value='203' '{%  if "203" in profit_center %} selected {% endif %}'>203_TENDER SERIAL MANUF</option>
+                                <option value='204' '{%  if "204" in profit_center %} selected {% endif %}'>204_SPACE TRANSPORTATION</option>
+                                <option value='205' '{%  if "205" in profit_center %} selected {% endif %}'>205_AIRBUS DS CM</option>
+                                <option value='206' '{%  if "206" in profit_center %} selected {% endif %}'>206_AIRBUS DS SM</option>
+                                <option value='207' '{%  if "207" in profit_center %} selected {% endif %}'>207_MYRIADE</option>
+                                <option value='208' '{%  if "208" in profit_center %} selected {% endif %}'>208_KUIPER</option>
+                                <option value='209' '{%  if "209" in profit_center %} selected {% endif %}'>209_THALES TELECOM</option>
+                                <option value='210' '{%  if "210" in profit_center %} selected {% endif %}'>210_INSTRU & SCIENCE</option>
+                                <option value='211' '{%  if "211" in profit_center %} selected {% endif %}'>211_TENDER SPATIAL</option>
+                                <option value='212' '{%  if "212" in profit_center %} selected {% endif %}'>212_TRAIN ACADEMY PROD</option>
+                                <option value='213' '{%  if "213" in profit_center %} selected {% endif %}'>213_ONE SAT</option>
+                                <option value='214' '{%  if "214" in profit_center %} selected {% endif %}'>214_INDUSTRIAL PROJECTS</option>
+                                <option value='215' '{%  if "215" in profit_center %} selected {% endif %}'>215_F-LIST PROTOTYPE</option>
+                                <option value='216' '{%  if "216" in profit_center %} selected {% endif %}'>216_CABIN - NEW BUSINESS</option>
+                                <option value='217' '{%  if "217" in profit_center %} selected {% endif %}'>217_BU NEW HARNESS OTHER</option>
+                                <option value='218' '{%  if "218" in profit_center %} selected {% endif %}'>218_MAINT SIMU AIRBUS</option>
+                                <option value='219' '{%  if "219" in profit_center %} selected {% endif %}'>219_M-E INNOVATION</option>
+                                <option value='220' '{%  if "220" in profit_center %} selected {% endif %}'>220_A320 SPACE FLEX</option>
+                                <option value='221' '{%  if "221" in profit_center %} selected {% endif %}'>221_FAL BELUGA XL</option>
+                                <option value='222' '{%  if "222" in profit_center %} selected {% endif %}'>222_RB 3043 ENG. HAR</option>
+                                <option value='223' '{%  if "223" in profit_center %} selected {% endif %}'>223_A350 LAVATORIES</option>
+                                <option value='224' '{%  if "224" in profit_center %} selected {% endif %}'>224_MRJ90NRC</option>
+                                <option value='225' '{%  if "225" in profit_center %} selected {% endif %}'>225_CLEANSKY</option>
+                                <option value='226' '{%  if "226" in profit_center %} selected {% endif %}'>226_BU ENG SERV OTHER</option>
+                                <option value='227' '{%  if "227" in profit_center %} selected {% endif %}'>227_H175 BOXES</option>
+                                <option value='228' '{%  if "228" in profit_center %} selected {% endif %}'>228_HDI-EMB550</option>
+                                <option value='229' '{%  if "229" in profit_center %} selected {% endif %}'>229_F2000 PIEUVRE ELEC</option>
+                                <option value='230' '{%  if "230" in profit_center %} selected {% endif %}'>230_WIRING SUPPORT CAN</option>
+                                <option value='231' '{%  if "231" in profit_center %} selected {% endif %}'>231_AH SIMU MAINTENANCE</option>
+                                <option value='232' '{%  if "232" in profit_center %} selected {% endif %}'>232_DCIS INDUS</option>
+                                <option value='233' '{%  if "233" in profit_center %} selected {% endif %}'>233_A320 ZODIAC GALLEYS</option>
+                                <option value='234' '{%  if "234" in profit_center %} selected {% endif %}'>234_ACCOST</option>
+                                <option value='236' '{%  if "236" in profit_center %} selected {% endif %}'>236_HAYDN</option>
+                                <option value='237' '{%  if "237" in profit_center %} selected {% endif %}'>237_LATCAB</option>
+                                <option value='238' '{%  if "238" in profit_center %} selected {% endif %}'>238_MRJ90 RC</option>
+                                <option value='239' '{%  if "239" in profit_center %} selected {% endif %}'>239_MRJ90 LABS</option>
+                                <option value='240' '{%  if "240" in profit_center %} selected {% endif %}'>240_DCIS PROD SUP</option>
+                                <option value='241' '{%  if "241" in profit_center %} selected {% endif %}'>241_DCIS B737</option>
+                                <option value='242' '{%  if "242" in profit_center %} selected {% endif %}'>242_DCIS A380 STR</option>
+                                <option value='243' '{%  if "243" in profit_center %} selected {% endif %}'>243_DCIS A330NEO</option>
+                                <option value='244' '{%  if "244" in profit_center %} selected {% endif %}'>244_ZODIAC IRKUT BINS</option>
+                                <option value='245' '{%  if "245" in profit_center %} selected {% endif %}'>245_INSTAL B777 AAA-AFI</option>
+                                <option value='246' '{%  if "246" in profit_center %} selected {% endif %}'>246_SAFRAN CABIN CRJ NG2</option>
+                                <option value='247' '{%  if "247" in profit_center %} selected {% endif %}'>247_A320 AIRSPACE FACC</option>
+                                <option value='248' '{%  if "248" in profit_center %} selected {% endif %}'>248_SAFRAN CABIN A220</option>
+                                <option value='249' '{%  if "249" in profit_center %} selected {% endif %}'>249_THALES IFEC</option>
+                                <option value='250' '{%  if "250" in profit_center %} selected {% endif %}'>250_WOODWARD A320</option>
+                                <option value='251' '{%  if "251" in profit_center %} selected {% endif %}'>251_KITT - NEW BUSINESS</option>
+                                <option value='252' '{%  if "252" in profit_center %} selected {% endif %}'>252_BLACKSKY</option>
+                                <option value='253' '{%  if "253" in profit_center %} selected {% endif %}'>253_PANASONIC IFE</option>
+                                <option value='254' '{%  if "254" in profit_center %} selected {% endif %}'>254_ZII IFE</option>
+                                <option value='255' '{%  if "255" in profit_center %} selected {% endif %}'>255_R&T OPTIC FIBER ECOL</option>
+                                <option value='256' '{%  if "256" in profit_center %} selected {% endif %}'>256_ZODIAC CL650/G5000</option>
+                                <option value='257' '{%  if "257" in profit_center %} selected {% endif %}'>257_BANC ABE NG</option>
+                                <option value='258' '{%  if "258" in profit_center %} selected {% endif %}'>258_OLW SPACE</option>
+                                <option value='259' '{%  if "259" in profit_center %} selected {% endif %}'>259_RR PEARL15</option>
+                                <option value='260' '{%  if "260" in profit_center %} selected {% endif %}'>260_DINA</option>
+                                <option value='261' '{%  if "261" in profit_center %} selected {% endif %}'>261_DINA</option>
+                                <option value='262' '{%  if "262" in profit_center %} selected {% endif %}'>262_WSSI</option>
+                                <option value='263' '{%  if "263" in profit_center %} selected {% endif %}'>263_H160 BOXES</option>
+                                <option value='264' '{%  if "264" in profit_center %} selected {% endif %}'>264_TENDER BUSINESS JETS</option>
+                                <option value='267' '{%  if "267" in profit_center %} selected {% endif %}'>267_LIFI - NRC</option>
+                                <option value='268' '{%  if "268" in profit_center %} selected {% endif %}'>268_B777X WIRE BUNDLES</option>
+                                <option value='269' '{%  if "269" in profit_center %} selected {% endif %}'>269_PROJET CAYENNE</option>
+                                <option value='270' '{%  if "270" in profit_center %} selected {% endif %}'>270_LIFI - RC</option>
+                                <option value='277' '{%  if "277" in profit_center %} selected {% endif %}'>277_SIMU SX</option>
+                                <option value='278' '{%  if "278" in profit_center %} selected {% endif %}'>278_CAPTAIN</option>
+                                <option value='282' '{%  if "282" in profit_center %} selected {% endif %}'>282_CAVIAR</option>
+                                <option value='283' '{%  if "283" in profit_center %} selected {% endif %}'>283_CHOSE</option>
+                                <option value='284' '{%  if "284" in profit_center %} selected {% endif %}'>284_PROJET ACIPE</option>
+                                <option value='285' '{%  if "285" in profit_center %} selected {% endif %}'>285_LIS US NEW BUSINESS</option>
+                                <option value='286' '{%  if "286" in profit_center %} selected {% endif %}'>286_SMART FACTORY PROJ</option>
+                                <option value='288' '{%  if "288" in profit_center %} selected {% endif %}'>288_CHALLENGER 350 - BBD</option>
+                                <option value='289' '{%  if "289" in profit_center %} selected {% endif %}'>289_CHALLENGER 650 EWIS</option>
+                                <option value='290' '{%  if "290" in profit_center %} selected {% endif %}'>290_G5000X/6000X - BBD</option>
+                                <option value='291' '{%  if "291" in profit_center %} selected {% endif %}'>291_GLOBAL 7500 EWIS</option>
+                                <option value='292' '{%  if "292" in profit_center %} selected {% endif %}'>292_A220 POWER FEE.EWIS</option>
+                                <option value='293' '{%  if "293" in profit_center %} selected {% endif %}'>293_CHALLENGER 350 - MHI</option>
+                                <option value='294' '{%  if "294" in profit_center %} selected {% endif %}'>294_SPIRIT - V2500/BR710</option>
+                                <option value='295' '{%  if "295" in profit_center %} selected {% endif %}'>295_G5000X/6000X - MHI</option>
+                                <option value='296' '{%  if "296" in profit_center %} selected {% endif %}'>296_QUERETARO HORS-SÉRIE</option>
+                                <option value='701' '{%  if "701" in profit_center %} selected {% endif %}'>701_MANUF. SERVICES CANA</option>
+                                <option value='703' '{%  if "703" in profit_center %} selected {% endif %}'>703_KITTING CANADA</option>
+                                <option value='705' '{%  if "705" in profit_center %} selected {% endif %}'>705_CANADA GOVERNMENT</option>
+                                <option value='707' '{%  if "707" in profit_center %} selected {% endif %}'>707_LION</option>
+                                <option value='708' '{%  if "708" in profit_center %} selected {% endif %}'>708_CAE V2 VENTILATORS</option>
+                                <option value='709' '{%  if "709" in profit_center %} selected {% endif %}'>709_CAYENNE STA2 DISTRIB</option>
+                                <option value='710' '{%  if "710" in profit_center %} selected {% endif %}'>710_LAVAL - PROGR SPACE</option>
+                                <option value='750' '{%  if "750" in profit_center %} selected {% endif %}'>750_SCREENS ACS</option>
+                                <option value='801' '{%  if "801" in profit_center %} selected {% endif %}'>801_ADASI MANUF DEU</option>
+                                <option value='802' '{%  if "802" in profit_center %} selected {% endif %}'>802_F-LIST PROTOTYPES</option>
+                                <option value='805' '{%  if "805" in profit_center %} selected {% endif %}'>805_FAL HAMBURG</option>
+                                <option value='809' '{%  if "809" in profit_center %} selected {% endif %}'>809_OTHER MANUF SERV DEU</option>
+                                <option value='811' '{%  if "811" in profit_center %} selected {% endif %}'>811_ENGINEERING SERVICES</option>
+                                <option value='812' '{%  if "812" in profit_center %} selected {% endif %}'>812_KOPTER</option>
+                                <option value='813' '{%  if "813" in profit_center %} selected {% endif %}'>813_GP TRAVEL SUBCONTRAC</option>
+                                <option value='814' '{%  if "814" in profit_center %} selected {% endif %}'>814_OHB MANUFACTURING</option>
+                                <option value='820' '{%  if "820" in profit_center %} selected {% endif %}'>820_LUFTHANSA KI DE</option>
+                                <option value='996' '{%  if "996" in profit_center %} selected {% endif %}'>996_NON RECURRING EBIT</option>
+                                <option value='997' '{%  if "997" in profit_center %} selected {% endif %}'>997_IND. COSTS NO-INCORP</option>
+                                <option value='998' '{%  if "998" in profit_center %} selected {% endif %}'>998_GESTION STOCKS</option>
+                                <option value='999' '{%  if "999" in profit_center %} selected {% endif %}'>999_DIR. COSTS NO-INCORP</option>
+                                <option value='98A' '{%  if "98A" in profit_center %} selected {% endif %}'>98A_FREESTOCK AIRBUS</option>
+                                <option value='98B' '{%  if "98B" in profit_center %} selected {% endif %}'>98B_FREESTOCK BOEING</option>
+                                <option value='98C' '{%  if "98C" in profit_center %} selected {% endif %}'>98C_FREESTOCK BU SPACE</option>
+                                <option value='98D' '{%  if "98D" in profit_center %} selected {% endif %}'>98D_FREESTOCK DASSAULT</option>
+                                <option value='98E' '{%  if "98E" in profit_center %} selected {% endif %}'>98E_FREESTOCK NON AVIONN</option>
+                                <option value='98F' '{%  if "98F" in profit_center %} selected {% endif %}'>98F_FREESTOCK BOMBARDIER</option>
+                                <option value='98G' '{%  if "98G" in profit_center %} selected {% endif %}'>98G_FREESTOCK ATR</option>
+                                <option value='98H' '{%  if "98H" in profit_center %} selected {% endif %}'>98H_FREESTOCK SAFRAN</option>
+                                <option value='98I' '{%  if "98I" in profit_center %} selected {% endif %}'>98I_STOCK CA MITAC</option>
+                                <option value='98K' '{%  if "98K" in profit_center %} selected {% endif %}'>98K_FREESTOCK QUERETARO</option>
+                                <option value='98M' '{%  if "98M" in profit_center %} selected {% endif %}'>98M_FREESTOCK MULTI-PROG</option>
+                                <option value='98O' '{%  if "98O" in profit_center %} selected {% endif %}'>98O_FREESTOCK OTHER</option>
+                                <option value='98T' '{%  if "98T" in profit_center %} selected {% endif %}'>98T_FREESTOCK THALÈS</option>
+                                <option value='BPM' '{%  if "BPM" in profit_center %} selected {% endif %}'>BPM_BPM SUPPORT</option>
+                                <option value='BRB' '{%  if "BRB" in profit_center %} selected {% endif %}'>BRB_BRANCH BILLING</option>
+                                <option value='COM' '{%  if "COM" in profit_center %} selected {% endif %}'>COM_COMMERCIAL</option>
+                                <option value='COS' '{%  if "COS" in profit_center %} selected {% endif %}'>COS_COSTING</option>
+                                <option value='DEW' '{%  if "DEW" in profit_center %} selected {% endif %}'>DEW_SYSTEMS FREESTOCK PC</option>
+                                <option value='ENG' '{%  if "ENG" in profit_center %} selected {% endif %}'>ENG_ENGINEERING</option>
+                                <option value='F01' '{%  if "F01" in profit_center %} selected {% endif %}'>F01_MANAGEMENT FEES</option>
+                                <option value='FAC' '{%  if "FAC" in profit_center %} selected {% endif %}'>FAC_FACILITY EXPENSES</option>
+                                <option value='G&A' '{%  if "G&A" in profit_center %} selected {% endif %}'>G&A_G&A</option>
+                                <option value='H&R' '{%  if "H&R" in profit_center %} selected {% endif %}'>H&R_HUMAN RESOURCES</option>
+                                <option value='I&T' '{%  if "I&T" in profit_center %} selected {% endif %}'>I&T_I&T</option>
+                                <option value='IND' '{%  if "IND" in profit_center %} selected {% endif %}'>IND_INDUSTRIALIZATION</option>
+                                <option value='LEA' '{%  if "LEA" in profit_center %} selected {% endif %}'>LEA_LEAN MANAGEMENT& AET</option>
+                                <option value='MEN' '{%  if "MEN" in profit_center %} selected {% endif %}'>MEN_MANUF ENGINEERING</option>
+                                <option value='MET' '{%  if "MET" in profit_center %} selected {% endif %}'>MET_METHODS</option>
+                                <option value='MGT' '{%  if "MGT" in profit_center %} selected {% endif %}'>MGT_MANAGEMENT</option>
+                                <option value='PMA' '{%  if "PMA" in profit_center %} selected {% endif %}'>PMA_PRODUCT MANAGER</option>
+                                <option value='PRG' '{%  if "PRG" in profit_center %} selected {% endif %}'>PRG_PROGRAMS</option>
+                                <option value='PRS' '{%  if "PRS" in profit_center %} selected {% endif %}'>PRS_PRODUCTION SUPPORT</option>
+                                <option value='QUA' '{%  if "QUA" in profit_center %} selected {% endif %}'>QUA_PROGRAMS QUALITY</option>
+                                <option value='R&T' '{%  if "R&T" in profit_center %} selected {% endif %}'>R&T_R&T</option>
+                                <option value='SPF' '{%  if "SPF" in profit_center %} selected {% endif %}'>SPF_SHOPFLOOR</option>
+                                <option value='SUP' '{%  if "SUP" in profit_center %} selected {% endif %}'>SUP_SUPPLY CHAIN</option>
+                                <option value='TAC' '{%  if "TAC" in profit_center %} selected {% endif %}'>TAC_TRAINING ACADEMY</option>
+                                <option value='TRA' '{%  if "TRA" in profit_center %} selected {% endif %}'>TRA_TRANSFER</option>
+                                <option value='TRAI' '{%  if "TRAI" in profit_center %} selected {% endif %}'>TRAI_TRAINING</option>
+                                <option value='WOR' '{%  if "WOR" in profit_center %} selected {% endif %}'>WOR_SHOP FLOORS</option>
+                                
+
+
+                            </select>
+                        </div>
+            </div>
+            <div class="col-lg-4 col-3">
+                <label for=" inputEmail4">Weeks: 
+                    {% if '/dashboard/home' in request.get_full_path  %} 
+                    
+                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                    title="To see more weeks, go to the KPI page"></i>
+                    {% else %}
+                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                    title="Weeks available"></i>
+                    
+                    {% endif %}
+
+                </label>
+                <div class="col-lg-2 col-3">
+                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectweek' style="width: 100px !important;border-radius: 10px;" onclick='selectAllWeek()' value="Select All"/>
+                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectweek' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllWeek()' value="Unselect All"/>  
+                </div>
+                <br>
+                <ul class="ks-cboxtags">
+                    {% for week in weekavailable %}
+                        <!--week must be convert to string cause weeks is list of string ['5','6']-->
+                        <li><input type="checkbox"  id={{week}} value={{week}} name="week"  '{% if week|stringformat:"i" in weeks %} checked  {% endif %}' ><label for={{week}}>{{week}}</label></li>
+                    {% endfor %}        
+                </ul>                                          
+            </div>
+    </div>
+</div>
+<div class="card-footer text-center"">
+<button type="submit" class="btn btn-primary" id="checkBtn" style="width: 120px !important;">Apply</button>
+</div>
+
+
+
+<script type="text/javascript">
+    function selectAllDivision(){
+        var items=document.getElementsByName('division');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=true;
+        }
+        document.getElementById('selectdivision').style.display = "none";
+        document.getElementById('unselectdivision').style.display = "block";
+    }
+    
+    function UnSelectAllDivision(){
+        var items=document.getElementsByName('division');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=false;
+        }
+        document.getElementById('selectdivision').style.display = "block";
+        document.getElementById('unselectdivision').style.display = "none";
+    }			
+</script>
+
+<script type="text/javascript">
+
+    function selectAllCp(){
+        $("#cp > option").prop("selected", "selected");
+                $("#cp").trigger("change");
+        document.getElementById('selectcp').style.display = "none";
+        document.getElementById('unselectcp').style.display = "block";
+    }
+    function UnSelectAllCp(){
+        $("#cp > option").prop("selected", "");
+                $("#cp").trigger("change");
+        document.getElementById('selectcp').style.display = "block";
+        document.getElementById('unselectcp').style.display = "none";
+    }
+    </script>
+
+<script type="text/javascript">
+    function selectAllWeek(){
+        var items=document.getElementsByName('week');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=true;
+        }
+        document.getElementById('selectweek').style.display = "none";
+        document.getElementById('unselectweek').style.display = "block";
+    }
+    
+    function UnSelectAllWeek(){
+        var items=document.getElementsByName('week');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=false;
+        }
+        document.getElementById('selectweek').style.display = "block";
+        document.getElementById('unselectweek').style.display = "none";
+    }			
+</script>
+
+
+<script>
+$(document).ready(function() {
+    $('.select2').select2();
+});
+
+</script>
+
+<!-- Required checkbox at least one  -->
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#checkBtn').click(function() {
+          checked = $("input[name=week]:checked").length;
+    
+          if(!checked) {
+            $(document).Toasts('create', 
+            { 
+                title: 'Error', 
+                autohide: false, 
+                delay: 750, 
+                body: 'You must select at least one Week.', 
+                class:"toast bg-danger fade" 
+            }) ; 
+            return false;
+          }
+    
+        });
+    });
+    
+    </script>

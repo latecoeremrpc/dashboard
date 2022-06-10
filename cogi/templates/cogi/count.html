@@ -1,0 +1,22 @@
+{% extends 'base2.html' %}
+{% block children %}
+
+
+
+
+
+    <!-- small box -->
+    <div class="small-box bg-success" style="margin-bottom:0 !important" id="ofpastcount">
+        <div class="inner">
+        <h3>{{cogi_count}}<sup style="font-size: 15px"></sup></h3>
+        <p>Cogi Work order </p>
+        </div>
+        <div class="icon">
+            <i class="far fa-chart-bar"></i>
+        </div>
+        <a href='{% url 'cogidetails' %}' class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+
+    </div>
+
+
+{% endblock children%}

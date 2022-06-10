@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block content %}
+{{request_url}}
+{{check}}
+<div class="content">
+    <div class="container-fluid">   
+        <div class="row">        
+            <div class="col-sm-6">
+                <div class="card-header">
+                    <h3 class="card-title">Available KPIs</h3>
+                </div>
+                <div id="modules">
+                    <div class="card card-info collapsed-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Manufacturing</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
+                                </button>
+                            </div> 
+                        </div>
+                        <div class="card-body">
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>ofpast</b>\count</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>ofpast</b>\count_per_cause</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>ofpast</b>\count_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>ofpast</b>\count_per_week_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>ofpast</b>\count_per_profit_center</a></p>
+                        </div>
+                    </div>
+                    <div class="card card-primary collapsed-card">
+                        <div class="card-header">
+                            <h3 class="card-title">MRPC</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
+                                </button>
+                            </div> 
+                        </div>
+                        <div class="card-body">
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>purchasepast</b>\count</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>purchasepast</b>\count_convert_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>purchasepast</b>\count_convert_per_week_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>purchasepast</b>\count_receive_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>purchasepast</b>\count_receive_per_week_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>intercopurchase</b>\count</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>intercopurchase</b>\count_convert_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>intercopurchase</b>\count_convert_per_week_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>intercopurchase</b>\count_receive_per_division</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>intercopurchase</b>\count_receive_per_week_per_division</a></p>
+                        </div>
+                    </div>
+                    <div class="card card-warning collapsed-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Logistics</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
+                                </button>
+                            </div> 
+                        </div>
+                        <div class="card-body">
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>cogi</b>\count</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>cogi</b>\count_per_accountability</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>cogi</b>\count_per_code</a></p>
+                            <p class="drag"><a class="btn btn-block btn-outline-secondary btn-xs item"><b>cogi</b>\count_per_week_per_division</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-sm-6">
+                <div class="card-header">
+                    <h3 class="card-title">Your Home's KPIs</h3>
+                </div>
+                <form action={%url 'homesettings' %} method='POST'>
+                    {% csrf_token %}
+                <ul class="list-group">
+                    <div id="dropzone" class="ui-droppable">
+                        {%if homekpi%}
+                            {%for kpi in homekpi%}
+                            <div class="drop-item" id ={{kpi.id}}>
+                                    <input name="kpi" type="hidden" value="{{kpi.kpi}}">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center btn btn-block bg-gradient-secondary btn-xs">{{kpi.kpi}}
+                                        <select name="col" id="col" class="custom-select">
+                                            <option value="3" {%if kpi.col == 3 %} selected {%endif%} >Small</option>
+                                            <option value="6" {%if kpi.col == 6 %} selected {%endif%} >Medium</option>
+                                            <option value="12" {%if kpi.col == 12 %} selected {%endif%} >Large</option>
+                                        </select>
+                                    </li>
+                                    <button type="button" class="btn btn-default btn-xs remove" onclick="remove('{{kpi.id}}')"><i class="fas fa-times"></i></button>
+                                </div>
+                            {%endfor%}
+                        {%endif%}
+                    </div>
+                </ul>
+                <center><button type="submit" class="btn btn-primary" style="width: 120px !important;">Apply</button> </form></center>
+            </div>
+        </div>
+        <blockquote class="callout callout-info">
+            <h5><i class="fas fa-info"></i> Note:</h5>
+            <p>To add a kpi just choose from the available list, drag and drop into your list, you can choose the size of the display, small is 1/3 of the page width
+                medium is 1/2 , and large the kpi occupies the whole width of the page, the order of kpis in your home page is the same as your choosen list here.
+            </p>
+            <small>Have a nice Day!</small><br>
+            <small><cite title="Source Title">MRPC Team</cite></small>
+        </blockquote>
+    </div>
+</div>    
+
+
+<script>
+    
+function remove(el) {
+    const element = document.getElementById(el);
+    // console.log(element)
+    element.remove();
+}
+    $('.drag').draggable({ 
+        appendTo: 'body',
+        helper: 'clone'
+    });
+    
+    $('#dropzone').droppable({
+        activeClass: 'active',
+        hoverClass: 'hover',
+        accept: ":not(.ui-sortable-helper)", // Reject clones generated by sortable
+    drop: function (e, ui) {       
+    var $el = $('<div class="drop-item"><input name="kpi" type="hidden" value="'+ui.draggable.text()+'">  <li class="list-group-item d-flex justify-content-between align-items-center btn btn-block bg-gradient-secondary btn-xs">'+ ui.draggable.text()+'<select name="col" id="col" class="custom-select"><option value="3">Small</option><option value="6">Medium</option><option value="12">Large</option></select></li> </div>');
+    $el.append($('<button type="button" class="btn btn-default btn-xs remove"><i class="fas fa-times"></i></button>').click(function () { $(this).parent().detach(); }));
+    $(this).append($el);
+    }
+    }).sortable({
+    items: '.drop-item',
+    sort: function() {
+    // gets added unintentionally by droppable interacting with sortable
+    // using connectWithSortable fixes this, but doesn't allow you to customize active/hoverClass options
+    $( this ).removeClass( "active" );
+    }
+});
+</script>
+{% endblock%}
