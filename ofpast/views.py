@@ -30,8 +30,8 @@ def upload_files(request):
     #Improt Files
     if current_week < 10:
         current_week=str(0)+str(current_week)
-    coois_file=r"\\sp-is.lat.corp\sites\MRPC\Dashboard Data\web_dashboard\COOIS - OF PASSE\COOIS\COOIS_OF_PASSE_"+format(current_year)+format(current_week)+".XLSX"
-    koc_file=r"\\sp-is.lat.corp\sites\MRPC\Dashboard Data\web_dashboard\COOIS - OF PASSE\KOC4\KOC4_OF_PASSE_"+format(current_year)+format(current_week)+".XLSX"
+    coois_file=r"\\centaure\Extract_SAP\COOIS-PAST_WORK_ORDERS\COOIS_OF_PASSE_"+format(current_year)+format(current_week)+".XLSX"
+    koc_file=r"\\centaure\Extract_SAP\KOC4-PAST_WORK_ORDERS\KOC4_OF_PASSE_"+format(current_year)+format(current_week)+".XLSX"
 
     coois_exists = exists(coois_file)
     koc_exists = exists(koc_file)

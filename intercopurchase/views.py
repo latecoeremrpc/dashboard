@@ -29,22 +29,22 @@ def upload_files(request):
     current_year=datetime.datetime.now().isocalendar().year
 
         #Holidays / calendar
-    global dh #define calendar as global variable
-    holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"    
+    # global dh #define calendar as global variable
+    # holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"    
 
     #Improt Files
     if current_week < 10:
         current_week=str(0)+str(current_week)
-    purchase_file=r"\\sp-is.lat.corp\sites\MRPC\Dashboard Data\web_dashboard\\PURCH.REQ PAST\PPR_"+format(current_year)+format(current_week)+".XLSX"
+    purchase_file=r"\\centaure\Extract_SAP\SE16N-EBAN-PAST_PURCHASE_REQUEST\PPR_"+format(current_year)+format(current_week)+".XLSX"
     # purchase_file=r"\\sp-is.lat.corp\sites\MRPC\Outil\Documents partages\Dashboard\DA_PASSE.XLSX"
     purchase_exists = exists(purchase_file)
-    holidays_exists = exists(holidaysfile)
+    # holidays_exists = exists(holidaysfile)
 
     if purchase_exists :
-        dh=pd.read_excel(holidaysfile)
-        dh=dh.rename(columns={'FOU-2110':'2110','LAB-2000':'2000','LEC-2030':'2030','LIP-2020':'2020','COL-2010':'2010','HBG-2200':'2200','HER-2300':'2300','CAS-2400':'2400','BEL-2500':'2500','LAV-2600':'2600','QRO-2320':'2320'})
-        for col in dh.columns:
-            dh[col]= pd.to_datetime(dh[col]).dt.date
+        # dh=pd.read_excel(holidaysfile)
+        # dh=dh.rename(columns={'FOU-2110':'2110','LAB-2000':'2000','LEC-2030':'2030','LIP-2020':'2020','COL-2010':'2010','HBG-2200':'2200','HER-2300':'2300','CAS-2400':'2400','BEL-2500':'2500','LAV-2600':'2600','QRO-2320':'2320'})
+        # for col in dh.columns:
+        #     dh[col]= pd.to_datetime(dh[col]).dt.date
 
         import_purchase(purchase_file,current_year,current_week,conn)
 

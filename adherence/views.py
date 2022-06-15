@@ -55,8 +55,8 @@ def calcul(request):
     #upload files
     start_time = time.time()
 
-    upload_material(conn,week,year)
-    upload_coois(conn,week,year)
+    # upload_material(conn,week,year)
+    # upload_coois(conn,week,year)
     upload_zpp(conn,week,year)
 
     #Get data from DB
