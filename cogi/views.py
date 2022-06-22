@@ -29,7 +29,7 @@ def upload_files(request):
         #Improt Files
     if current_week < 10:
         current_week=str(0)+str(current_week)
-    cogi_file=r"\\sp-is.lat.corp\sites\MRPC\Dashboard Data\web_dashboard\COGI\COGI_"+format(current_year)+format(current_week)+".XLSX"
+    cogi_file=r"\\centaure\Extract_SAP\SE16N-AFFW\AFFW_"+format(current_year)+format(current_week)+".XLSX"
     # cogi_file=r"\\sp-is.lat.corp\sites\MRPC\Dashboard Data\PowerBI - Sources de données\COGI\COGI_2022W07.XLSX"
     cogi_exists = exists(cogi_file)
     if cogi_exists:
@@ -147,6 +147,11 @@ def details(request):
 def import_cogi(conn,file,current_week,current_year):
 
     dc=pd.read_excel(file)
+    #Select Column need
+    dc=dc.iloc[:,[0,2,61,49,62,37,10,6,7,8,23,13,14,60,18]]
+    #Add new column not exist in file
+    dc.insert(0,'treatment_status',None,True)
+    dc.insert(8,'error_text',None,True)
     #Add Columns Week and Year
     dc.insert(0,'year',current_year,True)
     dc.insert(1,'week',current_week,True)
