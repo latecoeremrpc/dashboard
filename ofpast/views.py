@@ -138,24 +138,21 @@ def ofpast_results(coois_data):
     #Format Column
     dc['date_end_real'] = pd.to_datetime(dc['date_end_real'],errors='ignore').dt.date
     
-    #Check if date end real + 15 > now()
+    #Check if date end real + 7 > now()
     try:
-        dc.loc[dc['date_end_real']+datetime.timedelta(days=15) < datetime.datetime.now().date() ,"date_end_real_business" ] ='Inf to now'
-        dc.loc[dc['date_end_real']+datetime.timedelta(days=15) > datetime.datetime.now().date() ,"date_end_real_business" ] ='Sup to now'
-        
+        dc.loc[dc['date_end_real']+datetime.timedelta(days=7) < datetime.datetime.now().date() ,"date_end_real_business" ] ='Inf to now'
+        dc.loc[dc['date_end_real']+datetime.timedelta(days=7) > datetime.datetime.now().date() ,"date_end_real_business" ] ='Sup to now'
     except:
         pass
-
-
     dc.loc[( dc.system_status.str.contains("LIVR") ) & (dc.material.notna()) & ( dc.date_end_real_business == 'Inf to now') , "RootCause"] = "COGI is blocking CLSD status"
-    dc.loc[ (dc.system_status.str.contains("LIVR") ) & (dc.material.notna()) & ( dc.date_end_real_business == 'Sup to now'), "RootCause"] = "WO confirmed less than 2 weeks ago"
+    dc.loc[ (dc.system_status.str.contains("LIVR") ) & (dc.material.notna()) & ( dc.date_end_real_business == 'Sup to now'), "RootCause"] = "WO confirmed less than 1 weeks ago"
 
     dc.loc[( dc.system_status.str.contains("CONF")) & ( dc.order.str.contains("CT") ) , "RootCause"]= 'LCT released, confirmed, but not CLSD'
     dc.loc[ (~dc.system_status.str.contains("CONF")) & ( dc.order.str.contains("CT") ) , "RootCause"] = 'LCT released and not confirmed'
     
     dc.loc[ (~dc.system_status.str.contains("CONF")) & ( (dc.order_type.str.contains("YP03")) | (dc.order_type.str.contains("YP04")) ) & (dc.material.notna()) , "RootCause"] = 'WO not confirmed'
     
-    dc.loc[ ( dc.system_status.str.contains("LIVR") ) 
+    dc.loc[ ( ~dc.system_status.str.contains("LIVR") ) 
             & (dc.system_status.str.contains("CONF")) 
             & ( (dc.order_type.str.contains("YP03")) | (dc.order_type.str.contains("YP04")) ) 
             & (dc.material.notna()) , "RootCause"] = 'WO confirmed but no stk.entry'
@@ -190,7 +187,6 @@ def ofpast_results(coois_data):
     dc.loc [ ( (dc.order_type.str.contains("YP23")) | (dc.order_type.str.contains("YP24")) ) 
             &( ~dc.system_status.str.contains("CONF") )
             & (dc.material.notna()),"RootCause"] ='WO not confirmed : no rescheduling possible' 
-
 
     dc.loc[(dc.RootCause == ''),"RootCause"] = 'Undefined cause'
 
