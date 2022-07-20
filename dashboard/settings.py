@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'ofpast',
     'purchasepast',
     'cogi',
-    'intercopurchase'
+    'intercopurchase',
+    'inventory_accuracy',
 ]
 
 MIDDLEWARE = [

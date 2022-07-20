@@ -1,0 +1,19 @@
+{% extends 'base2.html' %}
+{% block children %}
+{% load humanize %}
+
+<!-- small box -->
+<div class="small-box bg-danger">
+    <div class="inner">
+    <h3>{{total_deviation_cost|intword}}<sup style="font-size: 15px"> euro</sup></h3>
+    <p>Real cost</p>
+    </div>
+    <div class="icon">
+        <i class="fas fa-euro-sign"></i>
+    </div>
+    <a href='#' class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+</div>
+
+{% endblock children%}
+
+

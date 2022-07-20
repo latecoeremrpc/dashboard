@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {% if message_error %}
+        {%include 'homepage\error_msg.html'%}
+        {% endif %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">  
+                    <div class="card-header">
+                    <h3 class="card-title">Filter</h3>
+                    </div>
+                    <form action={% url 'inventory_accuracyhome' %} method="post">
+                        {%include 'homepage/filter.html' %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                {%include 'inventory_accuracy/count.html' %}
+                
+            </div>
+            <div class="col-lg-3 col-6">
+                {%include 'inventory_accuracy/cost.html' %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+
+            </div>
+            <div class="col-lg-6">
+                
+            </div>      
+        </div>    
+        <div class="row">
+            <div class="col-lg-12">
+                
+            </div>
+        </div> 
+        <div class="row">
+            <div class="col-lg-12">
+                
+            </div>
+        </div>         
+
+    </div>
+</div>
+   
+{% endblock %}
+
+   
+
+
