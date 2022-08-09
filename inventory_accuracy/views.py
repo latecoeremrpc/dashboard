@@ -1,4 +1,3 @@
-from unicodedata import decimal
 from django.http import HttpResponse
 from django.shortcuts import render
 from io import StringIO
@@ -19,15 +18,43 @@ def upload_files(request):
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
-    file= r"\\prfoufiler01\donnees$\Public\2022 07 12 Z_LISTE_INV.xlsx"
-    file_exists=exists(file)
-    print(file_exists)
-    message_error= 'Unable to upload files, not exist or unreadable!'
-    if file_exists:
-        import_files(file,year,week,conn)
-        home(request)
-    else:
-        return render(request,'inventory_accuracy\index.html',{'message_error':message_error})    
+    list_inv_file= r"\\prfoufiler01\donnees$\Public\2022 07 12 Z_LISTE_INV.xlsx"
+    t001_file= r"\\prfoufiler01\donnees$\Public\T001_202229.xlsx"
+    t001k_file= r"\\prfoufiler01\donnees$\Public\T001K_202229.XLSX "
+    tcurr_file= r"\\prfoufiler01\donnees$\Public\TCURR_202229.XLSX"
+
+    list_inv_file_exists=exists(list_inv_file)
+    t001_file_exists=exists(t001_file)
+    t001k_file_exists=exists(t001k_file)
+    tcurr_file_exists=exists(tcurr_file)
+
+    message_error= ''
+
+    if list_inv_file_exists == False:
+        message_error= 'Unable to upload LIST INV File, not exist or unreadable!'
+        return render(request,'inventory_accuracy\index.html',{'message_error':message_error})   
+    if t001_file_exists == False:
+        message_error= 'Unable to upload TOO1 File, not exist or unreadable!'
+        return render(request,'inventory_accuracy\index.html',{'message_error':message_error})   
+    if t001k_file_exists == False:
+        message_error= 'Unable to upload TK001 File, not exist or unreadable!'
+        return render(request,'inventory_accuracy\index.html',{'message_error':message_error}) 
+    if tcurr_file_exists == False:
+        message_error= 'Unable to upload TCURR File, not exist or unreadable!'
+        return render(request,'inventory_accuracy\index.html',{'message_error':message_error}) 
+
+    import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn)
+    home(request)
+
+
+
+
+
+    # if file_exists:
+    #     import_files(file,year,week,conn)
+    #     home(request)
+    # else:
+    #     return render(request,'inventory_accuracy\index.html',{'message_error':message_error})    
     # print('#'*50)
     # print(file_exists)
     # print('#'*50)
@@ -80,18 +107,10 @@ def inventory_accuracy_results(sq00_data):
     # count
     inventory_accuracy_results.count=df.shape[0]
 
-    # url = f'https://api.exchangerate.host/latest'
-    # response = requests.get(url)
-    # data = response.json()
-    # df['rate']=df['dev'].map(data['rates'])
-
-    #currency conversion
-    # df['deviation_cost_euro']=df['deviation_cost'].astype(float)*df['rate']
-    df['deviation_cost_euro']=df['deviation_cost']
     #new KPI   
     df['type_of_measurement']=np.where( ( (df['unit']=='G') | (df['unit']=='KG') ), 'weighd','counted')
-    # # Pour un article pesé : Stock accuracy = 100% si l’écart < 3% et l’écart < 250€ sinon la réf est considéré en écart
-    # df.insert(0, 'stock_accuracy', None)
+    # Pour un article pesé : Stock accuracy = 100% si l’écart < 3% et l’écart < 250€ sinon la réf est considéré en écart
+    df.insert(0, 'stock_accuracy', None)
     # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='weighd') & (df['deviation'] < 0.03) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
     # # Pour un article compté : Stock accuracy = 100% si l’écart < 1% et l’écart < 250€ sinon la réf est considéré en écart
     # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='counted') & (df['deviation'] < 0.01) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
@@ -101,12 +120,26 @@ def inventory_accuracy_results(sq00_data):
     inventory_accuracy_results.total_deviation_cost=df['deviation_cost'].sum()
 
 
-def import_files(file,year,week,conn):
-    df=pd.read_excel(file)
-#dropping the duplicate of columns
+def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
+    df=pd.read_excel(list_inv_file)
+    df_t001=pd.read_excel(t001_file)
+    df_t001k=pd.read_excel(t001k_file)
+    df_tcurr=pd.read_excel(tcurr_file)
+    #dropping the duplicate of columns
     df=df.drop(df.columns[ [9,11,14,16] ],axis=1)
 
-    #rename columns
+    df_t001k = df_t001k.iloc[:, [0,1]]
+    df_t001k.rename(columns={'Domaine valorisation':'division','Société':'company'},  inplace = True)
+
+    df_t001=df_t001.iloc[:, [0,4]]
+    df_t001.rename(columns={'Société':'company','Devise':'currency'},  inplace = True)
+
+    df_tcurr=df_tcurr.iloc[:, [2,3,4]]
+    df_tcurr.rename(columns={'Devise cible':'target_currency','Début validité':'date','Taux':'rate'},  inplace = True)
+    df_tcurr['date']=pd.to_datetime( df_tcurr['date'])
+    df_tcurr=df_tcurr.sort_values(['target_currency', 'date'],ascending = [True, False])
+    df_tcurr=df_tcurr.groupby(['target_currency'])['rate'].first().reset_index() 
+
     df.rename(columns = {'Doc.inven.':'inventory_doc',
                         'Article':'material',
                         'Désignation article':'designation',
@@ -129,13 +162,31 @@ def import_files(file,year,week,conn):
                         'TyS':'Tys'},  inplace = True)
 
     #Adding the year and week columns
-    
     #insert year and week in first and second position
     df.insert(0, 'year', year)
     df.insert(1, 'week', week)
     df["division"]=df["division"].fillna(0).astype(int)
     df["store"]=df["store"].fillna(0).astype(int)
     df["Tys"]=df["Tys"].fillna(0).astype(int)
+
+    # Merge files
+    # Get company from t0001k
+    df_t001k_dict=dict(zip(df_t001k['division'],df_t001k['company']))
+    df['company']=df['division'].map(df_t001k_dict)
+    # Get currency from t001
+    df_t001_dict=dict(zip(df_t001['company'],df_t001['currency']))
+    df['currency']=df['company'].map(df_t001_dict)
+    # Get rate  from tcurr
+    df_tcurr_dict=dict(zip(df_tcurr['target_currency'],df_tcurr['rate']))
+    df['rate']=df['currency'].map(df_tcurr_dict)
+    df['rate'] = df['rate'].str.replace(',','.')
+    df['rate']=df['rate'].fillna(1)
+    # df['rate']=df['rate'].astype(float)
+    #Calculate deviation_cost_euro
+    #Check for TND !!!
+    #check for precision in float
+    df['deviation_cost_euro']=df['deviation_cost'].astype('float32')*df['rate'].astype('float32')
+
     list_inv = StringIO()
     #convert file to csv
     list_inv.write(df.to_csv( header=None, index=False ,sep=';'))
@@ -168,7 +219,11 @@ def import_files(file,year,week,conn):
                     'delete',
                     'refecrence_inventory',
                     'inventory_number',
-                    'Tys'         
+                    'Tys',    
+                    'company',
+                    'currency',
+                    'rate',
+                    'deviation_cost_euro',         
             ],
             null="",
             sep=";",

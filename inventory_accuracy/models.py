@@ -25,6 +25,10 @@ class SQ00(models.Model):
     refecrence_inventory=models.CharField(max_length=50,null=True)
     inventory_number=models.CharField(max_length=50,null=True)
     Tys=models.IntegerField(null=True)
-
+    company=models.CharField(max_length=50,null=True)
+    currency=models.CharField(max_length=50,null=True)
+    rate=models.FloatField(null=True)
+    deviation_cost_euro=models.FloatField(null=True)
+    
     def __str__(self):
         return self.material
