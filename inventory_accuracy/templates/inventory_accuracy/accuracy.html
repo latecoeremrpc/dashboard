@@ -1,0 +1,17 @@
+{% extends 'base2.html' %}
+{% block children %}
+
+    <!-- small box -->
+    <div class="small-box bg-success" style="margin-bottom:0 !important" id="ofpastcount">
+        <div class="inner">
+        <h3>{{inventory_accuracy_accuracy}} <sup style="font-size: 15px"><i class="fa-solid fa-percent"></i></sup></h3>
+        <p>Inventory accuracy</p>
+        </div>
+        <div class="icon">
+            <i class="fa-solid fa-percent"></i>
+        </div>
+        <a href='{% url 'ofpastdetails' %}' class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+
+
+{% endblock children%}

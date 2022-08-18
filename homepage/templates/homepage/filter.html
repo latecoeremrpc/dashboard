@@ -10,7 +10,7 @@
 <div class="card-body">
     <div class="row">
         {% csrf_token %}
-            <div class="col-lg-4 col-3">
+            <div class="col-lg- col-6">
                 <label for=" inputEmail4">Divisions:</label>
                 <div class="col-lg-5 col-3">
                     <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectdivision' style="width: 100px !important;border-radius: 10px;" onclick='selectAllDivision()' value="Select All"/>
@@ -18,7 +18,7 @@
                 </div>
                 <br>
                 <!--To Edit => Loop for division-->
-                <ul class="ks-cboxtags">
+                <ul class="ks-cboxtags" style="display: flex;flex-wrap: wrap;">
                     <li><input type="checkbox" id="checkbox1" value="2000" name="division" '{% if "2000" in divisions %} checked {% endif %}'><label for="checkbox1">2000</label></li>
                     <li><input type="checkbox" id="checkbox2" value="2010" name="division" '{% if "2010" in divisions %} checked {% endif %}'><label for="checkbox2">2010</label></li>
                     <li><input type="checkbox" id="checkbox3" value="2020" name="division" '{% if "2020" in divisions %} checked {% endif %}'><label for="checkbox3">2020</label></li>
@@ -31,7 +31,7 @@
                     <li><input type="checkbox" id="checkbox8" value="2600" name="division" '{% if "2600" in divisions %} checked {% endif %}'><label for="checkbox8">2600</label></li>
                 </ul> 
             </div>
-            <div class="col-lg-4 col-3">
+            <div class="col-lg- col-6">
                 <label>Profit Center:</label>
                         <div class="col-lg-5 col-3">
                             <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectcp' style="width: 100px !important;border-radius: 10px;"value="Select All" onclick='selectAllCp()'/>
@@ -290,7 +290,35 @@
                             </select>
                         </div>
             </div>
-            <div class="col-lg-4 col-3">
+    </div>
+    <hr>
+    <div class="row">
+            <div class="col-lg- col-6">
+                <label for=" inputEmail4">Years: 
+                    {% if '/dashboard/home' in request.get_full_path  %} 
+                    
+                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                    title="To see more years, go to the KPI page"></i>
+                    {% else %}
+                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                    title="Years available"></i>
+                    
+                    {% endif %}
+
+                </label>
+                <div class="col-lg-2 col-3">
+                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectyear' style="width: 100px !important;border-radius: 10px;" onclick='selectAllYear()' value="Select All"/>
+                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectyear' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllYear()' value="Unselect All"/>  
+                </div>
+                <br>
+                <ul class="ks-cboxtags">
+                    {% for year in yearavailable %}
+                        <!--year must be convert to string cause years is list of string ['5','6']-->
+                        <li><input type="checkbox"  id={{year}} value={{year}} name="year"  '{% if year|stringformat:"i" in years %} checked  {% endif %}' ><label for={{year}}>{{year}}</label></li>
+                    {% endfor %}        
+                </ul>                                          
+            </div>
+            <div class="col-lg- col-6">
                 <label for=" inputEmail4">Weeks: 
                     {% if '/dashboard/home' in request.get_full_path  %} 
                     
@@ -317,7 +345,7 @@
             </div>
     </div>
 </div>
-<div class="card-footer text-center"">
+<div class="card-footer text-center">
 <button type="submit" class="btn btn-primary" id="checkBtn" style="width: 120px !important;">Apply</button>
 </div>
 
@@ -362,6 +390,29 @@
     </script>
 
 <script type="text/javascript">
+    function selectAllYear(){
+        var items=document.getElementsByName('year');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=true;
+        }
+        document.getElementById('selectyear').style.display = "none";
+        document.getElementById('unselectyear').style.display = "block";
+    }
+    
+    function UnSelectAllYear(){
+        var items=document.getElementsByName('year');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=false;
+        }
+        document.getElementById('selectyear').style.display = "block";
+        document.getElementById('unselectyear').style.display = "none";
+    }			
+</script>
+
+
+<script type="text/javascript">
     function selectAllWeek(){
         var items=document.getElementsByName('week');
         for(var i=0; i<items.length; i++){
@@ -395,15 +446,16 @@ $(document).ready(function() {
 <script type="text/javascript">
     $(document).ready(function () {
         $('#checkBtn').click(function() {
-          checked = $("input[name=week]:checked").length;
+          week_checked = $("input[name=week]:checked").length;
+          year_checked = $("input[name=year]:checked").length;
     
-          if(!checked) {
+          if(!week_checked || !year_checked) {
             $(document).Toasts('create', 
             { 
                 title: 'Error', 
                 autohide: false, 
                 delay: 750, 
-                body: 'You must select at least one Week.', 
+                body: 'You must select at least one year and week.', 
                 class:"toast bg-danger fade" 
             }) ; 
             return false;

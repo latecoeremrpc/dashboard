@@ -14,6 +14,7 @@ def cost(request):
     return render(request,'inventory_accuracy\cost.html') 
     
 def upload_files(request):
+    delete=SQ00.objects.all().delete() #To delete
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
@@ -44,7 +45,7 @@ def upload_files(request):
         return render(request,'inventory_accuracy\index.html',{'message_error':message_error}) 
 
     import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn)
-    home(request)
+    return home(request)
 
 
 
@@ -60,10 +61,13 @@ def upload_files(request):
     # print('#'*50)
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
-    username=request.META['REMOTE_USER']
+    current_year=datetime.datetime.now().isocalendar().year
+    # username=request.META['REMOTE_USER']
+    username=''
 
     all_sq00_data= SQ00.objects.all()
-    weekavailable=all_sq00_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
+    weekavailable=all_sq00_data.values_list('week_date_cpt',flat=True).distinct().order_by('week_date_cpt') #flat=True will remove the tuples and return the list   
+    yearavailable=all_sq00_data.values_list('year_date_cpt',flat=True).distinct().order_by('year_date_cpt') #flat=True will remove the tuples and return the list   
     division=[]
     profit_center=[]
     week=[]
@@ -71,17 +75,20 @@ def home(request):
     if request.method=='POST':
         division=request.POST.getlist('division')
         week=request.POST.getlist('week')
+        year=request.POST.getlist('year')
         profit_center=request.POST.getlist('profit_center')
     
     message_error=''
-    if len(week) > 0:
-        sq00_data=all_sq00_data.filter(week__in=week)
-        if len(division) > 0:
-            sq00_data=sq00_data.filter(division__in=division)
-        if len(profit_center) > 0:
-            sq00_data=sq00_data.filter(profit_centre__in=profit_center)
+    if len(year) > 0:
+        sq00_data=all_sq00_data.filter(year_date_cpt__in=year)
+        if len(week) > 0:
+            sq00_data=all_sq00_data.filter(year_date_cpt__in=year,week_date_cpt__in=week)
+            if len(division) > 0:
+                sq00_data=sq00_data.filter(division__in=division)
+            if len(profit_center) > 0:
+                sq00_data=sq00_data.filter(profit_centre__in=profit_center)
     else:
-        sq00_data=all_sq00_data.filter(week=current_week)
+        sq00_data=all_sq00_data.filter(week_date_cpt=current_week,year_date_cpt=current_year)
 
 
 
@@ -89,35 +96,64 @@ def home(request):
         inventory_accuracy_results(sq00_data)
     else:
         message_error='There is no data with your selected filter'
-        inventory_accuracy_results.count=''
+        inventory_accuracy_results.total_count=''
+        inventory_accuracy_results.accuracy=''
         inventory_accuracy_results.cost_per_division=''
         inventory_accuracy_results.total_deviation_cost=''
+        inventory_accuracy_results.count_per_division=''
+        inventory_accuracy_results.count_per_week=''
 
     return render(request,'inventory_accuracy\index.html',{'all_sq00_data':all_sq00_data,
-    'username':username,
-    'weekavailable':weekavailable,'message_error':message_error,'weeks':week,'divisions':division,
-    'count':inventory_accuracy_results.count,
-    'cost_per_division':inventory_accuracy_results.cost_per_division,
-    'total_deviation_cost':inventory_accuracy_results.total_deviation_cost})
+    'username':username,'current_week':current_week,
+    'weekavailable':weekavailable,'yearavailable':yearavailable,'message_error':message_error,'weeks':week,'years':year,'divisions':division,
+    'inventory_accuracy_total_count':inventory_accuracy_results.total_count,
+    'inventory_accuracy_accuracy':inventory_accuracy_results.accuracy,
+    'inventory_accuracy_count_per_division':inventory_accuracy_results.count_per_division,
+    'inventory_accuracy_cost_per_division':inventory_accuracy_results.cost_per_division,
+    'inventory_accuracy_total_deviation_cost':inventory_accuracy_results.total_deviation_cost,
+    'inventory_accuracy_count_per_week':inventory_accuracy_results.count_per_week})
     
 
 
 def inventory_accuracy_results(sq00_data):
     df=pd.DataFrame(list(sq00_data.values()))
-    # count
-    inventory_accuracy_results.count=df.shape[0]
+    # df.to_csv('df.csv')
+    # total_count rows
+    inventory_accuracy_results.total_count=df.shape[0]
+    df_division_grouped=df.groupby(['division'])['id'].count().reset_index() 
+    # df['percent_gap']=np.where((df['theoritical_quantity'] == 0) | (df['theoritical_quantity'].isna()), True,False)
+    # df.to_csv('df_.csv')
+    df['theoritical_quantity'] = df['theoritical_quantity'].fillna(0)
+    # df['percent_gap']=np.where((df['theoritical_quantity'] == 0),100,0)
+    # df.to_csv('df.csv')
+    # df['percent_gap']=np.where( df['percent_gap'] == 0 , ( (df['deviation'].astype(np.float32) / df['theoritical_quantity'].astype(np.float32)) *100), df['percent_gap'])
+    df['percent_gap']=np.where(((df['theoritical_quantity']==0)), 100, ( (df['deviation'].astype(np.float64) / df['theoritical_quantity'].astype(np.float64)) *100))
+    # df.to_csv('df.csv')
+    df['stock_accuracy']=np.where(df.percent_gap >= 1 , False ,True)
+    df_gap=df.loc[df['stock_accuracy'] == True]
 
+    inventory_accuracy_results.accuracy=round( ( ( df_gap.shape[0]/inventory_accuracy_results.total_count) * 100 ) ,2)
+    inventory_accuracy_results.count_per_division=df_gap.groupby(['division'])['id'].count().reset_index() 
+    inventory_accuracy_results.count_per_division['total_count']=inventory_accuracy_results.count_per_division['division'].map(dict(zip(df_division_grouped['division'],df_division_grouped['id'])))
+    inventory_accuracy_results.count_per_division['percent']=round( (inventory_accuracy_results.count_per_division['id'] / inventory_accuracy_results.count_per_division['total_count'])*100 , 2)
+    print('DF Division count')
+    print(df_division_grouped)
+    print('Dict DF grouped')
+    print(dict(zip(df_division_grouped['division'],['id'])))
+    print(inventory_accuracy_results.count_per_division)
     #new KPI   
-    df['type_of_measurement']=np.where( ( (df['unit']=='G') | (df['unit']=='KG') ), 'weighd','counted')
+    # df['type_of_measurement']=np.where( ( (df['unit']=='G') | (df['unit']=='KG') ), 'weighd','counted')
     # Pour un article pesé : Stock accuracy = 100% si l’écart < 3% et l’écart < 250€ sinon la réf est considéré en écart
-    df.insert(0, 'stock_accuracy', None)
+    # df.insert(0, 'stock_accuracy', None)
     # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='weighd') & (df['deviation'] < 0.03) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
     # # Pour un article compté : Stock accuracy = 100% si l’écart < 1% et l’écart < 250€ sinon la réf est considéré en écart
     # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='counted') & (df['deviation'] < 0.01) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
 
     #deviation cost per division
-    inventory_accuracy_results.cost_per_division=df.groupby(  ['year','week','division'])['deviation_cost_euro'].sum().reset_index() 
-    inventory_accuracy_results.total_deviation_cost=df['deviation_cost'].sum()
+    inventory_accuracy_results.total_deviation_cost=df_gap['deviation_cost_euro'].sum()
+    inventory_accuracy_results.cost_per_division=df_gap.groupby(['division'])['deviation_cost_euro'].sum().reset_index()
+    inventory_accuracy_results.count_per_week=df_gap.groupby(['year_date_cpt','week_date_cpt'])['id'].count().reset_index()
+
 
 
 def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
@@ -186,6 +222,9 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
     #Check for TND !!!
     #check for precision in float
     df['deviation_cost_euro']=df['deviation_cost'].astype('float32')*df['rate'].astype('float32')
+    #extract year and week from date_catchment
+    df['week_date_cpt']=df['date_catchment'].dt.isocalendar().week
+    df['year_date_cpt']=df['date_catchment'].dt.isocalendar().year
 
     list_inv = StringIO()
     #convert file to csv
@@ -223,7 +262,9 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
                     'company',
                     'currency',
                     'rate',
-                    'deviation_cost_euro',         
+                    'deviation_cost_euro',  
+                    'week_date_cpt',
+                    'year_date_cpt'      
             ],
             null="",
             sep=";",

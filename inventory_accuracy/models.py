@@ -29,6 +29,8 @@ class SQ00(models.Model):
     currency=models.CharField(max_length=50,null=True)
     rate=models.FloatField(null=True)
     deviation_cost_euro=models.FloatField(null=True)
+    week_date_cpt=models.IntegerField(null=True)
+    year_date_cpt=models.IntegerField(null=True)
     
     def __str__(self):
         return self.material
