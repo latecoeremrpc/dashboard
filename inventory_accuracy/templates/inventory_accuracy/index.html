@@ -19,7 +19,6 @@
                 </div>
             </div>
         </div>
-
         <div class="row">
             <div class="col-lg-3 col-6">
                 {%include 'inventory_accuracy/accuracy.html' %}
@@ -29,6 +28,12 @@
                 {%include 'inventory_accuracy/cost.html' %}
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-12">
+                {%include 'inventory_accuracy/accuracy_per_division.html' %}
+                
+            </div>
+        </div> 
         <div class="row">
             <div class="col-lg-6">
                 {%include 'inventory_accuracy/count_per_division.html' %}
@@ -42,12 +47,7 @@
                 {%include 'inventory_accuracy/count_per_week.html' %}
             </div>
         </div> 
-        <div class="row">
-            <div class="col-lg-12">
-                {%include 'inventory_accuracy/accuracy_per_division.html' %}
-                
-            </div>
-        </div>         
+        
 
     </div>
 </div>

@@ -136,11 +136,7 @@ def inventory_accuracy_results(sq00_data):
     inventory_accuracy_results.count_per_division=df_gap.groupby(['division'])['id'].count().reset_index() 
     inventory_accuracy_results.count_per_division['total_count']=inventory_accuracy_results.count_per_division['division'].map(dict(zip(df_division_grouped['division'],df_division_grouped['id'])))
     inventory_accuracy_results.count_per_division['percent']=round( (inventory_accuracy_results.count_per_division['id'] / inventory_accuracy_results.count_per_division['total_count'])*100 , 2)
-    print('DF Division count')
-    print(df_division_grouped)
-    print('Dict DF grouped')
-    print(dict(zip(df_division_grouped['division'],['id'])))
-    print(inventory_accuracy_results.count_per_division)
+    
     #new KPI   
     # df['type_of_measurement']=np.where( ( (df['unit']=='G') | (df['unit']=='KG') ), 'weighd','counted')
     # Pour un article pesé : Stock accuracy = 100% si l’écart < 3% et l’écart < 250€ sinon la réf est considéré en écart

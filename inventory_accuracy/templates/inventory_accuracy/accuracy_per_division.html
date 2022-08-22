@@ -104,6 +104,15 @@
                                 borderColor:  ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36'],
                                 borderWidth: 1,
                                 data: [{% for index, data in inventory_accuracy_count_per_division.iterrows %} {{data.percent}}, {% endfor %}]
+                                },
+                                {
+                                    type: "line",
+                                    label: "Accuracy target",
+                                    data:  [{% for index, data in inventory_accuracy_count_per_division.iterrows %} 98, {% endfor %}],
+                                    lineTension: 0, 
+                                    fill: false,
+                                    backgroundColor:'#59CE8F',
+                                    borderColor:'#59CE8F',
                                 }
                             ]
                             },
@@ -169,7 +178,7 @@
             <p class="card-text text-center">
                 No Data available for this selection
             </p>
-            <a class="btn btn-primary" href="{% url 'ofpastcalcul' %}" role="button">Calculate now</a>
+            <a class="btn btn-primary" href="{% url 'inventory_accuracyupload' %}" role="button">Calculate now</a>
         </center>
         {% endif %}
     </div>
