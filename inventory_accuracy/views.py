@@ -7,6 +7,7 @@ import numpy as np
 from os.path import exists
 import datetime
 import requests
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from inventory_accuracy.models import SQ00
 
 # Create your views here.
@@ -62,8 +63,8 @@ def upload_files(request):
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
-    # username=request.META['REMOTE_USER']
-    username=''
+    username=request.META['REMOTE_USER']
+    # username=''
 
     all_sq00_data= SQ00.objects.all()
     weekavailable=all_sq00_data.values_list('week_date_cpt',flat=True).distinct().order_by('week_date_cpt') #flat=True will remove the tuples and return the list   
@@ -131,6 +132,10 @@ def inventory_accuracy_results(sq00_data):
     # df.to_csv('df.csv')
     df['stock_accuracy']=np.where(df.percent_gap >= 1 , False ,True)
     df_gap=df.loc[df['stock_accuracy'] == True]
+    inventory_accuracy_results.data=df
+    # df.to_csv('df.csv')
+    # print(df.columns)
+
 
     inventory_accuracy_results.accuracy=round( ( ( df_gap.shape[0]/inventory_accuracy_results.total_count) * 100 ) ,2)
     inventory_accuracy_results.count_per_division=df_gap.groupby(['division'])['id'].count().reset_index() 
@@ -144,14 +149,37 @@ def inventory_accuracy_results(sq00_data):
     # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='weighd') & (df['deviation'] < 0.03) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
     # # Pour un article compté : Stock accuracy = 100% si l’écart < 1% et l’écart < 250€ sinon la réf est considéré en écart
     # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='counted') & (df['deviation'] < 0.01) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
-
     #deviation cost per division
     inventory_accuracy_results.total_deviation_cost=df_gap['deviation_cost_euro'].sum()
     inventory_accuracy_results.cost_per_division=df_gap.groupby(['division'])['deviation_cost_euro'].sum().reset_index()
     inventory_accuracy_results.count_per_week=df_gap.groupby(['year_date_cpt','week_date_cpt'])['id'].count().reset_index()
 
+def details(request):
+    all_inventory_data=SQ00.objects.all()
+    inventory_accuracy_results(all_inventory_data)
+    data=inventory_accuracy_results.data
+    
 
+    message_success=''
 
+    now = datetime.datetime.now()
+    current_time = now.strftime("%d_%m_%y_%H:%M:%S")
+
+    # Convert dataframe to dic for paginitation
+    records = data.to_dict(orient='records')
+
+    paginator = Paginator(records, 50)
+    page = request.GET.get('page')
+    records = paginator.get_page(page)
+    if request.method == 'POST':
+        # Download file 
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=inventory_accuracy_details_'+current_time+'.csv'
+        # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+        data.to_csv(path_or_buf=response,index=False)
+        return response
+    return render(request,"inventory_accuracy/details.html",{'data':records,'message_success':message_success})
+    
 def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
     df=pd.read_excel(list_inv_file)
     df_t001=pd.read_excel(t001_file)

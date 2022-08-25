@@ -43,8 +43,8 @@ def calcul(request):
     # material_data=Material.objects.all().delete()
     # coois_data=Coois.objects.all().delete()
 
-    holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"
-    # holidaysfile=r"C:\Users\L0005082\Desktop\CALENDRIER_SITE_2022_C.xlsx"
+    # holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"
+    holidaysfile=r"C:\Users\L0005082\Desktop\CALENDRIER_SITE_2022_C.xlsx"
 
     
     global dh #define calendar as global variable
@@ -56,7 +56,7 @@ def calcul(request):
     #upload files
     start_time = time.time()
 
-    upload_material(conn,week,year)
+    # upload_material(conn,week,year)
     upload_coois(conn,week,year)
     upload_zpp(conn,week,year)
 
@@ -615,7 +615,7 @@ def upload_material(conn,week,year):
 
 def upload_coois(conn,week,year):
     #Get Coois File
-    cooisfile = r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\COOIS_GLOBAL BEFORE MRP 202232.XLSX"
+    cooisfile = r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\COOIS_GLOBAL BEFORE MRP.XLSX"
     # cooisfile = r"\\prfoufiler01\donnees$\Public\coois\COOIS_GLOBAL BEFORE MRP.XLSX"
     # \\prfoufiler01\donnees$\Public\coois
     # cooisfile = r"http://sp-is.lat.corp/sites/MRPC/ExtractSAP/COOIS_GLOBAL%20BEFORE%20MRP%20202143.XLSX"

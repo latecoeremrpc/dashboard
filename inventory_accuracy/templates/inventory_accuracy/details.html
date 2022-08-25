@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {% if message_success %}
+        {%include 'homepage\success_msg.html'%}
+        {% endif %}
+        <div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 550px;">
+            <div class="card-header">
+                <div class="card-tools" style="margin-right: -0.8rem;" >
+                    <form method="POST" action="{% url 'inventory_accuracydetails' %}">
+                        {% csrf_token %}
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" download fas fa-download"></i></button></li>
+                    </form>
+                    <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+                    </ul>
+                </div>
+                <h5 class="m-0">Inventory accuracy details</h5>
+            </div>
+            <div class="card-body">
+                <!-- Pagination -->
+                {% if data.has_other_pages %}
+                <ul class="pagination justify-content-end">
+                    {% if data.has_previous %}
+                        <li class="page-item">
+                                <a class="page-link" href="?page={{ data.previous_page_number }}">
+                                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                    {% endif %}
+                    {% if data.number|add:'-5' > 1 %}
+                        <li class="page-item" >
+                            <a class="page-link" href="?page={{ data.number|add:'-5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% for i in data.paginator.page_range %}
+                        {% if data.number == i %}
+                            <li class="page-link">
+                                <span>{{ i }} 
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% elif i > data.number|add:'-5' and i < data.number|add:'5' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %} 
+                    {% if data.paginator.num_pages > data.number|add:'5' %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.number|add:'5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% if data.has_next %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.next_page_number }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+                        </li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+                <!-- End Pagination -->
+                <table class='table table-sm table-bordered table-hover table-head-fixed table-responsive-sm table-condensed '  >
+                    <thead class="table-light" style="white-space: nowrap">
+                            <tr>
+                                <th>ID</th>
+                                <th>Year import file</th>
+                                <th>Week import file</th>
+                                <th>Inventory doc</th>
+                                <th>Material</th>
+                                <th>Designation</th>
+                                <th>Type</th>
+                                <th>Unit</th>
+                                <th>Division</th>
+                                <th>Store</th>
+                                <th>Supplier</th>
+                                <th>Theoritical quantity</th>
+                                <th>Entred quantity</th>
+                                <th>Deviation</th>
+                                <th>Deviation cost</th>
+                                <th>Dev</th>
+                                <th>Date catchment</th>
+                                <th>Corrected by</th>
+                                <th>Catchment</th>
+                                <th>Delete?</th>
+                                <th>Refecrence_inventory</th>
+                                <th>Inventory_number</th>
+                                <th>Tys</th>
+                                <th>Company</th>
+                                <th>Currency</th>
+                                <th>Rate</th>
+                                <th>Deviation cost euro</th>
+                                <th>Week of date cpt</th>
+                                <th>Year of date cpt</th>
+                                <th>Percent gap</th>
+                                <th>Stock accuracy ?</th>
+                                
+                                
+                            </tr>
+                    </thead>    
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{row.id}}</td>
+                            <td>{{row.year}}</td>
+                            <td>{{row.week}}</td>
+                            <td>{{row.inventory_doc}}</td>
+                            <td>{{row.material}}</td>
+                            <td>{{row.designation}}</td>
+                            <td>{{row.type}}</td>
+                            <td>{{row.unit}}</td>
+                            <td>{{row.division}}</td>
+                            <td>{{row.store}}</td>
+                            <td>{{row.supplier}}</td>
+                            <td>{{row.theoritical_quantity}}</td>
+                            <td>{{row.entred_quantity}}</td>
+                            <td>{{row.deviation}}</td>
+                            <td>{{row.deviation_cost}}</td>
+                            <td>{{row.dev}}</td>
+                            <td>{{row.date_catchment}}</td>
+                            <td>{{row.corrected_by}}</td>
+                            <td>{{row.catchment}}</td>
+                            <td>{{row.delete}}</td>
+                            <td>{{row.refecrence_inventory}}</td>
+                            <td>{{row.inventory_number}}</td>
+                            <td>{{row.Tys}}</td>
+                            <td>{{row.company}}</td>
+                            <td>{{row.currency}}</td>
+                            <td>{{row.rate}}</td>
+                            <td>{{row.deviation_cost_euro}}</td>
+                            <td>{{row.week_date_cpt}}</td>
+                            <td>{{row.year_date_cpt}}</td>
+                            <td>{{row.percent_gap}}</td>
+                            <td>{{row.stock_accuracy}}</td>                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{%endblock%}

@@ -25,6 +25,6 @@ urlpatterns = [
     path('dashboard/mrpc/intercopurchase/', include('intercopurchase.urls')),   
     path('dashboard/logistics/cogi/', include('cogi.urls')),
     path('dashboard/convertpdf/', include('convertpdf.urls')),
-    path('dashboard/inventory_accuracy/', include('inventory_accuracy.urls')),
+    path('dashboard/logistics/inventory_accuracy/', include('inventory_accuracy.urls')),
 
 ]
