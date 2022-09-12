@@ -14,38 +14,38 @@
         </div>
         <div class="modal-body">
             <ul class="list-group list-group-flush">
-                <li class="list-group-item"><b>Documentation</b> : IN_MRPC_014 </li>
-                <li class="list-group-item"><b>Input</b> : Tcode : COOIS variant /EXTRACT_OF_PA, KOC4, VBUP</li>
-                <li class="list-group-item"><b>Filter</b> : KOC4 controling area PA01 WO list from COOIS extraction </li>
+                <li class="list-group-item"><b>Documentation</b> : TBD </li>
+                <li class="list-group-item"><b>Input</b> : SQ00 > Domaine global > MAGASIN > Z_LISTE_INV •TCURR •T001K •T001</li>
+                <li class="list-group-item"><b>Filter</b> : TBD </li>
                 <li class="list-group-item"><b>Rules</b>:        
                     <ul>
-                        <li>Link WO/cost/WBS status/WO distribution (Past/Actual/Future) : </li>
+                        <li>To get the prices in euro : </li>
                         <ul>
-                            <li>Link WO and costs : WO number in COOIS and KOC4 extraction </li> 
-                            <li>Link WO and customer order status : Customer order number in COOIS and VBUP extraction</li>
-                            <li>Define WO distribution : Past : plan end date of WO < Today less 1 week</li>
+                            <li>From T001K retrieve the 'company' with the key 'division'. </li> 
+                            <li>From T001 retrieve the 'currency' with the key 'company'. </li>
+                            <li>From TCUUR retrieve the 'Conversion rate' with the key 'currency'.</li>
                         </ul>
-                        <li>WO Distribution : Nominal WIP / To be invoiced / TCLO pending / Waiting financial :</li>
+                        <li>Convert the gap recorded in Euro Amount difference * Conversion rate :</li>
                         <ul>
-                            <li>TCLO pending : WO Status does not contain CLOT or TCLO and customer order status is ‘C’</li>
-                            <li>To be invoiced : WO Status contain CLOT or TCLO and customer order status does not contain ‘C’</li>
-                            <li>Nominal WIP : WO Status does not contain CLOT or TCLO and customer order status does not contain ‘C’</li>
-                            <li>Waiting financial : WO Status contain CLOT or TCLO and customer order status is ‘C’</li>
+                            <li>Amount difference * Conversion rate </li>
                         </ul> 
-                        <li>Root causes distribution WO in the past :</li>
+                        <li>Calculate percentage gap :</li>
                         <ul>
-                            <li>COGI blocking TCLO status : if WO Type = Y04 or YP03 or YP24 or YP23 or YP10 or YP11 and WO Status = LIVR and Material number <> ""</li> 
-                            <li> LCT released but not confirmed : WO number contain LCT and WO Status does not contain CONF or CNFP</li>
-                            <li> LCT released, confirmed but not Delivered : WO number contain LCT and WO status contain CONF</li>
-                            <li> Rush Order not released : if WO type= YP09 or YP10 or YP11 and WO status contain OUV.</li>
-                            <li> RushOrder confirmed but not technically completed: if WO type = YP09 or YP29 or YP10 and WO status contains CONF and material number = ""</li>
-                            <li> Rush Order confirmed but not delivered : if WO type = YP10 or YP11 and WO status contains CONF and material number <> ""</li>
-                            <li> Rush Order not confirmed and not delivered : if WO type = YP10 or YP11 and WO status does not contains CONF and material number <> ""</li>
-                            <li> Rush Order not confirmed but not technically completed : if WO type = Yp09 or YP29 or YP10 or YP11 + status does not contains CONF or/and CNFP and material number = ""</li>
-                            <li> WO partially confirmed : if WO type = Y04 or YP03 or YP24 or YP23 or YP10 or YP11 and WO status contains CNFP and material number <> ""</li>
-                            <li> WO Not confirmed : if WO type = Y04 or YP03 or YP24 or YP23 or YP10 or YP11 and WO status does not contains CONF or/and CNFP and material number <> ""</li>
-                            <li> WO confirmed and not delivered : if WO type =  Y04 or YP03 or YP24 or YP23 or YP10 or YP11 and WO status contains CONF and material number <> ""</li>
-                            <li> WO created but not released : if WO type = Y04 or YP03 or YP24 or YP23 or YP10 or YP11 and WO status and material number <> ""</li>
+                            <li>If 'theoretical quantity' differs from 0, percentage gap = (recorded difference / theoretical quantity) * 100</li> 
+                            <li>If 'theoretical quantity' = 0, percentage gap = 100</li>
+                        </ul>
+                        <li>Calculate stock accuracy ? :</li>
+                        <ul>
+                            <li>If percentage gap >= 1, receive False</li> 
+                            <li>If percent gap < 1, receive True</li>
+                        </ul>
+                        <li>Accuracy :</li>
+                        <ul>
+                            <li>Accuracy = Number of ligens True(percent gap < 1) / total number of lines</li> 
+                        </ul>
+                        <li>Target :</li>
+                        <ul>
+                            <li>The tagret on the graphs is set by the indicator manager.</li> 
                         </ul>
                     </ul>
     

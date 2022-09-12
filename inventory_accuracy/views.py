@@ -18,12 +18,18 @@ def upload_files(request):
     delete=SQ00.objects.all().delete() #To delete
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
-    week=datetime.datetime.today().isocalendar()[1]
+    # week=datetime.datetime.today().isocalendar()[1]
+    week=36
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
-    list_inv_file= r"\\prfoufiler01\donnees$\Public\2022 07 12 Z_LISTE_INV.xlsx"
-    t001_file= r"\\prfoufiler01\donnees$\Public\T001_202229.xlsx"
-    t001k_file= r"\\prfoufiler01\donnees$\Public\T001K_202229.XLSX "
-    tcurr_file= r"\\prfoufiler01\donnees$\Public\TCURR_202229.XLSX"
+    # list_inv_file= r"\\prfoufiler01\donnees$\Public\2022 07 12 Z_LISTE_INV.xlsx"
+    list_inv_file= r"\\centaure\Extract_SAP\SQ00-ZLIST_INV\ZLIST_INV_"+format(year)+format(week)+".xlsx"
+    # t001_file= r"\\prfoufiler01\donnees$\Public\T001_202229.xlsx"
+    t001_file= r"\\centaure\Extract_SAP\SE16N-T001\T001_"+format(year)+format(week)+".xlsx"
+    # t001k_file= r"\\prfoufiler01\donnees$\Public\T001K_202229.XLSX "
+    # t001k_file= r"\\prfoufiler01\donnees$\Public\T001K_202229.XLSX "
+    t001k_file= r"\\centaure\Extract_SAP\SE16N-T001K\T001K_"+format(year)+format(week)+".XLSX "
+    # tcurr_file= r"\\prfoufiler01\donnees$\Public\TCURR_202229.XLSX"
+    tcurr_file= r"\\centaure\Extract_SAP\SE16N-TCURR\TCURR_"+format(year)+format(week)+".XLSX"
 
     list_inv_file_exists=exists(list_inv_file)
     t001_file_exists=exists(t001_file)
@@ -194,6 +200,7 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
     df_t001=df_t001.iloc[:, [0,4]]
     df_t001.rename(columns={'Société':'company','Devise':'currency'},  inplace = True)
 
+    df_tcurr=df_tcurr[ ( df_tcurr['Type de cours'].isin(['M','P']) ) & (df_tcurr['Dev. source']=='EUR') ]
     df_tcurr=df_tcurr.iloc[:, [2,3,4]]
     df_tcurr.rename(columns={'Devise cible':'target_currency','Début validité':'date','Taux':'rate'},  inplace = True)
     df_tcurr['date']=pd.to_datetime( df_tcurr['date'])
@@ -221,6 +228,7 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
                         'N° inventaire':'inventory_number',
                         'TyS':'Tys'},  inplace = True)
 
+    df=df[~df['date_catchment'].isna()]
     #Adding the year and week columns
     #insert year and week in first and second position
     df.insert(0, 'year', year)

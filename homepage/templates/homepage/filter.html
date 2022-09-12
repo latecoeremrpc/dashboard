@@ -8,8 +8,61 @@
 </style>
 
 <div class="card-body">
+    {% csrf_token %}
     <div class="row">
-        {% csrf_token %}
+        <div class="col-lg- col-6">
+            <label for=" inputEmail4">Years: 
+                {% if '/dashboard/home' in request.get_full_path  %} 
+                
+                <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                title="To see more years, go to the KPI page"></i>
+                {% else %}
+                <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                title="Years available"></i>
+                
+                {% endif %}
+
+            </label>
+            <div class="col-lg-2 col-3">
+                <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectyear' style="width: 100px !important;border-radius: 10px;" onclick='selectAllYear()' value="Select All"/>
+                <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectyear' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllYear()' value="Unselect All"/>  
+            </div>
+            <br>
+            <ul class="ks-cboxtags">
+                {% for year in yearavailable %}
+                    <!--year must be convert to string cause years is list of string ['5','6']-->
+                    <li><input type="checkbox"  id={{year}} value={{year}} name="year"  '{% if year|stringformat:"i" in years %} checked  {% endif %}' ><label for={{year}}>{{year}}</label></li>
+                {% endfor %}        
+            </ul>                                          
+        </div>
+        <div class="col-lg- col-6">
+            <label for=" inputEmail4">Weeks: 
+                {% if '/dashboard/home' in request.get_full_path  %} 
+                
+                <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                title="To see more weeks, go to the KPI page"></i>
+                {% else %}
+                <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
+                title="Weeks available"></i>
+                
+                {% endif %}
+
+            </label>
+            <div class="col-lg-2 col-3">
+                <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectweek' style="width: 100px !important;border-radius: 10px;" onclick='selectAllWeek()' value="Select All"/>
+                <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectweek' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllWeek()' value="Unselect All"/>  
+            </div>
+            <br>
+            <ul class="ks-cboxtags">
+                {% for week in weekavailable %}
+                    <!--week must be convert to string cause weeks is list of string ['5','6']-->
+                    <li><input type="checkbox"  id={{week}} value={{week}} name="week"  '{% if week|stringformat:"i" in weeks %} checked  {% endif %}' ><label for={{week}}>{{week}}</label></li>
+                {% endfor %}        
+            </ul>                                          
+        </div>
+    </div>
+    <hr>
+    <div class="row">
             <div class="col-lg- col-6">
                 <label for=" inputEmail4">Divisions:</label>
                 <div class="col-lg-5 col-3">
@@ -291,59 +344,7 @@
                         </div>
             </div>
     </div>
-    <hr>
-    <div class="row">
-            <div class="col-lg- col-6">
-                <label for=" inputEmail4">Years: 
-                    {% if '/dashboard/home' in request.get_full_path  %} 
-                    
-                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
-                    title="To see more years, go to the KPI page"></i>
-                    {% else %}
-                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
-                    title="Years available"></i>
-                    
-                    {% endif %}
 
-                </label>
-                <div class="col-lg-2 col-3">
-                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectyear' style="width: 100px !important;border-radius: 10px;" onclick='selectAllYear()' value="Select All"/>
-                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectyear' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllYear()' value="Unselect All"/>  
-                </div>
-                <br>
-                <ul class="ks-cboxtags">
-                    {% for year in yearavailable %}
-                        <!--year must be convert to string cause years is list of string ['5','6']-->
-                        <li><input type="checkbox"  id={{year}} value={{year}} name="year"  '{% if year|stringformat:"i" in years %} checked  {% endif %}' ><label for={{year}}>{{year}}</label></li>
-                    {% endfor %}        
-                </ul>                                          
-            </div>
-            <div class="col-lg- col-6">
-                <label for=" inputEmail4">Weeks: 
-                    {% if '/dashboard/home' in request.get_full_path  %} 
-                    
-                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
-                    title="To see more weeks, go to the KPI page"></i>
-                    {% else %}
-                    <i class="fa-solid fa-circle-question" data-toggle="tooltip" data-placement="top" 
-                    title="Weeks available"></i>
-                    
-                    {% endif %}
-
-                </label>
-                <div class="col-lg-2 col-3">
-                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='selectweek' style="width: 100px !important;border-radius: 10px;" onclick='selectAllWeek()' value="Select All"/>
-                    <input type="button" class="btn btn-block btn-outline-info btn-xs" id='unselectweek' style="width: 100px !important;border-radius: 10px;display: none;" onclick='UnSelectAllWeek()' value="Unselect All"/>  
-                </div>
-                <br>
-                <ul class="ks-cboxtags">
-                    {% for week in weekavailable %}
-                        <!--week must be convert to string cause weeks is list of string ['5','6']-->
-                        <li><input type="checkbox"  id={{week}} value={{week}} name="week"  '{% if week|stringformat:"i" in weeks %} checked  {% endif %}' ><label for={{week}}>{{week}}</label></li>
-                    {% endfor %}        
-                </ul>                                          
-            </div>
-    </div>
 </div>
 <div class="card-footer text-center">
 <button type="submit" class="btn btn-primary" id="checkBtn" style="width: 120px !important;">Apply</button>

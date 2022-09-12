@@ -44,7 +44,7 @@ def calcul(request):
     # coois_data=Coois.objects.all().delete()
 
     # holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"
-    holidaysfile=r"C:\Users\L0005082\Desktop\CALENDRIER_SITE_2022_C.xlsx"
+    holidaysfile=r"\\prfoufiler01\public\CALENDRIER_SITE_2022_C.xlsx"
 
     
     global dh #define calendar as global variable
@@ -56,7 +56,7 @@ def calcul(request):
     #upload files
     start_time = time.time()
 
-    # upload_material(conn,week,year)
+    upload_material(conn,week,year)
     upload_coois(conn,week,year)
     upload_zpp(conn,week,year)
 

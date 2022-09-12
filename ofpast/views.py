@@ -63,7 +63,7 @@ def home(request):
     #Count per week per devision
     all_coois_data=Coois.objects.all()
     weekavailable=all_coois_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
-    yearavailable=all_coois_data.values_list('year',flat=True).distinct() #flat=True will remove the tuples and return the list  
+    yearavailable=all_coois_data.values_list('year',flat=True).distinct().order_by('year') #flat=True will remove the tuples and return the list  
 
     #Cost per week per devision
     all_koc4_data=Koc4.objects.all()
@@ -86,19 +86,33 @@ def home(request):
     if request.method == 'POST':
         message_error=''
         division=request.POST.getlist('division')
+        year=request.POST.getlist('year')
         week=request.POST.getlist('week')
         profit_center=request.POST.getlist('profit_center')
 
     # coois_data=all_coois_data
     message_error=''
-    if len(week) > 0:
-        coois_data=all_coois_data.filter(week__in=week)
-        if len(division) > 0:
-            coois_data=coois_data.filter(division__in=division)
-        if len(profit_center) > 0:
-            coois_data=coois_data.filter(profit_centre__in=profit_center)
+    if len(year) > 0:
+        coois_data=all_coois_data.filter(year__in=year)
+        if len(week) > 0:
+            coois_data=all_coois_data.filter(year__in=year,week__in=week)
+            if len(division) > 0:
+                coois_data=coois_data.filter(division__in=division)
+            if len(profit_center) > 0:
+                coois_data=coois_data.filter(profit_centre__in=profit_center)
     else:
-        coois_data=all_coois_data.filter(week=current_week)
+        coois_data=all_coois_data.filter(year=current_year,week=current_week)
+
+    # if len(year) > 0:
+    #     sq00_data=all_sq00_data.filter(year_date_cpt__in=year)
+    #     if len(week) > 0:
+    #         sq00_data=all_sq00_data.filter(year_date_cpt__in=year,week_date_cpt__in=week)
+    #         if len(division) > 0:
+    #             sq00_data=sq00_data.filter(division__in=division)
+    #         if len(profit_center) > 0:
+    #             sq00_data=sq00_data.filter(profit_centre__in=profit_center)
+    # else:
+    #     sq00_data=all_sq00_data.filter(week_date_cpt=current_week,year_date_cpt=current_year)
 
 
     
@@ -122,7 +136,7 @@ def home(request):
 
     return render(request,"ofpast/index.html",{'divisions':division,'profit_center':profit_center,'homekpi':homekpi,'ofpast_allweeks':ofpast_allweeks,
     'ofpast_divisions':ofpast_divisions,'current_week':current_week,'message_error':message_error,
-    'weekavailable':weekavailable,'yearavailable':yearavailable,'ofpast_divisions':ofpast_divisions,'weeks':week,
+    'weekavailable':weekavailable,'yearavailable':yearavailable,'ofpast_divisions':ofpast_divisions,'weeks':week,'years':year,
     'username':username,'ofpast_count_per_cause':ofpast_results.count_per_cause,'ofpast_count':ofpast_results.count,
     'ofpast_count_per_division':ofpast_results.count_per_division,'ofpast_count_per_week_per_division':ofpast_count_per_week_per_division,
     'ofpast_count_per_profit_center':ofpast_results.count_per_profit_center})
