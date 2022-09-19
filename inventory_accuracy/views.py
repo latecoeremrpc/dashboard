@@ -15,11 +15,10 @@ def cost(request):
     return render(request,'inventory_accuracy\cost.html') 
     
 def upload_files(request):
-    delete=SQ00.objects.all().delete() #To delete
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
-    # week=datetime.datetime.today().isocalendar()[1]
-    week=36
+    week=datetime.datetime.today().isocalendar()[1]
+    # week=36
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
     # list_inv_file= r"\\prfoufiler01\donnees$\Public\2022 07 12 Z_LISTE_INV.xlsx"
     list_inv_file= r"\\centaure\Extract_SAP\SQ00-ZLIST_INV\ZLIST_INV_"+format(year)+format(week)+".xlsx"
@@ -50,7 +49,9 @@ def upload_files(request):
     if tcurr_file_exists == False:
         message_error= 'Unable to upload TCURR File, not exist or unreadable!'
         return render(request,'inventory_accuracy\index.html',{'message_error':message_error}) 
-
+    
+    delete=SQ00.objects.all().delete() #To delete
+    
     import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn)
     return home(request)
 

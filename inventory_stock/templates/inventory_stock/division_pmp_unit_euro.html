@@ -1,0 +1,165 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block children %}
+<!-- Info Modal -->
+<div class="modal fade " id="inventory_stock_results_division_pmp_unit_euro_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Informations</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><b>Documentation</b> : TBD </li>
+                <li class="list-group-item"><b>Input</b> : SQ00 > Domaine global > MAGASIN > Z_LISTE_INV •TCURR •T001K •T001</li>
+                <li class="list-group-item"><b>Filter</b> : TBD </li>
+                <li class="list-group-item"><b>Rules</b>:        
+                    <ul>
+                        <li>To get the prices in euro : </li>
+                        <ul>
+                            <li>From T001K retrieve the 'company' with the key 'division'. </li> 
+                            <li>From T001 retrieve the 'currency' with the key 'company'. </li>
+                            <li>From TCUUR retrieve the 'Conversion rate' with the key 'currency'.</li>
+                        </ul>
+                        <li>Convert the gap recorded in Euro Amount difference * Conversion rate :</li>
+                        <ul>
+                            <li>Amount difference * Conversion rate </li>
+                        </ul> 
+                        <li>Calculate percentage gap :</li>
+                        <ul>
+                            <li>If 'theoretical quantity' differs from 0, percentage gap = (recorded difference / theoretical quantity) * 100</li> 
+                            <li>If 'theoretical quantity' = 0, percentage gap = 100</li>
+                        </ul>
+                        <li>Calculate stock accuracy ? :</li>
+                        <ul>
+                            <li>If percentage gap >= 1, receive False</li> 
+                            <li>If percent gap < 1, receive True</li>
+                        </ul>
+                        <li>Accuracy :</li>
+                        <ul>
+                            <li>Accuracy = Number of ligens True(percent gap < 1) / total number of lines</li> 
+                        </ul>
+                        <li>Target :</li>
+                        <ul>
+                            <li>The tagret on the graphs is set by the indicator manager.</li> 
+                        </ul>
+                    </ul>
+    
+                </li>
+            </ul>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+        </div>
+    </div>
+</div>
+<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 600px;">
+    <div class="card-header">
+        <div class="card-tools" style="margin-right: -0.8rem;" >
+            <form action={%url 'homesettings' %} method='POST'>
+                {% csrf_token %}
+                <input name="kpi" type="hidden" value="inventory_stock\division_pmp_unit_euro"> 
+                <input name="col" type="hidden" value="6"> 
+            <ul class="list-group list-group-horizontal" style="height: 35px;">
+                <li class="list-group-item" style="padding:7px;"><i type="button"  data-toggle="modal" data-target="#inventory_stock_results_division_pmp_unit_euro_modal" class="info fas fa-info-circle"></i></li>
+                <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" favorite fas fa-heart" {%if 'inventory_stock\\division_pmp_unit_euro.html' in homekpi %} style="color:red;" {%endif%} ></i></button></li>
+            </form>
+            <li class="list-group-item" style="padding:7px;"><i type="button" class="download fas fa-download" id="btn-download-inventory_stock_results_division_pmp_unit_euro"></i></li>
+            <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+            </ul>
+        </div>
+        <h5 class="m-0">PMP Unit per division <sup>Euro</sup></h5>
+        
+    </div>
+    <div class="card-body ">
+        <h6 class="card-title ">Week(s): 
+            <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
+                {%for w in weeks %} 
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">{{w}}</li>
+                {%empty%}
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">{{current_week}}</li>
+                {%endfor%}
+            </ul> 
+        </h6>  
+        {% if inventory_stock_results_division_pmp_unit_euro.iterrows %}
+        <div style="height: 400px">
+            <canvas id="inventory_stock_results_division_pmp_unit_euro" ></canvas>
+
+            <script>
+                const inventory_stock_results_division_pmp_unit_euro=new Chart("inventory_stock_results_division_pmp_unit_euro", {
+                    // plugins: [ChartDataLabels],
+                    type: "bar",
+                    data: {
+                            labels: [{% for index, data in inventory_stock_results_division_pmp_unit_euro.iterrows %} '{{data.division}}', {% endfor %}],
+                            datasets: [
+                                {
+                                label:'Currency',
+                                backgroundColor:  ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36','#2a9d8f','#0081a7','#023047','#f38375','#005f73'],
+                                borderColor:  ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36','#2a9d8f','#0081a7','#023047','#f38375','#005f73'],
+                                borderWidth: 1,
+                                data: [{% for index, data in inventory_stock_results_division_pmp_unit_euro.iterrows %} {{data.pmp_unit_euro}}.toFixed(2), {% endfor %}]
+                                }
+                            ]
+                            },
+                    options: {
+                        plugins: {
+                                datalabels: {
+                                    anchor: 'end',
+                                    clamp: true,
+                                    color: 'black',
+                                    
+                                },
+                                legend: {
+                                display: false,
+                                position:'right',
+                                align:'middle',
+                                labels: {
+                                usePointStyle: true,
+                                boxWidth: 6
+                                },
+                                },
+
+                                title: {
+                                    display: false,
+                                    text: "tile"
+                                },
+                                
+                            },
+                            responsive: true,
+                            maintainAspectRatio:false, 
+
+                    }
+                });
+            </script>
+        </div>
+        {% else %}
+        <center style="margin-top: 15%;"><img src="{% static 'img/nodatafound.png' %}" alt="">
+            <p class="card-text text-center">
+                No Data available for this selection
+            </p>
+            <a class="btn btn-primary" href="{% url 'inventory_stockupload' %}" role="button">Calculate now</a>
+        </center>
+        {% endif %}
+    </div>
+
+    <script>
+        var image = inventory_stock_results_division_pmp_unit_euro.toBase64Image();
+        document.getElementById('btn-download-inventory_stock_results_division_pmp_unit_euro').onclick = function() {
+        var a = document.createElement('a');
+        a.href = inventory_stock_results_division_pmp_unit_euro.toBase64Image();
+        a.download = 'inventory_stock_results_division_pmp_unit_euro.png';
+        a.click();
+        }
+    </script>
+</div>
+
+
+
+{% endblock children%}

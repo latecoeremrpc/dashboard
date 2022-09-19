@@ -1,0 +1,12 @@
+{% extends 'base2.html' %}
+{% block children %}
+{% load humanize %}
+<div class="info-box mb-3 bg-info" style="background-color:#0081a7 !important;"> 
+    <span class="info-box-icon"><i class="fa-solid fa-euro-sign"></i></span>
+    <div class="info-box-content">
+        <span class="info-box-text">Total PS Unit EUR Cost</span>
+        <h3 class="info-box-number">{{inventory_stock_results_total_ps_unit_euro_cost|intword}}</h3>
+    </div>
+</div>
+
+{% endblock children%}

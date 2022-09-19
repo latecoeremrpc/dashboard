@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {% load humanize %}
+        {% if message_error %}
+        {%include 'homepage\error_msg.html'%}
+        {% endif %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">  
+                    <div class="card-header">
+                    <h3 class="card-title">Filter</h3>
+                    </div>
+                    <form action={% url 'inventory_stockhome' %} method="post">
+                        {%include 'homepage/filter.html' %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                {%include 'inventory_stock/total_count.html' %}
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                {%include 'inventory_stock\total_pmp_unit_euro.html' %}
+            </div>
+            <div class="col-lg-3 col-6">
+                {%include 'inventory_stock\total_ps_unit_euro_cost.html' %}
+            </div>
+            <div class="col-lg-3 col-6">
+                {%include 'inventory_stock\total_valuation_ps_euro_cost.html' %}
+            </div>
+            <div class="col-lg-3 col-6">
+                {%include 'inventory_stock\total_valuation_pmp_euro_cost.html' %}
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-6">
+            {%include 'inventory_stock\division_pmp_unit_euro.html' %}
+            </div>
+            <div class="col-6">
+                {%include 'inventory_stock\division_ps_unit_euro_cost.html' %}
+            </div>
+            <div class="col-6">
+                {%include 'inventory_stock\division_valuation_ps_euro_cost.html' %}
+            </div>
+            <div class="col-6">
+                {%include 'inventory_stock\division_valuation_pmp_euro_cost.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

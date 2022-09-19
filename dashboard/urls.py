@@ -26,5 +26,6 @@ urlpatterns = [
     path('dashboard/logistics/cogi/', include('cogi.urls')),
     path('dashboard/convertpdf/', include('convertpdf.urls')),
     path('dashboard/logistics/inventory_accuracy/', include('inventory_accuracy.urls')),
+    path('dashboard/logistics/inventory_stock/', include('inventory_stock.urls')),
 
 ]

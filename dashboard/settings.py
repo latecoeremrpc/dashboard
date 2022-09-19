@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'cogi',
     'intercopurchase',
     'inventory_accuracy',
+    'inventory_stock',
 ]
 
 MIDDLEWARE = [
