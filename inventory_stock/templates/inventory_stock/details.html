@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {% if message_success %}
+        {%include 'homepage\success_msg.html'%}
+        {% endif %}
+        <div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 550px;">
+            <div class="card-header">
+                <div class="card-tools" style="margin-right: -0.8rem;" >
+                    <form method="POST" action="{% url 'inventory_stockdetails' %}">
+                        {% csrf_token %}
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" download fas fa-download"></i></button></li>
+                    </form>
+                    <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+                    </ul>
+                </div>
+                <h5 class="m-0">Inventory stock details</h5>
+            </div>
+            <div class="card-body">
+                <!-- Pagination -->
+                {% if data.has_other_pages %}
+                <ul class="pagination justify-content-end">
+                    {% if data.has_previous %}
+                        <li class="page-item">
+                                <a class="page-link" href="?page={{ data.previous_page_number }}">
+                                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                    {% endif %}
+                    {% if data.number|add:'-5' > 1 %}
+                        <li class="page-item" >
+                            <a class="page-link" href="?page={{ data.number|add:'-5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% for i in data.paginator.page_range %}
+                        {% if data.number == i %}
+                            <li class="page-link">
+                                <span>{{ i }} 
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% elif i > data.number|add:'-5' and i < data.number|add:'5' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %} 
+                    {% if data.paginator.num_pages > data.number|add:'5' %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.number|add:'5' }}">&hellip;</a>
+                        </li>
+                    {% endif %}
+                    {% if data.has_next %}
+                        <li>
+                            <a class="page-link" href="?page={{ data.next_page_number }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+                        </li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+                <!-- End Pagination -->
+                <table class='table table-sm table-bordered table-hover table-head-fixed table-responsive-sm table-condensed '  >
+                    <thead class="table-light" style="white-space: nowrap">
+                            <tr>
+                                <th>year</th>
+                                <th>week</th>
+                                <th>material</th>
+                                <th>division</th>
+                                <th>profit_center</th>
+                                <th>material_type</th>
+                                <th>individual_collective</th>
+                                <th>standard_price</th>
+                                <th>pr_moy_pond</th>
+                                <th>price_basis</th> 
+                                <th>company</th>
+                                <th>currency</th> 
+                                <th>rate</th> 
+                                <th>ps_unit_div</th>
+                                <th>pmp_unit_div</th>
+                                <th>ps_unit_euro</th>
+                                <th>pmp_unit_euro</th>
+                                <th>stock</th>
+                                <th>lot_qm</th>
+                                <th>stock_transit</th>
+                                <th>stock_blocked</th>
+                                <th>valuation_ps_div</th>
+                                <th>valuation_pmp_div</th>
+                                <th>valuation_ps_euro</th>
+                                <th>valuation_pmp_euro</th> 
+                                
+                                
+                            </tr>
+                    </thead>    
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{row.year}}</td>
+                            <td>{{row.week}}</td>
+                            <td>{{row.material}}</td>
+                            <td>{{row.division}}</td>
+                            <td>{{row.profit_center}}</td>
+                            <td>{{row.material_type}}</td>
+                            <td>{{row.individual_collective}}</td>
+                            <td>{{row.standard_price}}</td>
+                            <td>{{row.pr_moy_pond}}</td>
+                            <td>{{row.price_basis}}</td> 
+                            <td>{{row.company}}</td>
+                            <td>{{row.currency}}</td> 
+                            <td>{{row.rate}}</td> 
+                            <td>{{row.ps_unit_div}}</td>
+                            <td>{{row.pmp_unit_div}}</td>
+                            <td>{{row.ps_unit_euro}}</td>
+                            <td>{{row.pmp_unit_euro}}</td>
+                            <td>{{row.stock}}</td>
+                            <td>{{row.lot_qm}}</td>
+                            <td>{{row.stock_transit}}</td>
+                            <td>{{row.stock_blocked}}</td>
+                            <td>{{row.valuation_ps_div}}</td>
+                            <td>{{row.valuation_pmp_div}}</td>
+                            <td>{{row.valuation_ps_euro}}</td>
+                            <td>{{row.valuation_pmp_euro}}</td>                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{%endblock%}

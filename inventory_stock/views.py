@@ -138,8 +138,27 @@ def inventory_stock_results(MaterialSheet_data):
     
 
 
-def details():
-    return True
+def details(request):
+    data=pd.DataFrame(MaterialSheet.objects.all().values())
+    message_success=''
+
+    now = datetime.datetime.now()
+    current_time = now.strftime("%d_%m_%y_%H:%M:%S")
+
+    # Convert dataframe to dic for paginitation
+    records = data.to_dict(orient='records')
+
+    paginator = Paginator(records, 50)
+    page = request.GET.get('page')
+    records = paginator.get_page(page)
+    if request.method == 'POST':
+        # Download file 
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=inventory_stock_details_'+current_time+'.csv'
+        # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+        data.to_csv(path_or_buf=response,index=False)
+        return response
+    return render(request,"inventory_stock/details.html",{'data':records,'message_success':message_success})
 
 def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_file,tcurr_file,year,week,conn):
     print('Hello')
