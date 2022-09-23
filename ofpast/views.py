@@ -206,6 +206,7 @@ def ofpast_results(coois_data):
 
     #All data
     ofpast_results.data= dc.where(pd.notnull(dc), None)
+    # ofpast_results.data= dc
 
     # if (current_week in weekavailable and current_year in yearavailable) or week :
     #Count
@@ -224,6 +225,7 @@ def details(request):
     all_coois_data=Coois.objects.all()
     ofpast_results(all_coois_data)
     data=ofpast_results.data
+    # data.to_csv('ofpastdf.csv',index=False)
     message_success=''
 
     now = datetime.datetime.now()
@@ -236,6 +238,8 @@ def details(request):
     page = request.GET.get('page')
     records = paginator.get_page(page)
     if request.method == 'POST':
+        ofpast_results(all_coois_data)
+        data=ofpast_results.data
         # Download file 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename=WoPast_details_'+current_time+'.csv'

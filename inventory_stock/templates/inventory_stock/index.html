@@ -28,10 +28,6 @@
         <hr>
         <div class="row">
             <div class="col-lg-3 col-6">
-                {%include 'inventory_stock\total_pmp_unit_euro.html' %}
-            </div>
-            <div class="col-lg-3 col-6">
-                {%include 'inventory_stock\total_ps_unit_euro_cost.html' %}
             </div>
             <div class="col-lg-3 col-6">
                 {%include 'inventory_stock\total_valuation_ps_euro_cost.html' %}
@@ -39,20 +35,25 @@
             <div class="col-lg-3 col-6">
                 {%include 'inventory_stock\total_valuation_pmp_euro_cost.html' %}
             </div>
+            <div class="col-lg-3 col-6">
+
+            </div>
         </div>
         <hr>
         <div class="row">
-            <div class="col-6">
-            {%include 'inventory_stock\division_pmp_unit_euro.html' %}
-            </div>
-            <div class="col-6">
-                {%include 'inventory_stock\division_ps_unit_euro_cost.html' %}
-            </div>
             <div class="col-6">
                 {%include 'inventory_stock\division_valuation_ps_euro_cost.html' %}
             </div>
             <div class="col-6">
                 {%include 'inventory_stock\division_valuation_pmp_euro_cost.html' %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+            {%include 'inventory_stock\division_valuation_ps_euro_cost_table.html' %}
+            </div>
+            <div class="col-6">
+                {%include 'inventory_stock\division_valuation_pmp_euro_cost_table.html' %}
             </div>
         </div>
     </div>

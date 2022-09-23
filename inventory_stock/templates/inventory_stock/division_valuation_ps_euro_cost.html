@@ -65,7 +65,7 @@
                                 backgroundColor:  ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36','#2a9d8f','#0081a7','#023047','#f38375','#005f73'],
                                 borderColor:  ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36','#2a9d8f','#0081a7','#023047','#f38375','#005f73'],
                                 borderWidth: 1,
-                                data: [{% for index, data in inventory_stock_results_division_valuation_ps_euro_cost.iterrows %} {{data.valuation_ps_euro}}, {% endfor %}]
+                                data: [{% for index, data in inventory_stock_results_division_valuation_ps_euro_cost.iterrows %} ({{data.valuation_ps_euro}}).toFixed(2), {% endfor %}]
                                 }
                             ]
                             },

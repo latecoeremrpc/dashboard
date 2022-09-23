@@ -2,7 +2,7 @@
     <ul class="list-group list-group-flush">
         <li class="list-group-item"><b>Documentation</b> : TBD </li>
         <li class="list-group-item"><b>Input</b> : •IS_FICHE_ART •ZPP_FLG13 •MB52 •TCURR •T001K •T001</li>
-        <li class="list-group-item"><b>Filter</b> : TBD </li>
+        <li class="list-group-item"><b>Filter</b> : None </li>
         <li class="list-group-item"><b>Rules</b>:        
             <ul>
                 <li>Filter on :</li>
@@ -22,23 +22,23 @@
                 </ul>
                 <li>Rate = :</li>
                 <ul>
-                    <li>TCURR!Rate or TCURR!Rate*10 if Currency ="TND "Search ID: T001!Currency = TCURR!Target CurrencyFilter: Price type = "p" and Dev. Source = "EUR" and Dev. Target = "CAD" or "INR" or "MAD" or "TND" or "MXN "Sorts: TCURR!Most recent date</li> 
+                    <li>TCURR!Rate or TCURR!Rate "Search ID: T001!Currency = TCURR!Target CurrencyFilter: Price type = "p" and Dev. Source = "EUR" and Dev. Target = "CAD" or "INR" or "MAD" or "TND" or "MXN "Sorts: TCURR!Most recent date</li> 
                 </ul>
                 <li>PS-Unit-Div = :</li>
                 <ul>
-                    <li>Standard Price / Price Base (*10 if Currency = "TND")</li> 
+                    <li>Standard Price / Price Base </li> 
                 </ul>
                 <li>PMP-Unit-Div = :</li>
                 <ul>
-                    <li>Pr moy pond / Price base (*10 if Currency ="TND")</li> 
+                    <li>Pr moy pond / Price base </li> 
                 </ul>
                 <li>PS-Unit-Euro = :</li>
                 <ul>
-                    <li>Standard Price if Currency = "EUR" or =Standard Price / Price Base / Rate</li> 
+                    <li>PS-Unit-Div if Currency = "EUR" or =Standard Price / Price Base / Rate</li> 
                 </ul>
                 <li>PMP-Unit-Euro  = :</li>
                 <ul>
-                    <li>Pr moy pond if Currency = "EUR" or =Pr moy pond / Price Base / Rate</li> 
+                    <li>PMP-Unit-Div if Currency = "EUR" or =Pr moy pond / Price Base / Rate</li> 
                 </ul>
                 <li>Stock </li>
                 <ul>
@@ -48,13 +48,13 @@
                 <ul>
                     <li>From ZPP_FLG13</li> 
                 </ul>
-                <li>Stock Transi </li>
+                <li>Stock Transit </li>
                 <ul>
                     <li>From ZPP_FLG13</li> 
                 </ul>
                 <li>Stock bloqued</li>
                 <ul>
-                    <li>From MB52</li> 
+                    <li>From MB52 sum of Stock bloqued with Key: Material, Division</li> 
                 </ul>
                 <li>Valorisation PS-Div = : </li>
                 <ul>
@@ -66,11 +66,11 @@
                 </ul>
                 <li>Valorisation PS-Euro = :</li>
                 <ul>
-                    <li>(Stock + QM Lot + Transit Stock + Blocked Stock) x PS-Unit-Euro</li> 
+                    <li>(Stock + QM Lot + Transit Stock + Blocked Stock) x PS-Unit-Euro ( / 10 if Currency ="TND")</li> 
                 </ul>
                 <li>Valorisation PMP-Euro = :</li>
                 <ul>
-                    <li>(Stock + QM Lot + Transit Stock + Blocked Stock) x PMP-Unit-Euro</li> 
+                    <li>(Stock + QM Lot + Transit Stock + Blocked Stock) x PMP-Unit-Euro ( / 10 if Currency ="TND")</li> 
                 </ul>
                     
             </ul>

@@ -1,0 +1,73 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% load poll_extras %}
+{% load humanize %}
+
+{% block children %}
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h5 class="m-0">Valuation PS per division <sup>Euro</sup></h5>
+    </div>
+    <div class="card-body ">
+        <table  id="example2" class="table table-hover dataTable dtr-inline" aria-describedby="example2_info">
+            <thead>
+                <th>Division</th>
+                <th>Name</th>
+                <th>Current stock</th>
+                <th>Week before</th>
+                <th>Difference</th>
+                <th>Progress</th>
+            </thead>
+            <tbody>
+                {% for index, data in inventory_stock_results_week_division_valuation_ps_euro_cost.iterrows %}
+                <tr>
+                    <td> {{data.division}} </td>
+                    <td> 
+                        {% if data.division == '2000' %}
+                        LABEGE
+                        {% elif data.division == '2010' %}
+                        COLOMIERS
+                        {% elif data.division == '2020' %}
+                        LIPOSTHEY
+                        {% elif data.division == '2030' %}
+                        VENDARGUES
+                        {% elif data.division == '2040' %}
+                        BORDEROUGE
+                        {% elif data.division == '2110' %}
+                        FOUCHANA
+                        {% elif data.division == '2200' %}
+                        HAMBOURG
+                        {% elif data.division == '2300' %}
+                        HERMOSILLO
+                        {% elif data.division == '2400' %}
+                        CASABLANCA
+                        {% elif data.division == '2500' %}
+                        INDIA
+                        {% elif data.division == '2600' %}
+                        LAVAL
+                        {% endif %}
+                    </td>
+                    <td> € {{data.valuation_ps_euro|floatformat:"2"|intcomma}} </td>
+                    <td>
+                        {% for index, row in inventory_stock_results_week_before_division_valuation_ps_euro_cost.iterrows %}
+                            {% if row.division == data.division %}
+                            € {{ row.valuation_ps_euro|floatformat:"2"|intcomma}}
+                        </td>
+                        <td>{{ row.valuation_ps_euro|diff:data.valuation_ps_euro|floatformat:"0" }} </td>
+                        <td> <span class="badge bg-primary">{{ row.valuation_ps_euro|percent:data.valuation_ps_euro|floatformat:"0" }} %</span> </td></span> </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+
+
+{% endblock children%}

@@ -1,3 +1,4 @@
+from msilib.schema import Directory
 from django.http import HttpResponse
 from django.shortcuts import render
 from io import StringIO
@@ -9,6 +10,8 @@ import datetime
 import requests
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from inventory_accuracy.models import SQ00
+import glob
+import os
 
 # Create your views here.
 def cost(request):
@@ -20,15 +23,18 @@ def upload_files(request):
     week=datetime.datetime.today().isocalendar()[1]
     # week=36
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
-    # list_inv_file= r"\\prfoufiler01\donnees$\Public\2022 07 12 Z_LISTE_INV.xlsx"
+
     list_inv_file= r"\\centaure\Extract_SAP\SQ00-ZLIST_INV\ZLIST_INV_"+format(year)+format(week)+".xlsx"
-    # t001_file= r"\\prfoufiler01\donnees$\Public\T001_202229.xlsx"
-    t001_file= r"\\centaure\Extract_SAP\SE16N-T001\T001_"+format(year)+format(week)+".xlsx"
-    # t001k_file= r"\\prfoufiler01\donnees$\Public\T001K_202229.XLSX "
-    # t001k_file= r"\\prfoufiler01\donnees$\Public\T001K_202229.XLSX "
-    t001k_file= r"\\centaure\Extract_SAP\SE16N-T001K\T001K_"+format(year)+format(week)+".XLSX "
-    # tcurr_file= r"\\prfoufiler01\donnees$\Public\TCURR_202229.XLSX"
-    tcurr_file= r"\\centaure\Extract_SAP\SE16N-TCURR\TCURR_"+format(year)+format(week)+".XLSX"
+
+    #get files with last modification
+    directory_t001=glob.glob(r"\\centaure\Extract_SAP\SE16N-T001\*")
+    t001_file= max(directory_t001,key=os.path.getmtime)
+
+    directory_t001k=glob.glob(r"\\centaure\Extract_SAP\SE16N-T001K\*")
+    t001k_file= max(directory_t001k,key=os.path.getmtime)
+
+    directory_tcurr=glob.glob(r"\\centaure\Extract_SAP\SE16N-TCURR\*")
+    tcurr_file=max(directory_tcurr,key=os.path.getmtime)
 
     list_inv_file_exists=exists(list_inv_file)
     t001_file_exists=exists(t001_file)
@@ -50,7 +56,7 @@ def upload_files(request):
         message_error= 'Unable to upload TCURR File, not exist or unreadable!'
         return render(request,'inventory_accuracy\index.html',{'message_error':message_error}) 
     
-    delete=SQ00.objects.all().delete() #To delete
+    delete=SQ00.objects.all().delete()
     
     import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn)
     return home(request)
