@@ -16,21 +16,21 @@ import os
 def upload_files(request):
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
-    # week=datetime.datetime.today().isocalendar()[1]
-    week=36
-    all_MaterialSheet_data= MaterialSheet.objects.all().delete()
+    week=datetime.datetime.today().isocalendar()[1]
+    # week=37
+    # all_MaterialSheet_data= MaterialSheet.objects.all().delete()
 
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
-    # material_sheet_file=r"\\centaure\Extract_SAP\SQ00-FICHE_ARTICLE\IS_FICHE_ARTICLE_"+format(year)+format(week)+".xlsx"
-    # zpp_flg13_file=r"\\centaure\Extract_SAP\10-ZPP_FLG13\Z13_"+format(year)+format(week)+"_2.TXT"
-    # mb52_file=r"\\centaure\Extract_SAP\MB52\MB52_"+format(year)+format(week)+".xlsx"
+    material_sheet_file=r"\\centaure\Extract_SAP\SQ00-FICHE_ARTICLE\IS_FICHE_ARTICLE_"+format(year)+format(week)+".xlsx"
+    zpp_flg13_file=r"\\centaure\Extract_SAP\11-ZPP_FLG13 FULL\Z13_"+format(year)+format(week)+"_2.TXT"
+    mb52_file=r"\\centaure\Extract_SAP\MB52\MB52_"+format(year)+format(week)+".xlsx"
     # t001_file= r"\\centaure\Extract_SAP\SE16N-T001\T001_"+format(year)+format(week)+".xlsx"
     # t001k_file= r"\\centaure\Extract_SAP\SE16N-T001K\T001K_"+format(year)+format(week)+".XLSX "
     # tcurr_file= r"\\centaure\Extract_SAP\SE16N-TCURR\TCURR_"+format(year)+format(week)+".XLSX"
 
-    material_sheet_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\IS_FICHE_ARTICLE_202236.XLSX"
-    zpp_flg13_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\ZFLG13.TXT"
-    mb52_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\MB52_202235.XLSX"
+    # material_sheet_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\IS_FICHE_ARTICLE_202236.XLSX"
+    # zpp_flg13_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\ZFLG13.TXT"
+    # mb52_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\MB52_202235.XLSX"
 
     #get files with last modification
     directory_t001=glob.glob(r"\\centaure\Extract_SAP\SE16N-T001\*")
@@ -54,7 +54,7 @@ def upload_files(request):
         message_error= 'Unable to upload SQ00-FICHE_ARTICLE File, not exist or unreadable!'
         return render(request,'inventory_stock\index.html',{'message_error':message_error})  
     if zpp_flg13_file_exists == False:
-        zpp_flg13_file=r"\\centaure\Extract_SAP\10-ZPP_FLG13\Z13_"+format(year)+format(week)+"_1.TXT"
+        zpp_flg13_file=r"\\centaure\Extract_SAP\11-ZPP_FLG13 FULL\Z13_"+format(year)+format(week)+"_1.TXT"
         zpp_flg13_file_1_exists = exists(zpp_flg13_file)
         if zpp_flg13_file_1_exists == False:
             message_error= 'Unable to upload ZPP FLG13 File, not exist or unreadable!'
@@ -79,8 +79,7 @@ def upload_files(request):
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
-    # username=request.META['REMOTE_USER']
-    username='Ibiza'
+    username=request.META['REMOTE_USER']
     all_MaterialSheet_data= MaterialSheet.objects.all()
     weekavailable=all_MaterialSheet_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
     yearavailable=all_MaterialSheet_data.values_list('year',flat=True).distinct().order_by('year') #flat=True will remove the tuples and return the list   
@@ -153,8 +152,8 @@ def home(request):
 
 
 def inventory_stock_results_week(MaterialSheet_data):
-    # current_week=datetime.datetime.now().isocalendar().week
-    current_week=36
+    current_week=datetime.datetime.now().isocalendar().week
+    # current_week=37
 
     df=pd.DataFrame(MaterialSheet_data.values())
     df['ps_unit_div']=(df['standard_price'] / df['price_basis'])
@@ -234,7 +233,7 @@ def details(request):
     inventory_stock_results(data)
     data=inventory_stock_results.data
 
-    data['valuation_pmp_euro']=np.where( (data['currency'] == 'TND') , data['valuation_pmp_euro']/ 10 , data['valuation_pmp_euro'] )
+    # data['valuation_pmp_euro']=np.where( (data['currency'] == 'TND') , data['valuation_pmp_euro']/ 10 , data['valuation_pmp_euro'] )
     message_success=''
 
     now = datetime.datetime.now()
@@ -333,11 +332,13 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     df['lot_qm']=df['lot_qm'].fillna(0)
     df['stock_transit']=df['stock_transit'].fillna(0)
 
+    df_mb52=df_mb52.iloc[:,[0,1,14]]
+    df_mb52.columns =['Material', 'Division', 'bloqued']
     df_mb52['Division']=df_mb52['Division'].fillna(0)
     df_mb52['Division']=df_mb52['Division'].astype(int)
-    df_mb52['key']=df_mb52['Division'].astype('str')+df_mb52["Numéro d'article"].astype('str')
-    df_mb52=df_mb52.groupby(['key'])['Bloqué'].sum().reset_index()
-    dict_df_mb52_stock_blocked=dict(zip(df_mb52['key'],df_mb52['Bloqué']))
+    df_mb52['key']=df_mb52['Division'].astype('str')+df_mb52["Material"].astype('str')
+    df_mb52=df_mb52.groupby(['key'])['bloqued'].sum().reset_index()
+    dict_df_mb52_stock_blocked=dict(zip(df_mb52['key'],df_mb52['bloqued']))
     df['stock_bloqued']=df['key'].map(dict_df_mb52_stock_blocked)
     df['stock_bloqued']=df['stock_bloqued'].fillna(0)
 

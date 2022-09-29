@@ -10,6 +10,8 @@ from ofpast.models import Coois,Koc4
 from purchasepast.models import Purchase
 from purchasepast.views import purchase_results
 from intercopurchase.views import intercopurchase_results
+from inventory_stock.models import MaterialSheet
+from inventory_stock.views import inventory_stock_results , inventory_stock_results_week
 import os
 
 def homesettings(request):
@@ -108,6 +110,20 @@ def homeview(request):
     intercopurchase_count_receive_per_week_per_division=""
     intercopurchase_count_convert_per_week_per_division=""
 
+    #"""""""""""""Inventory Stok App"""""""""""""""
+    inventory_stock_results_week.division_valuation_ps_euro_cost=None
+    inventory_stock_results_week.division_valuation_pmp_euro_cost=None
+    inventory_stock_results_week.before_division_valuation_ps_euro_cost=None
+    inventory_stock_results_week.before_division_valuation_pmp_euro_cost=None
+    inventory_stock_results.total_count=None
+    inventory_stock_results.total_pmp_unit_euro=None
+    inventory_stock_results.total_ps_unit_euro_cost=None
+    inventory_stock_results.total_valuation_ps_euro_cost=None
+    inventory_stock_results.total_valuation_pmp_euro_cost=None
+    inventory_stock_results.division_pmp_unit_euro=None
+    inventory_stock_results.division_ps_unit_euro_cost=None
+    inventory_stock_results.division_valuation_ps_euro_cost=None
+    inventory_stock_results.division_valuation_pmp_euro_cost=None
     #-------------------------------------------------
     #Get kpis choosen from the user
     kpis=HomeKpi.objects.all().filter(username=username)
@@ -120,11 +136,16 @@ def homeview(request):
         division=request.POST.getlist('division')
         profit_center=request.POST.getlist('profit_center')
         week=request.POST.getlist('week')
+        year=request.POST.getlist('year')
         profit_center=request.POST.getlist('profit_center')
 
     range_week=range(current_week-7,current_week+1)
     # for week in range_week:
     weekavailable=[week for week in range_week]
+
+    range_year=range(current_year-1,current_year+1)
+    # for year in range_year:
+    yearavailable=[year for year in range_year]
 
     for kpi in kpis:
         if kpi.theme=='cogi':
@@ -266,12 +287,47 @@ def homeview(request):
             else:
                 # Call Function to get intercopurchase_results
                 intercopurchase_results(intercopurchase_data)
+        
+        if kpi.theme=='inventory_stock':
+
+            all_MaterialSheet_data= MaterialSheet.objects.all()
+            if len(year) > 0:
+                MaterialSheet_data=all_MaterialSheet_data.filter(year__in=year)
+                if len(week) > 0:
+                    MaterialSheet_data=all_MaterialSheet_data.filter(year__in=year,week__in=week)
+                    if len(division) > 0:
+                        MaterialSheet_data=MaterialSheet_data.filter(division__in=division)
+                    if len(profit_center) > 0:
+                        MaterialSheet_data=MaterialSheet_data.filter(profit_center__in=profit_center)
+            else:
+                MaterialSheet_data=all_MaterialSheet_data.filter(week=current_week,year=current_year)
+            if all_MaterialSheet_data:
+                inventory_stock_results_week(all_MaterialSheet_data)
+            else:
+                inventory_stock_results_week.division_valuation_ps_euro_cost=None
+                inventory_stock_results_week.division_valuation_pmp_euro_cost=None
+                inventory_stock_results_week.before_division_valuation_ps_euro_cost=None
+                inventory_stock_results_week.before_division_valuation_pmp_euro_cost=None
+            
+            if MaterialSheet_data:
+                inventory_stock_results(MaterialSheet_data)
+            else:
+                inventory_stock_results.total_count=None
+                inventory_stock_results.total_pmp_unit_euro=None
+                inventory_stock_results.total_ps_unit_euro_cost=None
+                inventory_stock_results.total_valuation_ps_euro_cost=None
+                inventory_stock_results.total_valuation_pmp_euro_cost=None
+                inventory_stock_results.division_pmp_unit_euro=None
+                inventory_stock_results.division_ps_unit_euro_cost=None
+                inventory_stock_results.division_valuation_ps_euro_cost=None
+                inventory_stock_results.division_valuation_pmp_euro_cost=None
+
 
     
     
     
     
-    return render (request, "homepage\index.html",{'current_week':current_week,'weeks':week,'profit_center':profit_center,'weekavailable':weekavailable,'username':username,'kpis':kpis,'divisions':division,
+    return render (request, "homepage\index.html",{'current_week':current_week,'current_year':current_year,'yearavailable':yearavailable,'weeks':week,'years':year,'profit_center':profit_center,'weekavailable':weekavailable,'username':username,'kpis':kpis,'divisions':division,
     'cogi_count':cogi_results.count,'cogi_count_per_code':cogi_results.count_per_code,'cogi_count_per_accountability':cogi_results.count_per_accountability,
     'cogi_allweeks':cogi_allweeks,'cogi_divisions':cogi_divisions,'cogi_count_per_week_per_division':cogi_count_per_week_per_division,
 
@@ -290,6 +346,22 @@ def homeview(request):
     'intercopurchase_count_convert_per_division':intercopurchase_results.count_convert_per_division,
     'intercopurchase_count_receive_per_week_per_division':intercopurchase_count_receive_per_week_per_division,
     'intercopurchase_count_convert_per_week_per_division':intercopurchase_count_convert_per_week_per_division,
+
+    'inventory_stock_results_total_count':inventory_stock_results.total_count,
+    'inventory_stock_results_total_pmp_unit_euro':inventory_stock_results.total_pmp_unit_euro,
+    'inventory_stock_results_total_ps_unit_euro_cost':inventory_stock_results.total_ps_unit_euro_cost,
+    'inventory_stock_results_total_valuation_ps_euro_cost':inventory_stock_results.total_valuation_ps_euro_cost,
+    'inventory_stock_results_total_valuation_pmp_euro_cost':inventory_stock_results.total_valuation_pmp_euro_cost,
+
+    'inventory_stock_results_division_pmp_unit_euro':inventory_stock_results.division_pmp_unit_euro,
+    'inventory_stock_results_division_ps_unit_euro_cost':inventory_stock_results.division_ps_unit_euro_cost,
+    'inventory_stock_results_division_valuation_ps_euro_cost':inventory_stock_results.division_valuation_ps_euro_cost,
+    'inventory_stock_results_division_valuation_pmp_euro_cost':inventory_stock_results.division_valuation_pmp_euro_cost,
+
+    'inventory_stock_results_week_division_valuation_ps_euro_cost':inventory_stock_results_week.division_valuation_ps_euro_cost,
+    'inventory_stock_results_week_division_valuation_pmp_euro_cost':inventory_stock_results_week.division_valuation_pmp_euro_cost,
+    'inventory_stock_results_week_before_division_valuation_ps_euro_cost':inventory_stock_results_week.before_division_valuation_ps_euro_cost,
+    'inventory_stock_results_week_before_division_valuation_pmp_euro_cost':inventory_stock_results_week.before_division_valuation_pmp_euro_cost,
 
     })
 
