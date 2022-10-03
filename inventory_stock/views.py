@@ -17,8 +17,8 @@ def upload_files(request):
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
-    # week=37
-    # all_MaterialSheet_data= MaterialSheet.objects.all().delete()
+    # week=39
+    # all_MaterialSheet_data= MaterialSheet.objects.all().filter(week=39).delete()
 
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
     material_sheet_file=r"\\centaure\Extract_SAP\SQ00-FICHE_ARTICLE\IS_FICHE_ARTICLE_"+format(year)+format(week)+".xlsx"
@@ -291,9 +291,10 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     # because can't read proprely the file with dask ther's an offset between headers and data
     df_zpp_flg13['key']=df_zpp_flg13['Période'].astype('str').str.strip()+df_zpp_flg13['Grp acheteurs'].astype('str').str.strip()
     # df_zpp_flg13['key']=df_zpp_flg13['key'].str.strip()
-    dict_zpp_flg13_stock=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Besoins'].str.strip())) #Stock in file
-    dict_zpp_flg13_lot_qm=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Consign. Stock'].str.strip())) #Lot Qm in file 
-    dict_zpp_flg13_stock_transit=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Désignation Fournisseur 2'].str.strip())) #Stock en Transit in file
+    dict_zpp_flg13_stock=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Besoins'].astype('str').str.strip())) #Stock in file
+    dict_zpp_flg13_lot_qm=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Consign. Stock'].astype('str').str.strip())) #Lot Qm in file 
+    dict_zpp_flg13_stock_transit=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Désignation Fournisseur 2'].astype('str').str.strip())) #Stock en Transit in file
+    dict_zpp_flg13_planif_unit=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Point Commande'].astype('str').str.strip())) #Unité de planif in file
 
 
     df=df.iloc[:,[0,1,4,6,26,62,63,88]]
@@ -326,7 +327,12 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     df['lot_qm']=df['lot_qm'].str.replace(',','.')
     df['stock_transit']=df['key'].map(dict_zpp_flg13_stock_transit)
     df['stock_transit']=df['stock_transit'].str.replace(',','.')
+    df['planif_unit']=df['key'].map(dict_zpp_flg13_planif_unit)
+    df['planif_unit']=df['planif_unit'].str.slice(start=5)
+    df['planif_unit']=np.where( ( df['planif_unit'].isin(['2091','FTWZ','2092']) ), df['planif_unit'], 0 )
 
+
+    df['division']=np.where((df['planif_unit']==0),df['division'],df['planif_unit'])
 
     df['stock']=df['stock'].fillna(0)
     df['lot_qm']=df['lot_qm'].fillna(0)
@@ -342,8 +348,13 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     df['stock_bloqued']=df['key'].map(dict_df_mb52_stock_blocked)
     df['stock_bloqued']=df['stock_bloqued'].fillna(0)
 
+
+    # df.to_csv('dfstock_s39.csv')
+
+
     
     del df['key']
+    del df['planif_unit']
     # df.to_csv('df_inventroy_stock.csv')
     # print(df)
     data = StringIO()

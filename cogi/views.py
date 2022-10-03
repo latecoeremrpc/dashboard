@@ -52,6 +52,7 @@ def home(request):
 
     if request.method == 'POST':
         division=request.POST.getlist('division')
+        year=request.POST.getlist('year')
         week=request.POST.getlist('week')
         profit_center=request.POST.getlist('profit_center')
 
@@ -71,14 +72,25 @@ def home(request):
 
     message_error=''
     #Check Filter, if filter exist get result with filter if not get current week
-    if len(week) > 0:
-        cogi_data=all_cogi_data.filter(week__in=week)
-        if len(division) > 0:
-            cogi_data=cogi_data.filter(division__in=division)
-        if len(profit_center) > 0:
-            cogi_data=cogi_data.filter(profit_centre__in=profit_center)
+    # if len(week) > 0:
+    #     cogi_data=all_cogi_data.filter(week__in=week)
+    #     if len(division) > 0:
+    #         cogi_data=cogi_data.filter(division__in=division)
+    #     if len(profit_center) > 0:
+    #         cogi_data=cogi_data.filter(profit_centre__in=profit_center)
+    # else:
+    #     cogi_data=all_cogi_data.filter(week=current_week)
+    if len(year) > 0:
+            cogi_data=all_cogi_data.filter(year__in=year)
+            if len(week) > 0:
+                cogi_data=all_cogi_data.filter(year__in=year,week__in=week)
+                if len(division) > 0:
+                    cogi_data=cogi_data.filter(division__in=division)
+                if len(profit_center) > 0:
+                    cogi_data=cogi_data.filter(profit_centre__in=profit_center)
     else:
-        cogi_data=all_cogi_data.filter(week=current_week)
+        cogi_data=all_cogi_data.filter(year=current_year,week=current_week)
+
     
     #Check if result is empty
     if not cogi_data :
@@ -96,7 +108,7 @@ def home(request):
         cogi_results(cogi_data)
 
     return render(request,'cogi\index.html',{'divisions':division,'message_error':message_error,'current_week':current_week,'username':username,'homekpi':homekpi,'cogi_allweeks':cogi_allweeks,'cogi_divisions':cogi_divisions,
-    'cogi_count_per_week_per_division':cogi_count_per_week_per_division,'cogi_count':cogi_results.count,'weekavailable':weekavailable,
+    'cogi_count_per_week_per_division':cogi_count_per_week_per_division,'cogi_count':cogi_results.count,'weekavailable':weekavailable,'yearavailable':yearavailable,'years':year,
     'cogi_count_per_code':cogi_results.count_per_code,'cogi_count_per_accountability':cogi_results.count_per_accountability,'weeks':week})
 
 
