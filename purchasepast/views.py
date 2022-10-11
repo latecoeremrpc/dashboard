@@ -58,7 +58,8 @@ def upload_files(request):
         return render(request,'purchasepast\index.html',{'message_error':message_error,'weekavailable':weekavailable,'current_week':current_week,'current_year':current_year,'week':week})
 
 def home(request):
-    username=request.META['REMOTE_USER']
+    # username=request.META['REMOTE_USER']
+    username='test'
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
     homekpi=list(HomeKpi.objects.all().filter(username=username).values_list('kpi',flat=True))
@@ -92,18 +93,19 @@ def home(request):
     if request.method == 'POST':
         division=request.POST.getlist('division')
         week=request.POST.getlist('week')
+        year=request.POST.getlist('year')
+        profit_center=request.POST.getlist('profit_center')
 
     message_error=''
     #Check Filter, if filter exist get result with filter if not get current week
-    if week and division:
-        purchase_data=all_purchase_data.filter(division__in=division).filter(week__in=week)
-    elif week:
-        purchase_data=all_purchase_data.filter(week__in=week)
-    elif division:
-        purchase_data=all_purchase_data.filter(division__in=division)
+    if len(year) > 0:
+            purchase_data=all_purchase_data.filter(year__in=year)
+            if len(week) > 0:
+                purchase_data=all_purchase_data.filter(year__in=year,week__in=week)
+                if len(division) > 0:
+                    purchase_data=purchase_data.filter(division__in=division)
     else:
-        purchase_data=all_purchase_data.filter(week=current_week)
-    
+        purchase_data=all_purchase_data.filter(year=current_year,week=current_week)
     #Check if result is empty
     if not purchase_data :
         message_error='There is no data with your selected filter'
@@ -123,7 +125,7 @@ def home(request):
 
     return render(request,"purchasepast\index.html",{'homekpi':homekpi,'purchase_allweeks':purchase_allweeks,
     'purchase_receive_divisions':purchase_receive_divisions,'purchase_convert_divisions':purchase_convert_divisions,'current_week':current_week,'message_error':message_error,
-    'weekavailable':weekavailable,'yearavailable':yearavailable,'divisions':division,'weeks':week,
+    'weekavailable':weekavailable,'yearavailable':yearavailable,'divisions':division,'weeks':week,'years':year,
     'username':username,'purchase_count_per_cause':purchase_results.count_per_cause,'purchase_count':purchase_results.count,
     'purchase_count_receive_per_division':purchase_results.count_receive_per_division,'purchase_count_receive_per_week_per_division':purchase_count_receive_per_week_per_division,
     'purchase_count_convert_per_week_per_division':purchase_count_convert_per_week_per_division,
@@ -133,13 +135,17 @@ def purchase_results(purchase_data):
     dp=pd.DataFrame(list(purchase_data.values()))  
     
     #All data
-    purchase_results.data= dp.where(pd.notnull(dp), None)
+    # purchase_results.data= dp.where(pd.notnull(dp), None)
 
     #Count
     purchase_results.count = len(dp.index)
 
     #value
-    purchase_results.value = dp['valuation_price'].sum()
+    # purchase_results.value = dp['valuation_price'].sum()
+
+    dp['value']=(dp['valuation_price'] / dp['base_price']) * dp['qte_requested']
+    dp['value']=dp['value'].fillna(0)
+    purchase_results.value = dp['value'].sum()
 
     #Count per cause
     purchase_results.count_per_cause=""

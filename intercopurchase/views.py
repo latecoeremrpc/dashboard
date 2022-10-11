@@ -41,14 +41,7 @@ def upload_files(request):
     # holidays_exists = exists(holidaysfile)
 
     if purchase_exists :
-        # dh=pd.read_excel(holidaysfile)
-        # dh=dh.rename(columns={'FOU-2110':'2110','LAB-2000':'2000','LEC-2030':'2030','LIP-2020':'2020','COL-2010':'2010','HBG-2200':'2200','HER-2300':'2300','CAS-2400':'2400','BEL-2500':'2500','LAV-2600':'2600','QRO-2320':'2320'})
-        # for col in dh.columns:
-        #     dh[col]= pd.to_datetime(dh[col]).dt.date
-
         import_purchase(purchase_file,current_year,current_week,conn)
-
-
         return home(request)
     else:
         message_error='Unable to upload files, not exist or unreadable!'
@@ -92,17 +85,18 @@ def home(request):
     if request.method == 'POST':
         division=request.POST.getlist('division')
         week=request.POST.getlist('week')
+        year=request.POST.getlist('year')
 
     message_error=''
     #Check Filter, if filter exist get result with filter if not get current week
-    if week and division:
-        intercopurchase_data=all_intercopurchase_data.filter(division__in=division).filter(week__in=week)
-    elif week:
-        intercopurchase_data=all_intercopurchase_data.filter(week__in=week)
-    elif division:
-        intercopurchase_data=all_intercopurchase_data.filter(division__in=division)
+    if len(year) > 0:
+            intercopurchase_data=all_intercopurchase_data.filter(year__in=year)
+            if len(week) > 0:
+                intercopurchase_data=all_intercopurchase_data.filter(year__in=year,week__in=week)
+                if len(division) > 0:
+                    intercopurchase_data=intercopurchase_data.filter(division__in=division)
     else:
-        intercopurchase_data=all_intercopurchase_data.filter(week=current_week)
+        intercopurchase_data=all_intercopurchase_data.filter(year=current_year,week=current_week)
     
     #Check if result is empty
     if not intercopurchase_data :
@@ -123,7 +117,7 @@ def home(request):
 
     return render(request,"intercopurchase\index.html",{'homekpi':homekpi,'intercopurchase_allweeks':intercopurchase_allweeks,
     'intercopurchase_receive_divisions':intercopurchase_receive_divisions,'intercopurchase_convert_divisions':intercopurchase_convert_divisions,'current_week':current_week,'message_error':message_error,
-    'weekavailable':weekavailable,'yearavailable':yearavailable,'divisions':division,'weeks':week,
+    'weekavailable':weekavailable,'yearavailable':yearavailable,'divisions':division,'weeks':week,'years':year,
     'username':username,'intercopurchase_count_per_cause':intercopurchase_results.count_per_cause,'intercopurchase_count':intercopurchase_results.count,
     'intercopurchase_count_receive_per_division':intercopurchase_results.count_receive_per_division,'intercopurchase_count_receive_per_week_per_division':intercopurchase_count_receive_per_week_per_division,
     'intercopurchase_count_convert_per_week_per_division':intercopurchase_count_convert_per_week_per_division,
@@ -139,7 +133,9 @@ def intercopurchase_results(intercopurchase_data):
     intercopurchase_results.count = len(dp.index)
 
     #value
-    intercopurchase_results.value = dp['valuation_price'].sum()
+    dp['value']=(dp['valuation_price'] / dp['base_price']) * dp['qte_requested']
+    dp['value']=dp['value'].fillna(0)
+    intercopurchase_results.value = dp['value'].sum()
 
     #Count per cause
     intercopurchase_results.count_per_cause=""
@@ -203,9 +199,11 @@ def import_purchase(file,year,week,conn):
                 'material',
                 'division',
                 'transferring_division',
+                'qte_requested',
                 'requisition_date',
                 'release_date',
                 'valuation_price',
+                'base_price',
                 'supplier',
                 'outline_agreement',
                 'principal_agmt_item',

@@ -17,7 +17,12 @@
                 <li class="list-group-item"><b>Documentation</b> : IN_MRPC_018  </li>
                 <li class="list-group-item"><b>Input</b> : Tcode : SE16N table EBAN variant /MRPC_WD_PRP</li>
                 <li class="list-group-item"><b>Filter</b> : release date = Today </li>
-                <li class="list-group-item"><b>Rule</b> : DA Filter purchasing group <b>NOT</b>  MRI, MRP </li>
+                <li class="list-group-item"><b>Rule</b> : 
+                    <ul>
+                        <li>DA Filter purchasing group <b>NOT</b>  MRI, MRP </li>
+                        <li> Value = (valuation price / base price) * qte requested </li>
+                    </ul>                
+                </li>
             </ul>
         </div>
         <div class="modal-footer">

@@ -21,7 +21,7 @@ def upload_files(request):
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
-    # week=36
+    week=39
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
 
     list_inv_file= r"\\centaure\Extract_SAP\SQ00-ZLIST_INV\ZLIST_INV_"+format(year)+format(week)+".xlsx"
@@ -76,8 +76,8 @@ def upload_files(request):
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
-    username=request.META['REMOTE_USER']
-    # username=''
+    # username=request.META['REMOTE_USER']
+    username=''
 
     all_sq00_data= SQ00.objects.all()
     weekavailable=all_sq00_data.values_list('week_date_cpt',flat=True).distinct().order_by('week_date_cpt') #flat=True will remove the tuples and return the list   
@@ -131,16 +131,16 @@ def home(request):
 
 def inventory_accuracy_results(sq00_data):
     df=pd.DataFrame(list(sq00_data.values()))
-    # df.to_csv('df.csv')
+    # df.to_csv('df_accuracy.csv')
     # total_count rows
     inventory_accuracy_results.total_count=df.shape[0]
+    print(inventory_accuracy_results.total_count)
     df_division_grouped=df.groupby(['division'])['id'].count().reset_index() 
-    # df['percent_gap']=np.where((df['theoritical_quantity'] == 0) | (df['theoritical_quantity'].isna()), True,False)
-    # df.to_csv('df_.csv')
+    print("count per division")
+    print(df_division_grouped)
+
     df['theoritical_quantity'] = df['theoritical_quantity'].fillna(0)
-    # df['percent_gap']=np.where((df['theoritical_quantity'] == 0),100,0)
-    # df.to_csv('df.csv')
-    # df['percent_gap']=np.where( df['percent_gap'] == 0 , ( (df['deviation'].astype(np.float32) / df['theoritical_quantity'].astype(np.float32)) *100), df['percent_gap'])
+    
     df['percent_gap']=np.where(((df['theoritical_quantity']==0)), 100, ( (df['deviation'].astype(np.float64) / df['theoritical_quantity'].astype(np.float64)) *100))
     # df.to_csv('df.csv')
     df['stock_accuracy']=np.where(df.percent_gap >= 1 , False ,True)
