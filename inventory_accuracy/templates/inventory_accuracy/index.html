@@ -20,12 +20,20 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-3 col-6">
-                {%include 'inventory_accuracy/accuracy.html' %}
-                
+            <div class="col-lg-1">
+
             </div>
-            <div class="col-lg-3 col-6">
+            <div class="col-lg-3">
+                {%include 'inventory_accuracy/accuracy.html' %}
+            </div>
+            <div class="col-lg-3">
                 {%include 'inventory_accuracy/cost.html' %}
+            </div>
+            <div class="col-lg-3">
+                {%include 'inventory_accuracy/count.html' %}
+            </div>
+            <div class="col-lg-2">
+
             </div>
         </div>
         <div class="row">
@@ -47,6 +55,11 @@
                 {%include 'inventory_accuracy/count_per_week.html' %}
             </div>
         </div> 
+        <div class="row">
+            <div class="col-lg-12">
+                {%include 'inventory_accuracy/cost_per_week.html' %}
+            </div>
+        </di
         
 
     </div>

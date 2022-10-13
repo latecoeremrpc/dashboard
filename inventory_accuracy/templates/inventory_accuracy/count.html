@@ -1,0 +1,21 @@
+{% extends 'base2.html' %}
+{% block children %}
+{% load humanize %}
+
+<!-- small box -->
+<div class="small-box  bg-info">
+    <div class="inner">
+    <h3>{{inventory_accuracy_total_count|intword}}<sup style="font-size: 15px"> </sup></h3>
+    <p>Count</p>
+    </div>
+    <div class="icon">
+        <i class="fas fa-tag"></i>
+    </div>
+    <a href='{% url 'inventory_accuracydetails' %}' class="small-box-footer"> Details <i class="fas fa-arrow-circle-right fa-beat" ></i></a>
+
+
+</div>
+
+{% endblock children%}
+
+

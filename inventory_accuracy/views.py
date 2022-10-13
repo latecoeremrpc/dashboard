@@ -21,7 +21,6 @@ def upload_files(request):
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
-    week=39
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
 
     list_inv_file= r"\\centaure\Extract_SAP\SQ00-ZLIST_INV\ZLIST_INV_"+format(year)+format(week)+".xlsx"
@@ -55,8 +54,10 @@ def upload_files(request):
     if tcurr_file_exists == False:
         message_error= 'Unable to upload TCURR File, not exist or unreadable!'
         return render(request,'inventory_accuracy\index.html',{'message_error':message_error}) 
-    
+    print('before delete')
     delete=SQ00.objects.all().delete()
+    print('After delete')
+
     
     import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn)
     return home(request)
@@ -93,6 +94,7 @@ def home(request):
         profit_center=request.POST.getlist('profit_center')
     
     message_error=''
+    print(year,week)
     if len(year) > 0:
         sq00_data=all_sq00_data.filter(year_date_cpt__in=year)
         if len(week) > 0:
@@ -104,8 +106,7 @@ def home(request):
     else:
         sq00_data=all_sq00_data.filter(week_date_cpt=current_week,year_date_cpt=current_year)
 
-
-
+    print(SQ00.objects.all().filter(year_date_cpt=2022,week_date_cpt=41).count())
     if sq00_data:
         inventory_accuracy_results(sq00_data)
     else:
@@ -114,18 +115,24 @@ def home(request):
         inventory_accuracy_results.accuracy=''
         inventory_accuracy_results.cost_per_division=''
         inventory_accuracy_results.total_deviation_cost=''
-        inventory_accuracy_results.count_per_division=''
         inventory_accuracy_results.count_per_week=''
+        inventory_accuracy_results.count_per_division=''
+        inventory_accuracy_results.accuracy_per_division=''
+        inventory_accuracy_results.cost_per_week=''
 
     return render(request,'inventory_accuracy\index.html',{'all_sq00_data':all_sq00_data,
     'username':username,'current_week':current_week,
     'weekavailable':weekavailable,'yearavailable':yearavailable,'message_error':message_error,'weeks':week,'years':year,'divisions':division,
     'inventory_accuracy_total_count':inventory_accuracy_results.total_count,
     'inventory_accuracy_accuracy':inventory_accuracy_results.accuracy,
-    'inventory_accuracy_count_per_division':inventory_accuracy_results.count_per_division,
     'inventory_accuracy_cost_per_division':inventory_accuracy_results.cost_per_division,
     'inventory_accuracy_total_deviation_cost':inventory_accuracy_results.total_deviation_cost,
-    'inventory_accuracy_count_per_week':inventory_accuracy_results.count_per_week})
+    'inventory_accuracy_count_per_week':inventory_accuracy_results.count_per_week,
+    'inventory_accuracy_count_per_division':inventory_accuracy_results.count_per_division,
+    'inventory_accuracy_accuracy_per_division':inventory_accuracy_results.accuracy_per_division,
+    'inventory_accuracy_cost_per_week':inventory_accuracy_results.cost_per_week
+    
+    })
     
 
 
@@ -133,39 +140,25 @@ def inventory_accuracy_results(sq00_data):
     df=pd.DataFrame(list(sq00_data.values()))
     # df.to_csv('df_accuracy.csv')
     # total_count rows
-    inventory_accuracy_results.total_count=df.shape[0]
-    print(inventory_accuracy_results.total_count)
-    df_division_grouped=df.groupby(['division'])['id'].count().reset_index() 
-    print("count per division")
-    print(df_division_grouped)
+    df_gap=df[df['catchment']=='X']
+    inventory_accuracy_results.total_count=df_gap.shape[0]
 
-    df['theoritical_quantity'] = df['theoritical_quantity'].fillna(0)
-    
-    df['percent_gap']=np.where(((df['theoritical_quantity']==0)), 100, ( (df['deviation'].astype(np.float64) / df['theoritical_quantity'].astype(np.float64)) *100))
-    # df.to_csv('df.csv')
-    df['stock_accuracy']=np.where(df.percent_gap >= 1 , False ,True)
-    df_gap=df.loc[df['stock_accuracy'] == True]
+    df_gap['stock_accuracy']=np.where((df_gap['refecrence_inventory'] == 'QTY_GAP') & (df_gap['deviation']!=0), 0 ,100)
+
     inventory_accuracy_results.data=df
-    # df.to_csv('df.csv')
-    # print(df.columns)
 
 
-    inventory_accuracy_results.accuracy=round( ( ( df_gap.shape[0]/inventory_accuracy_results.total_count) * 100 ) ,2)
-    inventory_accuracy_results.count_per_division=df_gap.groupby(['division'])['id'].count().reset_index() 
-    inventory_accuracy_results.count_per_division['total_count']=inventory_accuracy_results.count_per_division['division'].map(dict(zip(df_division_grouped['division'],df_division_grouped['id'])))
-    inventory_accuracy_results.count_per_division['percent']=round( (inventory_accuracy_results.count_per_division['id'] / inventory_accuracy_results.count_per_division['total_count'])*100 , 2)
-    
-    #new KPI   
-    # df['type_of_measurement']=np.where( ( (df['unit']=='G') | (df['unit']=='KG') ), 'weighd','counted')
-    # Pour un article pesé : Stock accuracy = 100% si l’écart < 3% et l’écart < 250€ sinon la réf est considéré en écart
-    # df.insert(0, 'stock_accuracy', None)
-    # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='weighd') & (df['deviation'] < 0.03) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
-    # # Pour un article compté : Stock accuracy = 100% si l’écart < 1% et l’écart < 250€ sinon la réf est considéré en écart
-    # df['stock_accuracy']=np.where ( ( (df['type_of_measurement']=='counted') & (df['deviation'] < 0.01) & (df['deviation_cost_euro']< 250)) , 1 , df['stock_accuracy'] )
-    #deviation cost per division
+
+    inventory_accuracy_results.accuracy=df_gap['stock_accuracy'].mean()
     inventory_accuracy_results.total_deviation_cost=df_gap['deviation_cost_euro'].sum()
+    
+    inventory_accuracy_results.accuracy_per_division=df_gap.groupby(['division'])['stock_accuracy'].mean().reset_index() 
+    inventory_accuracy_results.count_per_division=df_gap.groupby(['division'])['id'].count().reset_index() 
+
     inventory_accuracy_results.cost_per_division=df_gap.groupby(['division'])['deviation_cost_euro'].sum().reset_index()
     inventory_accuracy_results.count_per_week=df_gap.groupby(['year_date_cpt','week_date_cpt'])['id'].count().reset_index()
+    df_gap['year_date_cpt']=df_gap['year_date_cpt'].astype(int)
+    inventory_accuracy_results.cost_per_week=df_gap.groupby(['year_date_cpt','week_date_cpt'])['deviation_cost_euro'].sum().reset_index()
 
 def details(request):
     all_inventory_data=SQ00.objects.all()
@@ -198,7 +191,7 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
     df_t001=pd.read_excel(t001_file)
     df_t001k=pd.read_excel(t001k_file)
     df_tcurr=pd.read_excel(tcurr_file)
-    #dropping the duplicate of columns
+    #dropping the duplicate  columns
     df=df.drop(df.columns[ [9,11,14,16] ],axis=1)
 
     df_t001k = df_t001k.iloc[:, [0,1]]
@@ -219,6 +212,7 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
                         'Désignation article':'designation',
                         'TyAr':'type',
                         'UQ':'unit',
+                        'Div.':'division',
                         'Mag.':'store',
                         'Fourn.':'supplier',
                         'Quantité théorique':'theoritical_quantity',
@@ -226,7 +220,6 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
                         'écart enregistré':'deviation',
                         'Ecart (montant)':'deviation_cost',
                         'Dev..1':'dev',
-                        'Div.':'division',
                         'Sup':'delete',
                         'Dte cptage':'date_catchment',
                         'Rectifié par':'corrected_by',
@@ -235,7 +228,7 @@ def import_files(list_inv_file,t001_file,t001k_file,tcurr_file,year,week,conn):
                         'N° inventaire':'inventory_number',
                         'TyS':'Tys'},  inplace = True)
 
-    df=df[~df['date_catchment'].isna()]
+    # df=df[~df['date_catchment'].isna()]
     #Adding the year and week columns
     #insert year and week in first and second position
     df.insert(0, 'year', year)

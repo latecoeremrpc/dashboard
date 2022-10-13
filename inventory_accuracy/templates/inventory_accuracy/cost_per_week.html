@@ -3,7 +3,7 @@
 
 {% block children %}
 <!-- Info Modal -->
-<div class="modal fade " id="inventory_accuracy_count_per_division_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade " id="inventory_accuracy_cost_per_week_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
         <div class="modal-header">
@@ -64,17 +64,17 @@
         <div class="card-tools" style="margin-right: -0.8rem;" >
             <form action={%url 'homesettings' %} method='POST'>
                 {% csrf_token %}
-                <input name="kpi" type="hidden" value="inventory_accuracy\count_per_division"> 
+                <input name="kpi" type="hidden" value="inventory_accuracy\cost_per_week"> 
                 <input name="col" type="hidden" value="6"> 
             <ul class="list-group list-group-horizontal" style="height: 35px;">
-                <li class="list-group-item" style="padding:7px;"><i type="button"  data-toggle="modal" data-target="#inventory_accuracy_count_per_division_modal" class="info fas fa-info-circle"></i></li>
-                <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" favorite fas fa-heart" {%if 'inventory_accuracy\\count_per_division.html' in homekpi %} style="color:red;" {%endif%} ></i></button></li>
+                <li class="list-group-item" style="padding:7px;"><i type="button"  data-toggle="modal" data-target="#inventory_accuracy_cost_per_week_modal" class="info fas fa-info-circle"></i></li>
+                <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" favorite fas fa-heart" {%if 'inventory_accuracy\\cost_per_week.html' in homekpi %} style="color:red;" {%endif%} ></i></button></li>
             </form>
-            <li class="list-group-item" style="padding:7px;"><i type="button" class="download fas fa-download" id="btn-download-inventory_accuracy_accuracy_per_division"></i></li>
+            <li class="list-group-item" style="padding:7px;"><i type="button" class="download fas fa-download" id="btn-download-inventory_accuracy_cost_per_week"></i></li>
             <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
             </ul>
         </div>
-        <h5 class="m-0">Accuracy per division</h5>
+        <h5 class="m-0">Cost per week</h5>
         
     </div>
     <div class="card-body ">
@@ -87,44 +87,34 @@
                 {%endfor%}
             </ul> 
         </h6>  
-        {% if inventory_accuracy_accuracy_per_division.iterrows %}
+        {% if inventory_accuracy_cost_per_week.iterrows %}
         <div style="height: 400px">
-            <canvas id="inventory_accuracy_accuracy_per_division" ></canvas>
+            <canvas id="inventory_accuracy_cost_per_week" ></canvas>
 
             <script>
-                const inventory_accuracy_accuracy_per_division=new Chart("inventory_accuracy_accuracy_per_division", {
+                const inventory_accuracy_cost_per_week=new Chart("inventory_accuracy_cost_per_week", {
                     // plugins: [ChartDataLabels],
                     type: "bar",
                     data: {
-                            labels: [{% for index, data in inventory_accuracy_accuracy_per_division.iterrows %} '{{data.division}}', {% endfor %}],
+                            labels: [{% for index, data in inventory_accuracy_cost_per_week.iterrows %} '{{data.year_date_cpt|floatformat:0}}_{{data.week_date_cpt|floatformat:0}}', {% endfor %}],
                             datasets: [
                                 {
                                 label:'Currency',
                                 backgroundColor:  ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36'],
                                 borderColor:  ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36'],
                                 borderWidth: 1,
-                                data: [{% for index, data in inventory_accuracy_accuracy_per_division.iterrows %} {{data.stock_accuracy|floatformat:2}}, {% endfor %}]
-                                },
-                                {
-                                    type: "line",
-                                    label: "Accuracy target",
-                                    data:  [{% for index, data in inventory_accuracy_accuracy_per_division.iterrows %} 98, {% endfor %}],
-                                    lineTension: 0, 
-                                    fill: false,
-                                    backgroundColor:'#59CE8F',
-                                    borderColor:'#59CE8F',
+                                data: [{% for index, data in inventory_accuracy_cost_per_week.iterrows %} {{data.deviation_cost_euro|floatformat:2}}, {% endfor %}]
                                 }
                             ]
                             },
                     options: {
                         plugins: {
                                 datalabels: {
-                                    anchor: 'center',
+                                    anchor: 'end',
                                     clamp: true,
                                     color: 'black',
                                     
                                 },
-
                                 legend: {
                                 display: false,
                                 position:'right',
@@ -139,33 +129,8 @@
                                     display: false,
                                     text: "tile"
                                 },
-                                // add persent sign to tooltip 
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            var label = context.dataset.label || '';
-                                            if (context.parsed.y !== null) {
-                                                label += ' ' +context.parsed.y + '%';
-                                            }
-                                            return label;
-                                        }
-                                    }
-                                }
                                 
                             },
-                            // add persent sign to y scale 
-                            scales: {
-                                y: {
-                                  min: 0,
-                                  max: 100,
-                                  ticks: {
-                                    stepSize: 10,
-                                    callback: function (value, index, values) {
-                                      return value + " %";
-                                    }
-                                  }
-                                }
-                              },
                             responsive: true,
                             maintainAspectRatio:false, 
 
@@ -184,11 +149,11 @@
     </div>
 
     <script>
-        var image = inventory_accuracy_accuracy_per_division.toBase64Image();
-        document.getElementById('btn-download-inventory_accuracy_accuracy_per_division').onclick = function() {
+        var image = inventory_accuracy_cost_per_week.toBase64Image();
+        document.getElementById('btn-download-inventory_accuracy_cost_per_week').onclick = function() {
         var a = document.createElement('a');
-        a.href = inventory_accuracy_accuracy_per_division.toBase64Image();
-        a.download = 'inventory_accuracy_accuracy_per_division.png';
+        a.href = inventory_accuracy_cost_per_week.toBase64Image();
+        a.download = 'inventory_accuracy_cost_per_week.png';
         a.click();
         }
     </script>
