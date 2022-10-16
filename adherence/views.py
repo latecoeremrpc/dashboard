@@ -44,7 +44,7 @@ def calcul(request):
     # coois_data=Coois.objects.all().delete()
 
     # holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"
-    holidaysfile=r"\\prfoufiler01\public\CALENDRIER_SITE_2022_C.xlsx"
+    holidaysfile=r"C:\Users\L0005082\Documents\inputadherence\CALENDRIER_SITE_2022_D.xlsx"
 
     
     global dh #define calendar as global variable
@@ -55,11 +55,16 @@ def calcul(request):
         dh[col]= pd.to_datetime(dh[col],format='%d/%m/%Y').dt.date
     #upload files
     start_time = time.time()
-
+    print('start import')
     upload_material(conn,week,year)
     upload_coois(conn,week,year)
     upload_zpp(conn,week,year)
 
+    print('Time for upload files')
+    end_import=time.time()
+    print(end_import-start_time)
+
+    start_time=time.time()
     #Get data from DB
     zpp_data=Zpp.objects.all().filter(week=week)
     coois_data=Coois.objects.all().filter(week=week)
@@ -85,7 +90,7 @@ def calcul(request):
     
     # merge=merge.loc[merge['division'] == 2000]
     
-
+    print('end merge')
 
     start_time = time.time()
     datalist=[]
@@ -299,7 +304,12 @@ def calcul(request):
     dataResult.loc[dataResult["date_reference"] >= dataResult["H4_global_end"], 'after_H4_global'] = 1
     dataResult.loc[(dataResult["after_H4_global"] == 1) & (dataResult["fixation"] == "X"), 'after_H4_global_fix'] = 1  
 
-    
+    end_traitement = time.time()
+
+    print('_____Time for Traitement _________')
+    print(end_traitement - start_time)
+    print('__________________________________')  
+    start_time = time.time()
 
 
     result = StringIO()
@@ -379,7 +389,7 @@ def calcul(request):
     global total_time
     end_time = time.time()
     total_time = end_time - start_time
-    print('_____Time for Make DataFrame + save Result_________')
+    print('_____Time for save Result_________')
     print("Time: ", total_time,' secondes')
     print('__________________________________')  
 
@@ -403,7 +413,7 @@ def home(request):
     indicator=''
     indicator_list_weeks=''
 
-    result=Result.objects.all()      
+    result=Result.objects.all().filter(week=week)    
     dr=pd.DataFrame(list(result.values()))
 
     # dr.to_csv('result.csv',index=False)
@@ -436,28 +446,13 @@ def home(request):
                                                                                             ,'H3_15_P': 'sum'
 
                                                                                             }).reset_index()        
-        # #Severity Ordo calcul      
-        # Valentin                                                                                                                                                           
-        overview["severity_ordo_v"]=np.where(overview["H1"] >0,
-        ((overview["H1"]-overview["H1_M10"]-overview["H1_15_P"]-overview["H1_M20"]-overview["H1_unfix"])*100+(overview["H1_15_P"]*50))/overview["H1"],100)
-        #Ryadh
-        overview["severity_ordo_r"]=np.where(overview["H1"] >0,
+        
+        #Severity Ordo calcul
+        overview["severity_ordo"]=np.where(overview["H1"] >0,
         ((overview["H1"]-overview["H1_10_P"]-overview["H1_15_P"]-overview["H1_M20"]-overview["H1_unfix"])*100+(overview["H1_15_P"]*25))/overview["H1"],100)
-
-
+        
         # # Severity MPS calcul 
-        #Valentin
-        overview["severity_mps_v"]=np.where((overview["H3"]-overview["H1"]) >0,
-        (((overview["H3"]-overview["H1"]) 
-        - (overview["H3_M10"]-overview["H1_M10"])
-        -(overview["H3_15_P"]-overview["H1_15_P"])
-        -(overview["H3_M20"]-overview["H1_M20"])
-        -(overview["H3_unfix"]-overview["H1_unfix"]))*100+((overview["H3_15_P"]-overview["H1_15_P"])*50))
-        /((overview["H3"]-overview["H1"])+(overview["after_H4_global_fix"]*25)),
-        100)
-
-        #Ryadh
-        overview["severity_mps_r"]=np.where(((overview["H3"]-overview["H1"])+overview["after_H4_global_fix"]) >0,
+        overview["severity_mps"]=np.where(((overview["H3"]-overview["H1"])+overview["after_H4_global_fix"]) >0,
         (((overview["H3"]-overview["H1"]) 
         - (overview["H3_10_P"]-overview["H1_10_P"])
         -(overview["H3_15_P"]-overview["H1_15_P"])
@@ -476,19 +471,18 @@ def home(request):
         ((overview["H3"]-overview["H1_M20"]) == 0 ) & 
         ((overview["H3"]-overview["H1_unfix"]) == 0 ) & 
         (overview["after_H4_global_fix"] == 0 ),'True' ,'False')
-        # overview.to_csv('overview.csv',index=False)
 
-        indicator=overview.groupby(['division','year','week']).agg({'severity_ordo_r':'mean','severity_ordo_v':'mean','severity_mps_r':'mean','severity_mps_v':'mean'}).reset_index().sort_values(by=['week'])
+
+        indicator=overview.groupby(['division','year','week']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index().sort_values(by=['week'])
         indicator_list_weeks=overview.week.unique()
         indicator_list_weeks=list(indicator_list_weeks)
-        print("#" * 50)
-        print(indicator)
-        print("#" * 50)
         if overview.loc[overview['week'] == week].empty == False:
             overview_week=overview.loc[overview['week'] == week]
-            indicatorweek=overview_week.groupby(['division']).agg({'severity_ordo_r':'mean','severity_ordo_v':'mean','severity_mps_r':'mean','severity_mps_v':'mean'}).reset_index() 
-        # overview.to_csv('file_name.csv')
-    return render (request,"adherence/index.html",{'username':username,'year':year,'week':week,'overview_week':overview_week,'overview':overview,'indicator':indicator,'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks})
+            indicatorweek=overview_week.groupby(['division']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index() 
+    return render (request,"adherence/index.html",{'username':username,'year':year,'week':week,
+    'overview_week':overview_week,'overview':overview,'indicator':indicator,
+    'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks
+    })
 
 
 
@@ -570,7 +564,7 @@ def diff_date(reordo,available,division):
 
 def upload_material(conn,week,year):
     #Get Material File
-    materialfile = r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\Articles SAP - Identification Planif.xlsx"
+    materialfile = r"C:\Users\L0005082\Documents\inputadherence\Articles SAP - Identification Planif.xlsx"
     #Select column to use
     dm = pd.read_excel(materialfile,usecols="A:L")  
     #convert some column due to importing problems
@@ -615,7 +609,7 @@ def upload_material(conn,week,year):
 
 def upload_coois(conn,week,year):
     #Get Coois File
-    cooisfile = r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\COOIS_GLOBAL BEFORE MRP.XLSX"
+    cooisfile = r"C:\Users\L0005082\Documents\inputadherence\COOIS_GLOBAL BEFORE MRP.XLSX"
     # cooisfile = r"\\prfoufiler01\donnees$\Public\coois\COOIS_GLOBAL BEFORE MRP.XLSX"
     # \\prfoufiler01\donnees$\Public\coois
     # cooisfile = r"http://sp-is.lat.corp/sites/MRPC/ExtractSAP/COOIS_GLOBAL%20BEFORE%20MRP%20202143.XLSX"
@@ -686,21 +680,22 @@ def upload_coois(conn,week,year):
 
 def upload_zpp(conn,week,year):
     zppfile ={
-        "2110":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2110 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2000":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2000 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2030":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2030 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2020":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2020 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2010":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2010 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2200":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2200 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2300":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2300 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2400":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2400 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2500":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2500 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2600":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2600 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2110":r"C:\Users\L0005082\Documents\inputadherence\zpp\2110 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2000":r"C:\Users\L0005082\Documents\inputadherence\zpp\2000 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2030":r"C:\Users\L0005082\Documents\inputadherence\zpp\2030 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2020":r"C:\Users\L0005082\Documents\inputadherence\zpp\2020 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2010":r"C:\Users\L0005082\Documents\inputadherence\zpp\2010 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2200":r"C:\Users\L0005082\Documents\inputadherence\zpp\2200 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2300":r"C:\Users\L0005082\Documents\inputadherence\zpp\2300 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2400":r"C:\Users\L0005082\Documents\inputadherence\zpp\2400 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2500":r"C:\Users\L0005082\Documents\inputadherence\zpp\2500 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2600":r"C:\Users\L0005082\Documents\inputadherence\zpp\2600 ZPP_MD_STOCK BEFORE MRP.xls",
         # "2320":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2320 ZPP_MD_STOCK BEFORE MRP.xls",  #There's no production yet
         }
     for division,file in zppfile.items():
-        dz = pd.read_csv(file, sep='\t', encoding='utf-16le',names=['A','material','date_available', 'D', 'E','element', 'G', 'H', 'I','order','message','L','M','date_reordo','O','P'])
-        dz=dz.drop(columns=['A', 'D', 'E', 'G', 'H', 'I', 'O','L','M','P']) #Drop unused columns
+        # dz = pd.read_csv(file, sep='\t', encoding='utf-16le',names=['A','material','date_available', 'D', 'E','element', 'G', 'H', 'I','order','message','L','M','date_reordo','O','P'])
+        dz = pd.read_csv(file, sep='\t', encoding='utf-16le',names=['A','material','date_available', 'D', 'E','element', 'G', 'H', 'I','order','message','L','M','date_reordo','O','P','Q','R','S'])
+        dz=dz.drop(columns=['A', 'D', 'E', 'G', 'H', 'I','L','M','O','P','Q','R','S']) #Drop unused columns
         dz=dz.drop(dz[dz.material=='Article'].index) #Drop row contain article in column material
         dz=dz.drop(dz[dz.material==''].index) #Drop row null
         dz = dz.dropna(how='all') #Drop rows with all column is null

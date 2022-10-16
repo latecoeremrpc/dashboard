@@ -1,0 +1,76 @@
+{% load static %}
+
+
+<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 500px;">
+    <div class="card-header">
+        <h5 class="m-0">Overview</h5>
+    </div>
+    <div class="card-body " id="overview_wrapper">
+        <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
+            <li class="list-group-item" style="padding:0.4rem 0.6rem">Year: {{year}}</li>
+            <li class="list-group-item" style="padding:0.4rem 0.6rem">Week: {{week}}</li>
+        </ul>
+        {% if overview_week.iterrows %}
+        <hr>
+        <!-- this div for button download -->
+        <div class="col-sm-12 col-md-6"></div>
+        <br>
+        <table id='overview_table' class='table table-sm table-bordered table-hover table-head-fixed table-responsive-sm table-condensed '  >
+            <thead class="table-light" style="white-space: nowrap">
+                <tr>
+                    <!-- <th>#</th> -->
+                    <th>Week</th>
+                    <th>Division</th>
+                    <th>Profit center</th>
+                    <th>Planning</th>
+                    <th>Severity Ordo</th>
+                    <th>Severity MPS</th>
+                    <th>Schedule state</th>
+                    <th>MPS state</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, data in overview_week.iterrows %}
+                <tr>
+                    <td>{{data.week}}</td>
+                    <td>{{data.division}}</td>
+                    <td>{{data.profit_centre}}</td>
+                    <td>{{data.planning}}</td>
+                    <td>{{data.severity_ordo|floatformat:2 }}</td>
+                    <td>{{data.severity_mps|floatformat:2 }}</td>
+                    <td {% if data.schedule == 'True' %} style='color:#2a9d8f' {% else %}  style='color: #e63946' {% endif %}>{{data.schedule}}</td>
+                    <td {% if data.mps == 'True' %} style='color:#2a9d8f' {% else %}  style='color: #e63946' {% endif %}>{{data.mps}}</td>
+                </tr>
+                {% endfor%}
+            </tbody>
+        </table>
+        {% else %}
+        <center style="margin-top: 15%;"><img src="{% static 'img/nodatafound.png' %}" alt="">
+            <p class="card-text text-center">
+                No Data available for this selection
+            </p>
+            <a class="btn btn-primary" href="{% url 'adhrencemexepcalcul' %}" role="button">Calculate now</a>
+        </center>
+        {% endif %}
+    </div>
+  </div>
+
+
+<script>
+    $(document).ready( function () {
+    $('#overview_table').DataTable({
+        'buttons': [
+        'copy', 'excel'
+    ],
+
+      "paging": true,
+      "lengthChange": true,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": false,
+    }).buttons().container().appendTo('#overview_wrapper .col-md-6:eq(0)');
+    } );
+</script>

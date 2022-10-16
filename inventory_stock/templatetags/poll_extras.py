@@ -19,9 +19,12 @@ def diff( value, arg ):
     Divides the value; argument is the divisor.
     Returns empty string on any error.
     '''
-    try:
-        value = int( value )
-        arg = int( arg )
-        if arg: return value - arg
-    except: pass
-    return ''
+    # try:
+    #     value = int( value )
+    #     arg = int( arg )
+    #     if arg: return value - arg
+    # except: pass
+    # return ''
+    value = int( value )
+    arg = int( arg )
+    return value - arg
