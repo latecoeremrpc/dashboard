@@ -11,7 +11,7 @@
             <li class="list-group-item" style="padding:0.4rem 0.6rem">Year: {{year}}</li>
             <li class="list-group-item" style="padding:0.4rem 0.6rem">Week: {{week}}</li>
         </ul>
-        {% if overview_week.iterrows %}
+        {% if overview.iterrows %}
         <hr>
         <!-- this div for button download -->
         <div class="col-sm-12 col-md-6"></div>
@@ -61,7 +61,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for index, data in overview_week.iterrows %}
+                {% for index, data in overview.iterrows %}
                 <tr>
                     <td>{{data.week}}</td>
                     <td>{{data.division}}</td>

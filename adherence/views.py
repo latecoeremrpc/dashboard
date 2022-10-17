@@ -33,18 +33,9 @@ def calcul(request):
     if week==0:
         week=52
         year=year-1
-    # print(datetime.datetime.now().year)
-    # print(datetime.datetime.now().month)
-    # print(datetime.datetime.now().day)
-
-    #Delete Data before import #TO DELETE on prod!!!
-    # result=Result.objects.all().delete()
-    # zpp_data=Zpp.objects.all().delete()
-    # material_data=Material.objects.all().delete()
-    # coois_data=Coois.objects.all().delete()
 
     # holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"
-    holidaysfile=r"C:\Users\L0005082\Documents\inputadherence\CALENDRIER_SITE_2022_D.xlsx"
+    holidaysfile=r"\\prfoufiler01\donnees$\Public\input_adherence_41\CALENDRIER_SITE_2022_D.xlsx"
 
     
     global dh #define calendar as global variable
@@ -80,15 +71,13 @@ def calcul(request):
     r1.to_csv('r1.csv',index=False);
     #Merge Material and the result betwwen COOIS and ZPP
     merge=pd.merge(r1,dm, left_on=["material","division_x","year","week"],right_on=["material","division","year","week"])
-    merge.to_csv('merge.csv',index=False);
+    # merge.to_csv('merge.csv',index=False);
 
     #Apply formula 
     merge["H1_jo"]=merge["cycle_manuf"]+10
     merge["H2_jo"]=merge["cycle_manuf"]+merge["cycle_appro"]
     merge["H3_jo"]=merge["cycle_manuf"]+merge["H2_jo"]
     merge["H4_jo"]=merge["H3_jo"]+30
-    
-    # merge=merge.loc[merge['division'] == 2000]
     
     print('end merge')
 
@@ -401,19 +390,42 @@ def home(request):
     # username=request.META['REMOTE_USER']
     username=''
 
-    week=(date.today().isocalendar()[1])-1
-    year=date.today().isocalendar()[0]
-    #for the last week in the year
-    if week==0:
-        week=52
-        year=year-1
+    current_week=(date.today().isocalendar()[1])
+    current_year=date.today().isocalendar()[0]
+
     overview=''
     overview_week=''
     indicatorweek=''
     indicator=''
     indicator_list_weeks=''
+    year_weeks= Result.objects.values_list('year','week').distinct()
+    yearavailable=set()
+    weekavailable=set()
+    for year,week in year_weeks:
+        yearavailable.add(year)
+        weekavailable.add(week)
+    yearavailable=list(yearavailable)
+    weekavailable=list(weekavailable)
+    year=[]
+    week=[]
+    division=[]
+    profit_center=[]
+    if request.method == 'POST':
+        division=request.POST.getlist('division')
+        year=request.POST.getlist('year')
+        week=request.POST.getlist('week')
+        profit_center=request.POST.getlist('profit_center')
 
-    result=Result.objects.all().filter(week=week)    
+    # coois_data=all_coois_data
+    message_error=''
+    if len(year) > 0:
+        result=Result.objects.all().filter(year__in=year,week__in=week)
+        if len(division) > 0:
+                result=result.filter(division__in=division)
+        if len(profit_center) > 0:
+                result=result.filter(profit_centre__in=profit_center)
+    else:
+        result=Result.objects.all().filter(year=current_year,week=current_week)  
     dr=pd.DataFrame(list(result.values()))
 
     # dr.to_csv('result.csv',index=False)
@@ -476,11 +488,11 @@ def home(request):
         indicator=overview.groupby(['division','year','week']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index().sort_values(by=['week'])
         indicator_list_weeks=overview.week.unique()
         indicator_list_weeks=list(indicator_list_weeks)
-        if overview.loc[overview['week'] == week].empty == False:
-            overview_week=overview.loc[overview['week'] == week]
-            indicatorweek=overview_week.groupby(['division']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index() 
-    return render (request,"adherence/index.html",{'username':username,'year':year,'week':week,
-    'overview_week':overview_week,'overview':overview,'indicator':indicator,
+        indicatorweek=overview.groupby(['division']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index() 
+
+    return render (request,"adherence/index.html",{'username':username,'weekavailable':weekavailable,'yearavailable':yearavailable,'current_week':current_week,'current_week':current_week,
+    'years':year,'weeks':week,'divisions':division,'profit_center':profit_center,'message_error':message_error,
+    'overview':overview,'indicator':indicator,
     'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks
     })
 
@@ -564,7 +576,7 @@ def diff_date(reordo,available,division):
 
 def upload_material(conn,week,year):
     #Get Material File
-    materialfile = r"C:\Users\L0005082\Documents\inputadherence\Articles SAP - Identification Planif.xlsx"
+    materialfile = r"\\prfoufiler01\donnees$\Public\input_adherence_41\Articles SAP - Identification Planif.xlsx"
     #Select column to use
     dm = pd.read_excel(materialfile,usecols="A:L")  
     #convert some column due to importing problems
@@ -609,7 +621,7 @@ def upload_material(conn,week,year):
 
 def upload_coois(conn,week,year):
     #Get Coois File
-    cooisfile = r"C:\Users\L0005082\Documents\inputadherence\COOIS_GLOBAL BEFORE MRP.XLSX"
+    cooisfile = r"\\prfoufiler01\donnees$\Public\input_adherence_41\COOIS_GLOBAL BEFORE MRP.XLSX"
     # cooisfile = r"\\prfoufiler01\donnees$\Public\coois\COOIS_GLOBAL BEFORE MRP.XLSX"
     # \\prfoufiler01\donnees$\Public\coois
     # cooisfile = r"http://sp-is.lat.corp/sites/MRPC/ExtractSAP/COOIS_GLOBAL%20BEFORE%20MRP%20202143.XLSX"
@@ -680,16 +692,16 @@ def upload_coois(conn,week,year):
 
 def upload_zpp(conn,week,year):
     zppfile ={
-        "2110":r"C:\Users\L0005082\Documents\inputadherence\zpp\2110 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2000":r"C:\Users\L0005082\Documents\inputadherence\zpp\2000 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2030":r"C:\Users\L0005082\Documents\inputadherence\zpp\2030 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2020":r"C:\Users\L0005082\Documents\inputadherence\zpp\2020 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2010":r"C:\Users\L0005082\Documents\inputadherence\zpp\2010 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2200":r"C:\Users\L0005082\Documents\inputadherence\zpp\2200 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2300":r"C:\Users\L0005082\Documents\inputadherence\zpp\2300 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2400":r"C:\Users\L0005082\Documents\inputadherence\zpp\2400 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2500":r"C:\Users\L0005082\Documents\inputadherence\zpp\2500 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2600":r"C:\Users\L0005082\Documents\inputadherence\zpp\2600 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2110":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2110 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2000":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2000 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2030":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2030 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2020":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2020 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2010":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2010 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2200":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2200 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2300":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2300 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2400":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2400 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2500":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2500 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2600":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2600 ZPP_MD_STOCK BEFORE MRP.xls",
         # "2320":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2320 ZPP_MD_STOCK BEFORE MRP.xls",  #There's no production yet
         }
     for division,file in zppfile.items():
