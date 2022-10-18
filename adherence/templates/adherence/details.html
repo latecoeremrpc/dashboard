@@ -8,8 +8,20 @@
     </div>
     <div class="card-body" id="details_wrapper">
         <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
-            <li class="list-group-item" style="padding:0.4rem 0.6rem">Year: {{year}}</li>
-            <li class="list-group-item" style="padding:0.4rem 0.6rem">Week: {{week}}</li>
+            <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
+                {%for year in years %} 
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">Year: {{year}}</li>
+                {%empty%}
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">Year: {{current_year}}</li>
+                {%endfor%}
+            </ul> 
+            <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
+                {%for w in weeks %} 
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">Week: {{w}}</li>
+                {%empty%}
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">Week: {{current_week}}</li>
+                {%endfor%}
+            </ul>
         </ul>
         {% if overview.iterrows %}
         <hr>

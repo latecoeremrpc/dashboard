@@ -387,14 +387,13 @@ def calcul(request):
 
 def home(request):
 
-    # username=request.META['REMOTE_USER']
-    username=''
+    username=request.META['REMOTE_USER']
+    # username=''
 
     current_week=(date.today().isocalendar()[1])
     current_year=date.today().isocalendar()[0]
 
     overview=''
-    overview_week=''
     indicatorweek=''
     indicator=''
     indicator_list_weeks=''
@@ -490,7 +489,7 @@ def home(request):
         indicator_list_weeks=list(indicator_list_weeks)
         indicatorweek=overview.groupby(['division']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index() 
 
-    return render (request,"adherence/index.html",{'username':username,'weekavailable':weekavailable,'yearavailable':yearavailable,'current_week':current_week,'current_week':current_week,
+    return render (request,"adherence/index.html",{'username':username,'weekavailable':weekavailable,'yearavailable':yearavailable,'current_week':current_week,'current_year':current_year,
     'years':year,'weeks':week,'divisions':division,'profit_center':profit_center,'message_error':message_error,
     'overview':overview,'indicator':indicator,
     'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks

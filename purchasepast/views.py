@@ -58,8 +58,8 @@ def upload_files(request):
         return render(request,'purchasepast\index.html',{'message_error':message_error,'weekavailable':weekavailable,'current_week':current_week,'current_year':current_year,'week':week})
 
 def home(request):
-    # username=request.META['REMOTE_USER']
-    username='test'
+    username=request.META['REMOTE_USER']
+    # username='test'
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
     homekpi=list(HomeKpi.objects.all().filter(username=username).values_list('kpi',flat=True))
