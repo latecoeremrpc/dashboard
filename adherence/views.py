@@ -27,7 +27,7 @@ def calcul(request):
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')  
     
     # Get Current Week and Year
-    week=(date.today().isocalendar()[1])-1
+    week=(date.today().isocalendar()[1])
     year=date.today().isocalendar()[0]
     #for the last week in the year
     if week==0:
@@ -68,7 +68,7 @@ def calcul(request):
     #Merge COOIS and ZPP
     r1=pd.merge(dz,dc, on=["material","order","year","week"])
     r1['division_x']=r1['division_x'].astype(np.int64,errors='ignore')
-    r1.to_csv('r1.csv',index=False);
+    # r1.to_csv('r1.csv',index=False);
     #Merge Material and the result betwwen COOIS and ZPP
     merge=pd.merge(r1,dm, left_on=["material","division_x","year","week"],right_on=["material","division","year","week"])
     # merge.to_csv('merge.csv',index=False);
