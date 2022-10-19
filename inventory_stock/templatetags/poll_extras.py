@@ -7,9 +7,10 @@ def percent( value, arg ):
     Returns empty string on any error.
     '''
     try:
-        value = int( value )
-        arg = int( arg )
-        if arg: return (value / arg)*100
+        value =  value 
+        arg = arg 
+        delta= value - arg
+        if arg: return (delta/arg) * 100
     except: pass
     return ''
     

@@ -42,5 +42,6 @@ class Coois(models.Model):
     date_plan_opening=models.DateField(null=True) 
     date_request=models.DateField(null=True)
     date_entry=models.DateField(null=True)
+    date_actual_launch=models.DateField(null=True)
 
 

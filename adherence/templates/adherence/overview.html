@@ -1,7 +1,7 @@
 {% load static %}
 
 
-<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 500px;">
+<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 100%;">
     <div class="card-header">
         <h5 class="m-0">Overview</h5>
     </div>
@@ -49,8 +49,8 @@
                     <td>{{data.division}}</td>
                     <td>{{data.profit_centre}}</td>
                     <td>{{data.planning}}</td>
-                    <td>{{data.severity_ordo|floatformat:2 }}</td>
-                    <td>{{data.severity_mps|floatformat:2 }}</td>
+                    <td>{{data.severity_ordo|floatformat:2 }} %</td>
+                    <td>{{data.severity_mps|floatformat:2 }} %</td>
                     <td {% if data.schedule == 'True' %} style='color:#2a9d8f' {% else %}  style='color: #e63946' {% endif %}>{{data.schedule}}</td>
                     <td {% if data.mps == 'True' %} style='color:#2a9d8f' {% else %}  style='color: #e63946' {% endif %}>{{data.mps}}</td>
                 </tr>
@@ -83,6 +83,7 @@
       "info": true,
       "autoWidth": false,
       "responsive": false,
+
     }).buttons().container().appendTo('#overview_wrapper .col-md-6:eq(0)');
     } );
 </script>

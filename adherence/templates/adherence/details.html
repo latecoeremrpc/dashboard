@@ -2,7 +2,7 @@
 {% load poll_extras %}
 
 
-<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 500px;">
+<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 100%;">
     <div class="card-header">
     <h5 class="m-0">Details</h5> 
     </div>
@@ -28,14 +28,14 @@
         <!-- this div for button download -->
         <div class="col-sm-12 col-md-6"></div>
         <br>
-        <table id='details_table' class='table table-sm table-bordered table-hover table-head-fixed table-responsive-sm table-condensed'  >
+        <table id="details_table" class='table table-sm table-bordered table-hover table-head-fixed table-responsive-sm table-condensed'  >
             <thead class="table-light" style="white-space: nowrap">
                 <tr>
                     <!-- <th>#</th> -->
-                    <th>Week</th>
-                    <th>Division</th>
-                    <th>Profit center</th>
-                    <th>Planning</th>
+                    <th style='background-color:white;z-index:9999'>Week</th>
+                    <th style='background-color:white;z-index:9999'>Division</th>
+                    <th style='background-color:white;z-index:9999'>Profit center</th>
+                    <th style='background-color:white;z-index:9999'>Planning</th>
                     <th>profondeur</th>
                     <th style='background-color:#edede9;'>H1</th>
                     <th style='background-color:#edede9;'>H2</th>
@@ -75,10 +75,10 @@
             <tbody>
                 {% for index, data in overview.iterrows %}
                 <tr>
-                    <td>{{data.week}}</td>
-                    <td>{{data.division}}</td>
-                    <td>{{data.profit_centre}}</td>
-                    <td>{{data.planning}}</td>
+                    <td style='background-color:white;'>{{data.week}}</td>
+                    <td style='background-color:white;'>{{data.division}}</td>
+                    <td style='background-color:white;'>{{data.profit_centre}}</td>
+                    <td style='background-color:white;'>{{data.planning}}</td>
                     <td>{{data.profondeur|floatformat:2 }}</td>
                     <td>{{data.H1}}</td>
                     <td>{{data.H2}}</td>
@@ -131,18 +131,23 @@
 
 <script>
     $(document).ready( function () {
-    $('#details_table').DataTable({
+    var details_table= $('#details_table').DataTable({
         'buttons': [
         'copy', 'excel'
-    ],
-
-      "paging": true,
-      "lengthChange": true,
-      "searching": true,
-      "ordering": true,
-      "info": true,
-      "autoWidth": false,
-      "responsive": false,
+        ],
+        "select": true,
+        "paging": true,
+        "lengthChange": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": false,
+        "scrollCollapse": true,
+        "fixedColumns":   {
+        left: 4,
+        }
     }).buttons().container().appendTo('#details_wrapper .col-md-6:eq(0)');
+
     } );
 </script>

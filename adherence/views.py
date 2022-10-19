@@ -386,8 +386,12 @@ def calcul(request):
     return home(request)
 
 def home(request):
+    try:
+        username=request.META['REMOTE_USER']
+    except:
+        username=''
 
-    username=request.META['REMOTE_USER']
+    
     # username=''
 
     current_week=(date.today().isocalendar()[1])
@@ -484,15 +488,19 @@ def home(request):
         (overview["after_H4_global_fix"] == 0 ),'True' ,'False')
 
 
-        indicator=overview.groupby(['division','year','week']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index().sort_values(by=['week'])
+        # indicator=overview.groupby(['division','year','week']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index().sort_values(by=['week'])
+        indicator=overview.groupby(['year','week','division']).agg({'severity_ordo':'mean','severity_mps':'mean'}).unstack().fillna(0).stack().reset_index().sort_values(by=['year','week'])
+        indicator['year_week']= indicator['year'].astype(str)+'_'+indicator['week'].astype(str)
+        indicator_list_year_weeks=indicator.year_week.unique()
+        indicator_list_division=indicator.division.unique()
         indicator_list_weeks=overview.week.unique()
         indicator_list_weeks=list(indicator_list_weeks)
         indicatorweek=overview.groupby(['division']).agg({'severity_ordo':'mean','severity_mps':'mean'}).reset_index() 
-
+        print(indicator)
     return render (request,"adherence/index.html",{'username':username,'weekavailable':weekavailable,'yearavailable':yearavailable,'current_week':current_week,'current_year':current_year,
     'years':year,'weeks':week,'divisions':division,'profit_center':profit_center,'message_error':message_error,
     'overview':overview,'indicator':indicator,
-    'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks
+    'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks,'indicator_list_year_weeks':indicator_list_year_weeks,'indicator_list_division':indicator_list_division
     })
 
 

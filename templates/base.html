@@ -23,6 +23,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css'%}">
   <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css'%}">
   <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css'%}">
+  
 
   <!-- Theme style (Admin LTE)-->
   <link rel="stylesheet" href="{% static 'css/adminlte.css' %}">
@@ -63,6 +64,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
 <script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
 <script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+<script src="https://cdn.datatables.net/fixedcolumns/4.1.0/js/dataTables.fixedColumns.min.js"></script>
+
 
 <!-- AdminLTE App -->
 <script type="text/javascript" src="{% static 'adminlte.js' %}"></script>
@@ -235,7 +238,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Brand Logo -->
     <a href="{% url 'homepage' %}" class="brand-link">
       <img   src="{% static 'img/logo2.png' %}" alt="AdminLTE Logo"  style="height: 32px;margin-top: -6px;margin-left: 13px;">
-      <span class="brand-text" style="color:#FF6F91;">Dashboard v1.8.14</span>
+      <span class="brand-text" style="color:#FF6F91;">Dashboard v1.9.17</span>
       <i class="badge bg-purple" style="font-weight:100">Whatever It Takes</i>
     </a>
 
@@ -531,7 +534,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <footer class="main-footer text-sm">
     <!-- To the right -->
     <div class="float-right d-none d-sm-inline">
-      <span class="brand-text" style="color:#FF6F91;"><b>Dashboard v1.8.14</b></span>
+      <span class="brand-text" style="color:#FF6F91;"><b>Dashboard v1.9.17</b></span>
       <i class="badge bg-purple" style="font-weight:100">Whatever It Takes</i>
     </div>
     <!-- Default to the left -->

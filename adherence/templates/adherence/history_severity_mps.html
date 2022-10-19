@@ -5,7 +5,7 @@
 
 <div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 100% !important; ">
     <div class="card-header">
-        <h5 class="m-0">SEVERITY MPS</h5>
+        <h5 class="m-0">History SEVERITY MPS</h5>
     </div>
     <div class="card-body">
         <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
@@ -27,27 +27,40 @@
         {% if overview.iterrows %}
         
         <div style="height: 400px">
-            <canvas id="indicatorweek"></canvas>
+            <canvas id="history_mps"></canvas>
 
             <script>
-                var xValues = [{% for index, data in indicatorweek.iterrows %} {{data.division}}, {% endfor %}];
-                // var xValues = [6,9,7,3,10,7,4,6]
-                var severity_mps = [{% for index, data in indicatorweek.iterrows %} (Math.round({{data.severity_mps}}) ), {% endfor %}];
-                // var severity_mps_v = [{% for index, data in indicatorweek.iterrows %}(Math.round({{data.severity_mps_v}}) ), {% endfor %}];
+                var xValues = [{% for year_week in indicator_list_year_weeks %} '{{year_week}}', {% endfor %}];
                 var barColors = ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36'];
-                
-                new Chart("indicatorweek", {
-                    type: "bar",
+                function getRandomColor() {
+                var letters = '0123456789ABCDEF'.split('');
+                var color = '#';
+                for (var i = 0; i < 6; i++ ) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+                // var items = Array('#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36');
+                // var item = items[Math.floor(Math.random()*items.length)];
+                // return item;
+                }
+                new Chart("history_mps", {
+                    type: "line",
                     data: {
                             labels: xValues,
                             datasets: [
+                            {% for div in indicator_list_division %}
                                 {
-                                label: "Severity MPS",
-                                backgroundColor: barColors,
-                                borderColor: barColors,
+                                label: '{{div}}',
+                                backgroundColor:   'transparent',
+                                borderColor:  getRandomColor(),
                                 borderWidth: 1,
-                                data: severity_mps
+                                data: [
+                                        {%for index, data in indicator.iterrows%}
+                                            {% if data.division == div %} {{data.severity_mps|floatformat:2}},{%endif%} 
+                                        {% endfor %}
+                                        ]
                                 },
+                            {% endfor %}
                                 // {
                                 // label: "MPS Valentin",
                                 // backgroundColor: "#27879E",
@@ -60,18 +73,20 @@
                             options: {
                                 plugins: {
                                         datalabels: {
-                                            anchor: 'center',
+                                            anchor: 'start',
                                             clamp: true,
                                             color: 'black',
+                                            align :'start'
                                             
                                         },
                                         legend: {
-                                        display: false,
-                                        position:'right',
+                                        display: true,
+                                        position:'left',
                                         align:'middle',
                                         labels: {
                                         usePointStyle: true,
-                                        boxWidth: 6
+                                        boxWidth: 6,
+
                                         },
                                         },
         
@@ -90,9 +105,18 @@
                                                     return label;
                                                 }
                                             }
-                                        }
-                                        
+                                        },
                                     },
+                                    scales: {
+                                            // x: {
+                                            //     stacked: true,
+                                            // },
+                                            y: {
+                                                stacked: false,
+                                                min: 0,
+                                                max: 100
+                                            }
+                                            },
                                     responsive: true,
                                     maintainAspectRatio:false, 
         

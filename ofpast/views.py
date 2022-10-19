@@ -291,6 +291,7 @@ def import_coois(file,year,week,conn):
                 'date_plan_opening', 
                 'date_request',
                 'date_entry',
+                'date_actual_launch',
             ],
             null="",
             sep=",",
