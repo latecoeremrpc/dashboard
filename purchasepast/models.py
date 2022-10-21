@@ -23,4 +23,7 @@ class Purchase(models.Model):
     principal_agmt_item=models.CharField(null=True,max_length=20)
     purchase_order=models.CharField(null=True,max_length=20)
     purchase_order_item=models.CharField(null=True,max_length=20)
-
+    company=models.CharField(null=True,max_length=20)
+    currency=models.CharField(null=True,max_length=20)
+    rate=models.FloatField(null=True)
+    valuation_price_euro=models.FloatField(null=True)

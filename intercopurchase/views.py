@@ -70,7 +70,7 @@ def home(request):
 
 
     #Count per week per devision
-    all_intercopurchase_data=Purchase.objects.all().filter(Q(purchasing_group__startswith='MR'))
+    all_intercopurchase_data=Purchase.objects.all().filter(purchasing_group__startswith='MR')
     weekavailable=all_intercopurchase_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
     yearavailable=all_intercopurchase_data.values_list('year',flat=True).distinct() #flat=True will remove the tuples and return the list  
 
@@ -133,7 +133,7 @@ def intercopurchase_results(intercopurchase_data):
     intercopurchase_results.count = len(dp.index)
 
     #value
-    dp['value']=(dp['valuation_price'] / dp['base_price']) * dp['qte_requested']
+    dp['value']=(dp['valuation_price_euro'] / dp['base_price']) * dp['qte_requested']
     dp['value']=dp['value'].fillna(0)
     intercopurchase_results.value = dp['value'].sum()
 

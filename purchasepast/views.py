@@ -14,6 +14,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from os.path import exists
 from django.db.models import Q
 from django.http import HttpResponse
+import glob
 
 from purchasepast.models import Purchase
 from homepage.models import HomeKpi
@@ -36,29 +37,46 @@ def upload_files(request):
     if current_week < 10:
         current_week=str(0)+str(current_week)
     purchase_file=r"\\centaure\Extract_SAP\SE16N-EBAN-PAST_PURCHASE_REQUEST\PPR_"+format(current_year)+format(current_week)+".XLSX"
-    # purchase_file=r"\\sp-is.lat.corp\sites\MRPC\Outil\Documents partages\Dashboard\DA_PASSE.XLSX"
+
+    directory_t001=glob.glob(r"\\centaure\Extract_SAP\SE16N-T001\*")
+    t001_file= max(directory_t001,key=os.path.getmtime)
+
+    directory_t001k=glob.glob(r"\\centaure\Extract_SAP\SE16N-T001K\*")
+    t001k_file= max(directory_t001k,key=os.path.getmtime)
+
+    directory_tcurr=glob.glob(r"\\centaure\Extract_SAP\SE16N-TCURR\*")
+    tcurr_file=max(directory_tcurr,key=os.path.getmtime)
+    
+    t001_file_exists=exists(t001_file)
+    t001k_file_exists=exists(t001k_file)
+    tcurr_file_exists=exists(tcurr_file)
     purchase_exists = exists(purchase_file)
     # holidays_exists = exists(holidaysfile)
+    if t001_file_exists == False:
+        message_error= 'Unable to upload TOO1 File, not exist or unreadable!'
+        return render(request,'purchasepast\index.html',{'message_error':message_error})   
+    if t001k_file_exists == False:
+        message_error= 'Unable to upload TK001 File, not exist or unreadable!'
+        return render(request,'purchasepast\index.html',{'message_error':message_error}) 
+    if tcurr_file_exists == False:
+        message_error= 'Unable to upload TCURR File, not exist or unreadable!'
+        return render(request,'purchasepast\index.html',{'message_error':message_error}) 
+    if purchase_exists == False :
+        message_error= 'Unable to upload PPR File, not exist or unreadable!'
+        return render(request,'purchasepast\index.html',{'message_error':message_error}) 
 
-    if purchase_exists :
-        # dh=pd.read_excel(holidaysfile)
-        # dh=dh.rename(columns={'FOU-2110':'2110','LAB-2000':'2000','LEC-2030':'2030','LIP-2020':'2020','COL-2010':'2010','HBG-2200':'2200','HER-2300':'2300','CAS-2400':'2400','BEL-2500':'2500','LAV-2600':'2600','QRO-2320':'2320'})
-        # for col in dh.columns:
-        #     dh[col]= pd.to_datetime(dh[col]).dt.date
-
-        import_purchase(purchase_file,current_year,current_week,conn)
 
 
-        return home(request)
-    else:
-        message_error='Unable to upload files, not exist or unreadable!'
-        weekavailable=Purchase.objects.all().values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
-        week=[]
+    import_purchase(purchase_file,t001_file,t001k_file,tcurr_file,current_year,current_week,conn)
 
-        return render(request,'purchasepast\index.html',{'message_error':message_error,'weekavailable':weekavailable,'current_week':current_week,'current_year':current_year,'week':week})
+
+    return home(request)
 
 def home(request):
-    username=request.META['REMOTE_USER']
+    try:
+        username=request.META['REMOTE_USER']
+    except:
+        username=''
     # username='test'
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
@@ -184,8 +202,40 @@ def details(request):
     return render(request,"purchasepast/details.html",{'data':records,'message_success':message_success})
 
 
-def import_purchase(file,year,week,conn):
+def import_purchase(file,t001_file,t001k_file,tcurr_file,year,week,conn):
     dp=pd.read_excel(file)
+    df_t001=pd.read_excel(t001_file)
+    df_t001k=pd.read_excel(t001k_file)
+    df_tcurr=pd.read_excel(tcurr_file)
+
+
+
+    df_t001k = df_t001k.iloc[:, [0,1]]
+    df_t001k.rename(columns={'Domaine valorisation':'division','Société':'company'},  inplace = True)
+
+    df_t001=df_t001.iloc[:, [0,4]]
+    df_t001.rename(columns={'Société':'company','Devise':'currency'},  inplace = True)
+
+    df_tcurr=df_tcurr[ ( df_tcurr['Type de cours'].isin(['M','P']) ) & (df_tcurr['Dev. source']=='EUR') ]
+    df_tcurr=df_tcurr.iloc[:, [2,3,4]]
+    df_tcurr.rename(columns={'Devise cible':'target_currency','Début validité':'date','Taux':'rate'},  inplace = True)
+    df_tcurr['date']=pd.to_datetime( df_tcurr['date'])
+    df_tcurr=df_tcurr.sort_values(['target_currency', 'date'],ascending = [True, False])
+    df_tcurr=df_tcurr.groupby(['target_currency'])['rate'].first().reset_index() 
+    
+    df_t001k_dict=dict(zip(df_t001k['division'],df_t001k['company']))
+    
+    dp['company']=dp['Division'].map(df_t001k_dict)
+    # Get currency from t001
+    df_t001_dict=dict(zip(df_t001['company'],df_t001['currency']))
+    dp['currency']=dp['company'].map(df_t001_dict)
+    # Get rate  from tcurr
+    df_tcurr_dict=dict(zip(df_tcurr['target_currency'],df_tcurr['rate']))
+    dp['rate']=dp['currency'].map(df_tcurr_dict)
+    dp['rate'] = dp['rate'].str.replace(',','.')
+    dp['rate']=dp['rate'].fillna(1)
+    dp['rate']=dp['rate'].astype(float)
+    dp['valuation_price_euro']=dp['Prix de valorisation'].astype(float) / dp['rate']
     #Add Columns Week and Year
     # dp.rename(columns={'Division cédante':'transferring_division'})
     dp['Division cédante']=dp['Division cédante'].fillna(0).astype(np.int64)
@@ -209,14 +259,20 @@ def import_purchase(file,year,week,conn):
                 'material',
                 'division',
                 'transferring_division',
+                'qte_requested',
                 'requisition_date',
                 'release_date',
                 'valuation_price',
+                'base_price',
                 'supplier',
                 'outline_agreement',
                 'principal_agmt_item',
                 'purchase_order',
                 'purchase_order_item',
+                'company',
+                'currency',
+                'rate',
+                'valuation_price_euro',
             ],
             null="",
             sep=",",
