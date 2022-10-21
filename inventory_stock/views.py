@@ -80,7 +80,7 @@ def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
     username=request.META['REMOTE_USER']
-    all_MaterialSheet_data= MaterialSheet.objects.all()
+    all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100)
     weekavailable=all_MaterialSheet_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
     yearavailable=all_MaterialSheet_data.values_list('year',flat=True).distinct().order_by('year') #flat=True will remove the tuples and return the list   
     division=[]

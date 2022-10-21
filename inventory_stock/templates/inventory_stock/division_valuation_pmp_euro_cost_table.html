@@ -13,8 +13,8 @@
             <thead>
                 <th>Division</th>
                 <th>Name</th>
-                <th>Current stock (week: {{current_week}})</th>
-                <th>Week before</th>
+                <th>Week before  ({{current_week|diff:1}})</th>
+                <th>Current week  ({{current_week}})</th>
                 <th>Difference</th>
                 <th>Progress</th>
             </thead>
@@ -41,6 +41,10 @@
                         LAB TO CASA
                         {% elif data.division == 'FTWZ' %}
                         FTWZ
+                        {% elif data.division == '2320' %}
+                        QUERETARO
+                        {% elif data.division == '2310' %}
+                        GENERAL EXPENSES MEXICO
                         {% elif data.division == '2200' %}
                         HAMBOURG
                         {% elif data.division == '2300' %}
@@ -53,15 +57,15 @@
                         LAVAL
                         {% endif %}
                     </td>
-                    <td> € {{data.valuation_pmp_euro|floatformat:"2"|intcomma}} </td>
                     <td> {% for index, row in inventory_stock_results_week_before_division_valuation_pmp_euro_cost.iterrows %}
                             {% if row.division == data.division %}
                             € {{ row.valuation_pmp_euro|floatformat:"2"|intcomma}}
-                            </td>
-                            <td>{{ row.valuation_pmp_euro|diff:data.valuation_pmp_euro|floatformat:"0" }} </td>
-                            <td> 
-                                <span class="badge bg-primary">{{ row.valuation_pmp_euro|percent:data.valuation_pmp_euro|floatformat:"2" }} %</span> 
-                            </td>
+                    </td>
+                    <td> € {{data.valuation_pmp_euro|floatformat:"2"|intcomma}} </td>
+                    <td>{{ data.valuation_pmp_euro|diff:row.valuation_pmp_euro|floatformat:"0" }} </td>
+                    <td> 
+                        <span class="badge bg-primary">{{ data.valuation_pmp_euro|percent:row.valuation_pmp_euro|floatformat:"2" }} %</span> 
+                    </td>
 
                         {% endif %}
                     {% endfor %}
