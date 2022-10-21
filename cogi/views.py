@@ -67,7 +67,7 @@ def home(request):
     dc=pd.DataFrame(list(all_cogi_data.values()))
     cogi_allweeks=dc.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
     cogi_divisions=dc.division.unique()
-    cogi_count_per_week_per_division=dc.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+    cogi_count_per_week_per_division=dc.groupby(['year','week','division']).agg({'id':'count'}).unstack().fillna(0).stack().sort_values(by=['week']).reset_index()
 
 
     message_error=''
