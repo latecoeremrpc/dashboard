@@ -15,8 +15,10 @@ from inventory_stock.views import inventory_stock_results , inventory_stock_resu
 import os
 
 def homesettings(request):
-    username=request.META['REMOTE_USER'].split('\\')[1]
-    # username=os.environ.get("REMOTE_USER")
+    try:
+        username=request.META['REMOTE_USER']
+    except:
+        username='L0005082'
     
     request_url=''
     kpis=[]
@@ -55,7 +57,13 @@ def homesettings(request):
 
 
 def homeview(request):
-    username=request.META['REMOTE_USER'].split('\\')[1]
+    try:
+        username=request.META['REMOTE_USER']
+        # username='L0001907'
+    except:
+        # username='L0005082'
+        username='L0005082'
+        
 
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
@@ -126,8 +134,8 @@ def homeview(request):
     inventory_stock_results.division_valuation_pmp_euro_cost=None
     #-------------------------------------------------
     #Get kpis choosen from the user
+    themes=HomeKpi.objects.filter(username=username).values_list('theme',flat=True).distinct()
     kpis=HomeKpi.objects.all().filter(username=username)
-
     division=[]
     week=[]
     year=[]
@@ -147,148 +155,149 @@ def homeview(request):
     # for year in range_year:
     yearavailable=[year for year in range_year]
 
-    for kpi in kpis:
-        if kpi.theme=='cogi':
-            #Count per week per division
-            all_cogi_data=Cogi.objects.all()
-            dc=pd.DataFrame(list(all_cogi_data.values()))
-            cogi_allweeks=dc.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-            cogi_divisions=dc.division.unique()
-            cogi_count_per_week_per_division=dc.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-            # message_error=''
-            #Check Filter, if filter exist get result with filter if not get current week
-            #Check Filter, if filter exist get result with filter if not get current week
-            if len(week) > 0:
-                cogi_data=all_cogi_data.filter(week__in=week)
-                if len(division) > 0:
-                    cogi_data=cogi_data.filter(division__in=division)
-                if len(profit_center) > 0:
-                    cogi_data=cogi_data.filter(profit_centre__in=profit_center)
-            else:
-                cogi_data=all_cogi_data.filter(week=current_week)
-            
-            #Check if result is empty
-            if not cogi_data :
-                # message_error='There is no data with your selected filter'
-                #Count
-                cogi_results.count = ""
-                #Count per cause
-                cogi_results.count_per_code=""
-                #Count per division
-                cogi_results.count_per_week_per_division=""
-                #Count par accountability
-                cogi_results.count_per_accountability=""
-            else:
-                # Call Function to get cogi_results
-                cogi_results(cogi_data)
-        if kpi.theme=='ofpast':
-            #Count per week per devision
-            all_coois_data=Coois.objects.all()
-            dof=pd.DataFrame(list(all_coois_data.values()))
-            ofpast_divisions=dof.division.unique()
-            ofpast_allweeks=dof.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-            ofpast_count_per_week_per_division=dof.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+    # for kpi in kpis:
 
-            #Check Filter, if filter exist get result with filter if not get current week
-            if len(week) > 0:
-                coois_data=all_coois_data.filter(week__in=week)
-                if len(division) > 0:
-                    coois_data=coois_data.filter(division__in=division)
-                if len(profit_center) > 0:
-                    coois_data=coois_data.filter(profit_centre__in=profit_center)
-            else:
-                coois_data=all_coois_data.filter(week=current_week)
-                    
-            #Check if result is empty
-            if not coois_data :
-                #Count
-                ofpast_results.count = ""
-                #Count per cause
-                ofpast_results.count_per_cause=""
-                #Count per division
-                ofpast_results.count_per_division=""
-                #Count profit center 
-                ofpast_results.count_per_profit_center=""
-
-            else:
-                # Call Function to get ofpast_results
-                ofpast_results(coois_data)
-        if kpi.theme=='purchasepast':
-            #Count per week per devision
-            all_purchase_data=Purchase.objects.all().exclude(Q(purchasing_group__startswith='MR'))
-
-
-            dp=pd.DataFrame(list(all_purchase_data.values()))
-            purchase_allweeks=dp.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-            purchase_receive_divisions=dp.division.unique()
-            purchase_convert_divisions=dp.transferring_division.unique()
-            purchase_count_receive_per_week_per_division=dp.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-            purchase_count_convert_per_week_per_division=dp.groupby(['year','week','transferring_division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-
-
-            #Check Filter, if filter exist get result with filter if not get current week
-            if week and division:
-                purchase_data=all_purchase_data.filter(division__in=division).filter(week__in=week)
-            elif week:
-                purchase_data=all_purchase_data.filter(week__in=week)
-            elif division:
-                purchase_data=all_purchase_data.filter(division__in=division)
-            else:
-                purchase_data=all_purchase_data.filter(week=current_week)
-            
-            #Check if result is empty
-            if not purchase_data :
-                #Count
-                purchase_results.count = ""
-                #Count per cause
-                purchase_results.count_per_cause=""
-                #Count to receive per division
-                purchase_results.count_receive_per_division=""
-                #Count to convert per division
-                purchase_results.count_convert_per_division=""
-
-            else:
-                # Call Function to get purchase_results
-                purchase_results(purchase_data)
-        if kpi.theme=='intercopurchase':
-            #Count per week per devision
-            all_intercopurchase_data=Purchase.objects.all().filter(Q(purchasing_group__startswith='MR'))
-
-
-            dip=pd.DataFrame(list(all_intercopurchase_data.values()))
-            intercopurchase_allweeks=dip.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-            intercopurchase_receive_divisions=dip.division.unique()
-            intercopurchase_convert_divisions=dip.transferring_division.unique()
-            intercopurchase_count_receive_per_week_per_division=dip.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-            intercopurchase_count_convert_per_week_per_division=dip.groupby(['year','week','transferring_division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
-
-
-            #Check Filter, if filter exist get result with filter if not get current week
-            if week and division:
-                intercopurchase_data=all_intercopurchase_data.filter(division__in=division).filter(week__in=week)
-            elif week:
-                intercopurchase_data=all_intercopurchase_data.filter(week__in=week)
-            elif division:
-                intercopurchase_data=all_intercopurchase_data.filter(division__in=division)
-            else:
-                intercopurchase_data=all_intercopurchase_data.filter(week=current_week)
-            
-            #Check if result is empty
-            if not intercopurchase_data :
-                #Count
-                intercopurchase_results.count = ""
-                #Count per cause
-                intercopurchase_results.count_per_cause=""
-                #Count to receive per division
-                intercopurchase_results.count_receive_per_division=""
-                #Count to convert per division
-                intercopurchase_results.count_convert_per_division=""
-
-            else:
-                # Call Function to get intercopurchase_results
-                intercopurchase_results(intercopurchase_data)
+    if 'cogi' in themes:
+        #Count per week per division
+        all_cogi_data=Cogi.objects.all()
+        dc=pd.DataFrame(list(all_cogi_data.values()))
+        cogi_allweeks=dc.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+        cogi_divisions=dc.division.unique()
+        cogi_count_per_week_per_division=dc.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+        # message_error=''
+        #Check Filter, if filter exist get result with filter if not get current week
+        #Check Filter, if filter exist get result with filter if not get current week
+        if len(week) > 0:
+            cogi_data=all_cogi_data.filter(week__in=week)
+            if len(division) > 0:
+                cogi_data=cogi_data.filter(division__in=division)
+            if len(profit_center) > 0:
+                cogi_data=cogi_data.filter(profit_centre__in=profit_center)
+        else:
+            cogi_data=all_cogi_data.filter(week=current_week)
         
-        if kpi.theme=='inventory_stock':
+        #Check if result is empty
+        if not cogi_data :
+            # message_error='There is no data with your selected filter'
+            #Count
+            cogi_results.count = ""
+            #Count per cause
+            cogi_results.count_per_code=""
+            #Count per division
+            cogi_results.count_per_week_per_division=""
+            #Count par accountability
+            cogi_results.count_per_accountability=""
+        else:
+            # Call Function to get cogi_results
+            cogi_results(cogi_data)
+    if 'ofpast' in themes:
+        #Count per week per devision
+        all_coois_data=Coois.objects.all()
+        dof=pd.DataFrame(list(all_coois_data.values()))
+        ofpast_divisions=dof.division.unique()
+        ofpast_allweeks=dof.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+        ofpast_count_per_week_per_division=dof.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+
+        #Check Filter, if filter exist get result with filter if not get current week
+        if len(week) > 0:
+            coois_data=all_coois_data.filter(week__in=week)
+            if len(division) > 0:
+                coois_data=coois_data.filter(division__in=division)
+            if len(profit_center) > 0:
+                coois_data=coois_data.filter(profit_centre__in=profit_center)
+        else:
+            coois_data=all_coois_data.filter(week=current_week)
+                
+        #Check if result is empty
+        if not coois_data :
+            #Count
+            ofpast_results.count = ""
+            #Count per cause
+            ofpast_results.count_per_cause=""
+            #Count per division
+            ofpast_results.count_per_division=""
+            #Count profit center 
+            ofpast_results.count_per_profit_center=""
+
+        else:
+            # Call Function to get ofpast_results
+            ofpast_results(coois_data)
+    if 'purchasepast' in themes:
+        #Count per week per devision
+        all_purchase_data=Purchase.objects.all().exclude(Q(purchasing_group__startswith='MR'))
+
+
+        dp=pd.DataFrame(list(all_purchase_data.values()))
+        purchase_allweeks=dp.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+        purchase_receive_divisions=dp.division.unique()
+        purchase_convert_divisions=dp.transferring_division.unique()
+        purchase_count_receive_per_week_per_division=dp.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+        purchase_count_convert_per_week_per_division=dp.groupby(['year','week','transferring_division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+
+
+        #Check Filter, if filter exist get result with filter if not get current week
+        if week and division:
+            purchase_data=all_purchase_data.filter(division__in=division).filter(week__in=week)
+        elif week:
+            purchase_data=all_purchase_data.filter(week__in=week)
+        elif division:
+            purchase_data=all_purchase_data.filter(division__in=division)
+        else:
+            purchase_data=all_purchase_data.filter(week=current_week)
+        
+        #Check if result is empty
+        if not purchase_data :
+            #Count
+            purchase_results.count = ""
+            #Count per cause
+            purchase_results.count_per_cause=""
+            #Count to receive per division
+            purchase_results.count_receive_per_division=""
+            #Count to convert per division
+            purchase_results.count_convert_per_division=""
+
+        else:
+            # Call Function to get purchase_results
+            purchase_results(purchase_data)
+    if 'intercopurchase' in themes:
+        #Count per week per devision
+        all_intercopurchase_data=Purchase.objects.all().filter(Q(purchasing_group__startswith='MR'))
+
+
+        dip=pd.DataFrame(list(all_intercopurchase_data.values()))
+        intercopurchase_allweeks=dip.groupby(['year','week']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+        intercopurchase_receive_divisions=dip.division.unique()
+        intercopurchase_convert_divisions=dip.transferring_division.unique()
+        intercopurchase_count_receive_per_week_per_division=dip.groupby(['year','week','division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+        intercopurchase_count_convert_per_week_per_division=dip.groupby(['year','week','transferring_division']).agg({'id':'count'}).sort_values(by=['week']).reset_index()
+
+
+        #Check Filter, if filter exist get result with filter if not get current week
+        if week and division:
+            intercopurchase_data=all_intercopurchase_data.filter(division__in=division).filter(week__in=week)
+        elif week:
+            intercopurchase_data=all_intercopurchase_data.filter(week__in=week)
+        elif division:
+            intercopurchase_data=all_intercopurchase_data.filter(division__in=division)
+        else:
+            intercopurchase_data=all_intercopurchase_data.filter(week=current_week)
+        
+        #Check if result is empty
+        if not intercopurchase_data :
+            #Count
+            intercopurchase_results.count = ""
+            #Count per cause
+            intercopurchase_results.count_per_cause=""
+            #Count to receive per division
+            intercopurchase_results.count_receive_per_division=""
+            #Count to convert per division
+            intercopurchase_results.count_convert_per_division=""
+
+        else:
+            # Call Function to get intercopurchase_results
+            intercopurchase_results(intercopurchase_data)
+    
+    if 'inventory_stock' in themes:
 
             all_MaterialSheet_data= MaterialSheet.objects.all()
             if len(year) > 0:
@@ -327,7 +336,8 @@ def homeview(request):
     
     
     
-    return render (request, "homepage\index.html",{'current_week':current_week,'current_year':current_year,'yearavailable':yearavailable,'weeks':week,'years':year,'profit_center':profit_center,'weekavailable':weekavailable,'username':username,'kpis':kpis,'divisions':division,
+    return render (request, "homepage\index.html",{'current_week':current_week,'current_year':current_year,'yearavailable':yearavailable,'weeks':week,'years':year,'profit_center':profit_center,'weekavailable':weekavailable,
+    'username':username,'themes':themes,'divisions':division,'kpis':kpis,
     'cogi_count':cogi_results.count,'cogi_count_per_code':cogi_results.count_per_code,'cogi_count_per_accountability':cogi_results.count_per_accountability,
     'cogi_allweeks':cogi_allweeks,'cogi_divisions':cogi_divisions,'cogi_count_per_week_per_division':cogi_count_per_week_per_division,
 
