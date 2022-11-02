@@ -20,7 +20,7 @@ from datetime import datetime, time, timedelta,date
 import time
 import psycopg2
 from io import StringIO
-import os 
+import os     
 
 def calcul(request):
     # Connection to db
@@ -47,9 +47,9 @@ def calcul(request):
     #upload files
     start_time = time.time()
     print('start import')
-    upload_material(conn,week,year)
-    upload_coois(conn,week,year)
     upload_zpp(conn,week,year)
+    upload_coois(conn,week,year)
+    upload_material(conn,week,year)
 
     print('Time for upload files')
     end_import=time.time()
@@ -401,6 +401,8 @@ def home(request):
     indicatorweek=''
     indicator=''
     indicator_list_weeks=''
+    indicator_list_year_weeks=''
+    indicator_list_division=''
     year_weeks= Result.objects.values_list('year','week').distinct()
     yearavailable=set()
     weekavailable=set()
@@ -432,7 +434,7 @@ def home(request):
     dr=pd.DataFrame(list(result.values()))
 
     # dr.to_csv('result.csv',index=False)
-    if result:
+    if dr.size > 0:
         overview = dr.groupby(
                                 ['year','week','division','profit_centre','planning']).agg({'profondeur':'mean'
                                                                                             , 'H1': 'sum'
@@ -501,7 +503,7 @@ def home(request):
     'years':year,'weeks':week,'divisions':division,'profit_center':profit_center,'message_error':message_error,
     'overview':overview,'indicator':indicator,
     'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks,'indicator_list_year_weeks':indicator_list_year_weeks,'indicator_list_division':indicator_list_division
-    })
+    }) 
 
 
 
@@ -628,7 +630,7 @@ def upload_material(conn,week,year):
 
 def upload_coois(conn,week,year):
     #Get Coois File
-    cooisfile = r"\\prfoufiler01\donnees$\Public\input_adherence_41\COOIS_GLOBAL BEFORE MRP.XLSX"
+    cooisfile = r"\\centaure\Extract_SAP\COOIS-GLOBAL\COOIS_GLOBAL BEFORE MRP "+format(year)+format(week)+".xlsx"
     # cooisfile = r"\\prfoufiler01\donnees$\Public\coois\COOIS_GLOBAL BEFORE MRP.XLSX"
     # \\prfoufiler01\donnees$\Public\coois
     # cooisfile = r"http://sp-is.lat.corp/sites/MRPC/ExtractSAP/COOIS_GLOBAL%20BEFORE%20MRP%20202143.XLSX"
@@ -699,16 +701,16 @@ def upload_coois(conn,week,year):
 
 def upload_zpp(conn,week,year):
     zppfile ={
-        "2110":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2110 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2000":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2000 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2030":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2030 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2020":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2020 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2010":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2010 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2200":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2200 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2300":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2300 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2400":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2400 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2500":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2500 ZPP_MD_STOCK BEFORE MRP.xls",
-        "2600":r"\\prfoufiler01\donnees$\Public\input_adherence_41\2600 ZPP_MD_STOCK BEFORE MRP.xls",
+        "2110":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2110 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2000":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2000 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2030":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2030 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2020":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2020 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2010":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2010 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2200":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2200 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2300":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2300 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2400":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2400 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2500":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2500 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
+        "2600":r"\\centaure\Extract_SAP\30-ZPP_MD_STOCK\2600 ZPP_MD_STOCK BEFORE MRP "+format(year)+format(week)+".xls",
         # "2320":r"\\sp-is.lat.corp\sites\MRPC\ExtractSAP\2320 ZPP_MD_STOCK BEFORE MRP.xls",  #There's no production yet
         }
     for division,file in zppfile.items():
