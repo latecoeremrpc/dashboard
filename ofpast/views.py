@@ -12,6 +12,8 @@ import psycopg2
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from os.path import exists
 from django.http import HttpResponse
+from io import BytesIO
+
 
 
 
@@ -222,34 +224,45 @@ def ofpast_results(coois_data):
 
 
 def details(request):
+    username=request.META['REMOTE_USER']
+
     all_coois_data=Coois.objects.all()
     ofpast_results(all_coois_data)
     data=ofpast_results.data
     # data.to_csv('ofpastdf.csv',index=False)
     message_success=''
-
-    now = datetime.datetime.now()
-    current_time = now.strftime("%d_%m_%y_%H:%M:%S")
-
     # Convert dataframe to dic for paginitation
     records = data.to_dict(orient='records')
 
     paginator = Paginator(records, 50)
     page = request.GET.get('page')
     records = paginator.get_page(page)
+
+
+    return render(request,"ofpast/details.html",{'data':records,'message_success':message_success,'username':username})
+
+def download(request):
+    all_coois_data=Coois.objects.all()
+    now = datetime.datetime.now()
+    current_time = now.strftime("%d_%m_%y_%H:%M:%S")
     if request.method == 'POST':
+        print('post passed')
         ofpast_results(all_coois_data)
         data=ofpast_results.data
-        # Download file 
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=WoPast_details_'+current_time+'.csv'
-        # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
-        data.to_csv(path_or_buf=response,index=False)
+        with BytesIO() as b:
+        # Use the StringIO object as the filehandle.
+            writer = pd.ExcelWriter(b, engine='xlsxwriter')
+            data.to_excel(writer, sheet_name='Sheet1')
+            writer.save()
+            # Set up the Http response.
+            filename = 'wo_past.xlsx'
+            response = HttpResponse(
+                b.getvalue(),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
-
-    return render(request,"ofpast/details.html",{'data':records,'message_success':message_success})
-
-
+    
 
 
 def import_coois(file,year,week,conn):
