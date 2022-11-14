@@ -79,7 +79,8 @@ def upload_files(request):
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
-    username=request.META['REMOTE_USER']
+    # username=request.META['REMOTE_USER']
+    username=''
     all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100)
     weekavailable=all_MaterialSheet_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
     yearavailable=all_MaterialSheet_data.values_list('year',flat=True).distinct().order_by('year') #flat=True will remove the tuples and return the list   
@@ -168,10 +169,10 @@ def inventory_stock_results_week(MaterialSheet_data):
 
     df.replace([np.inf, -np.inf], 0, inplace=True)
 
-    df['valuation_ps_div']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_div']
-    df['valuation_pmp_div']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_div']
-    df['valuation_ps_euro']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_euro']
-    df['valuation_pmp_euro']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_euro']
+    df['valuation_ps_div']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_div']
+    df['valuation_pmp_div']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_div']
+    df['valuation_ps_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_euro']
+    df['valuation_pmp_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_euro']
 
     df['valuation_ps_euro']=np.where( (df['currency'] == 'TND') ,df['valuation_ps_euro'] / 10 , df['valuation_ps_euro'] )
     df['valuation_pmp_euro']=np.where( (df['currency'] == 'TND') , df['valuation_pmp_euro']/ 10 , df['valuation_pmp_euro'] )
@@ -204,10 +205,10 @@ def inventory_stock_results(MaterialSheet_data):
 
     df.replace([np.inf, -np.inf], 0, inplace=True)
 
-    df['valuation_ps_div']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_div']
-    df['valuation_pmp_div']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_div']
-    df['valuation_ps_euro']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_euro']
-    df['valuation_pmp_euro']=(df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_euro']
+    df['valuation_ps_div']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_div']
+    df['valuation_pmp_div']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_div']
+    df['valuation_ps_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_euro']
+    df['valuation_pmp_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_euro']
 
     df['valuation_ps_euro']=np.where( (df['currency'] == 'TND') ,df['valuation_ps_euro'] / 10 , df['valuation_ps_euro'] )
     df['valuation_pmp_euro']=np.where( (df['currency'] == 'TND') , df['valuation_pmp_euro']/ 10 , df['valuation_pmp_euro'] )
@@ -269,74 +270,115 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     print('End df_t001k')
     df_tcurr=pd.read_excel(tcurr_file)
     print('End df_tcurr')
-    df_zpp_flg13=dd.read_csv(zpp_flg13_file,encoding='ANSI',sep=';',dtype={'Division': 'object','Gestionnaire':'object','Type article':'object','Taille de lot maxi':'object'})
+    df_zpp_flg13=dd.read_csv(zpp_flg13_file,encoding='ANSI',sep=';', header=0, dtype={'Division': 'object','Gestionnaire':'object','Type article':'object','Taille de lot maxi':'object'})
     print('End ZPP FLG13')
+    new_columns = [
+    "Division",
+    "Ctr Pft",
+    "Gestionnaire",
+    "Desc. Tech.",
+    "Grp acheteurs",
+    "Référence article",
+    "Ty",
+    "St",
+    "Gv",
+    "Besoins",
+    "Stock",
+    "Consign. Stock",
+    "Lot QM",
+    "OF",
+    "CDE",
+    "OP",
+    "DA",
+    "Clé",
+    "Lot fixe",
+    "Sécurité",
+    "Exédents",
+    "Valorisation",
+    "Délai sécu",
+    "PMP-PS",
+    "ABC",
+    "Lot mini",
+    "Cycle",
+    "Tps récept.",
+    "Taille de lot maxi",
+    "Storage loc.",
+    "Désignation article",
+    "Unité",
+    "Type article",
+    "Appro Spe",
+    "Vrac",
+    "Type planif.",
+    "Fournisseur 1",
+    "Désignation Fournisseur 1",
+    "Fournisseur 2",
+    "Désignation Fournisseur 2",
+    "Stock en Transit",
+    "Quantité requise (1000)",
+    "Quantité requise (1010)",
+    "Quantité requise (1900)",
+    "Quantité requise (3000)",
+    "Quantité requise (3100)",
+    "Quantité requise (4000)",
+    "Quantité requise (5000)",
+    "Pt découplage",
+    "Stock VMI",
+    "Point Commande",
+    "Unité Planif",
+    "Quantité requise (4020)"
+    ]
+    df_zpp_flg13 = df_zpp_flg13.rename(columns=dict(zip(df_zpp_flg13.columns, new_columns)))
+    df_zpp_flg13=df_zpp_flg13.iloc[:,[0,1,5,10,11,12,32,40,51]]
+
+    df_zpp_flg13['key']=df_zpp_flg13['Division'].astype('str').str.strip()+df_zpp_flg13['Référence article'].astype('str').str.strip()
 
 
+    df["Division"]=df["Division"].fillna(0).astype(int)
+    df['key']=df['Division'].astype('str').str.strip()+df['Article'].astype('str').str.strip()
 
+    #Get individual_collective from df fiche article
+    dict_df_individual_collective=dict(zip(df['key'],df['I/C']))
+    df_zpp_flg13['individual_collective']=df_zpp_flg13['key'].map(dict_df_individual_collective)
+    #Get standard_price from df fiche article
+    dict_df_standard_price=dict(zip(df['key'],df['Prix standard']))
+    df_zpp_flg13['standard_price']=df_zpp_flg13['key'].map(dict_df_standard_price)
+    #Get price_basis from df fiche article
+    dict_df_price_basis=dict(zip(df['key'],df['Base de prix']))
+    df_zpp_flg13['price_basis']=df_zpp_flg13['key'].map(dict_df_price_basis)
+    #Get pr_moy_pond from df fiche article
+    dict_df_pr_moy_pond=dict(zip(df['key'],df['Pr.moy.pond']))
+    df_zpp_flg13['pr_moy_pond']=df_zpp_flg13['key'].map(dict_df_pr_moy_pond)
+    df_zpp_flg13['Type article']=df_zpp_flg13['Type article'].astype('str').str.strip()
+
+    df_zpp_flg13=df_zpp_flg13[ ( df_zpp_flg13['Type article'].isin(['AF','CA']) ) & (df_zpp_flg13['individual_collective'] == 2.0 ) ]
+
+        # Get exchange rate
     df_t001k = df_t001k.iloc[:, [0,1]]
     df_t001k.rename(columns={'Domaine valorisation':'division','Société':'company'},  inplace = True)
 
     df_t001=df_t001.iloc[:, [0,4]]
     df_t001.rename(columns={'Société':'company','Devise':'currency'},  inplace = True)
 
-    df_tcurr=df_tcurr[ ( df_tcurr['Type de cours'].isin(['M','P']) ) & (df_tcurr['Dev. source']=='EUR') ]
-    df_tcurr=df_tcurr.iloc[:, [2,3,4]]
-    df_tcurr.rename(columns={'Devise cible':'target_currency','Début validité':'date','Taux':'rate'},  inplace = True)
+    df_tcurr=df_tcurr[ ( df_tcurr['Type de cours'].isin(['M','P']) ) & (df_tcurr['Devise cible']=='EUR') ]
+    # df_tcurr=df_tcurr.iloc[:, [2,3,4]]
+    df_tcurr.rename(columns={'Dev. source':'target_currency','Début validité':'date','Taux':'rate'},  inplace = True)
     df_tcurr['date']=pd.to_datetime( df_tcurr['date'])
     df_tcurr=df_tcurr.sort_values(['target_currency', 'date'],ascending = [True, False])
     df_tcurr=df_tcurr.groupby(['target_currency'])['rate'].first().reset_index() 
 
-    #I use Période and Grp acheteurs instead Division and Material 
-    # because can't read proprely the file with dask ther's an offset between headers and data
-    df_zpp_flg13['key']=df_zpp_flg13['Période'].astype('str').str.strip()+df_zpp_flg13['Grp acheteurs'].astype('str').str.strip()
-    # df_zpp_flg13['key']=df_zpp_flg13['key'].str.strip()
-    dict_zpp_flg13_stock=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Besoins'].astype('str').str.strip())) #Stock in file
-    dict_zpp_flg13_lot_qm=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Consign. Stock'].astype('str').str.strip())) #Lot Qm in file 
-    dict_zpp_flg13_stock_transit=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Désignation Fournisseur 2'].astype('str').str.strip())) #Stock en Transit in file
-    dict_zpp_flg13_planif_unit=dict(zip(df_zpp_flg13['key'],df_zpp_flg13['Point Commande'].astype('str').str.strip())) #Unité de planif in file
-
-
-    df=df.iloc[:,[0,1,4,6,26,62,63,88]]
-    df.rename(columns={'Article':'material','Division':'division','TypArt':'material_type','I/C':'individual_collective','Prix standard':'standard_price','Base de prix':'price_basis','Pr.moy.pond':'pr_moy_pond'},  inplace = True)
-    df["division"]=df["division"].fillna(0).astype(int)
-    df.insert(0, 'year', year)
-    df.insert(1, 'week', week)
-
-    df=df[ ( df['material_type'].isin(['AF','CA']) ) & (df['individual_collective'] == 2.0 ) ]
-    # Merge files
-    # Get company from t0001k
+        # Get company from t0001k
     df_t001k_dict=dict(zip(df_t001k['division'],df_t001k['company']))
-    df['company']=df['division'].map(df_t001k_dict)
-    # Get currency from t001
+    df_zpp_flg13['company']=df_zpp_flg13['Division'].map(df_t001k_dict)
+        # Get currency from t001
     df_t001_dict=dict(zip(df_t001['company'],df_t001['currency']))
-    df['currency']=df['company'].map(df_t001_dict)
-    # Get rate  from tcurr
+    df_zpp_flg13['currency']=df_zpp_flg13['company'].map(df_t001_dict)
+        # Get rate  from tcurr
     df_tcurr_dict=dict(zip(df_tcurr['target_currency'],df_tcurr['rate']))
-    df['rate']=df['currency'].map(df_tcurr_dict)
-    df['rate'] = df['rate'].str.replace(',','.')
-    df['rate']=df['rate'].fillna(1)
-    df['rate']=df['rate'].astype(float)
-
-
-    df['key']=df['division'].astype('str')+df['material'].astype('str')
-
-    df['stock']=df['key'].map(dict_zpp_flg13_stock)
-    df['stock']=df['stock'].str.replace(',','.')
-    df['lot_qm']=df['key'].map(dict_zpp_flg13_lot_qm)
-    df['lot_qm']=df['lot_qm'].str.replace(',','.')
-    df['stock_transit']=df['key'].map(dict_zpp_flg13_stock_transit)
-    df['stock_transit']=df['stock_transit'].str.replace(',','.')
-    df['planif_unit']=df['key'].map(dict_zpp_flg13_planif_unit)
-    df['planif_unit']=df['planif_unit'].str.slice(start=5)
-    df['planif_unit']=np.where( ( df['planif_unit'].isin(['2091','FTWZ','2092']) ), df['planif_unit'], 0 )
-
-
-    df['division']=np.where((df['planif_unit']==0),df['division'],df['planif_unit'])
-
-    df['stock']=df['stock'].fillna(0)
-    df['lot_qm']=df['lot_qm'].fillna(0)
-    df['stock_transit']=df['stock_transit'].fillna(0)
+    df_zpp_flg13['rate']=df_zpp_flg13['currency'].map(df_tcurr_dict)
+    df_zpp_flg13['rate'] = df_zpp_flg13['rate'].str.replace(',','.')
+    df_zpp_flg13['rate'] = df_zpp_flg13['rate'].str.lstrip('/').str[0:]
+    df_zpp_flg13['rate']=df_zpp_flg13['rate'].fillna(1)
+    df_zpp_flg13['rate']=df_zpp_flg13['rate'].astype(float)
 
     df_mb52=df_mb52.iloc[:,[0,1,14]]
     df_mb52.columns =['Material', 'Division', 'bloqued']
@@ -345,22 +387,38 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     df_mb52['key']=df_mb52['Division'].astype('str')+df_mb52["Material"].astype('str')
     df_mb52=df_mb52.groupby(['key'])['bloqued'].sum().reset_index()
     dict_df_mb52_stock_blocked=dict(zip(df_mb52['key'],df_mb52['bloqued']))
-    df['stock_bloqued']=df['key'].map(dict_df_mb52_stock_blocked)
-    df['stock_bloqued']=df['stock_bloqued'].fillna(0)
+    df_zpp_flg13['stock_bloqued']=df_zpp_flg13['key'].map(dict_df_mb52_stock_blocked)
+    df_zpp_flg13['stock_bloqued']=df_zpp_flg13['stock_bloqued'].fillna(0)
+    #convert to pandas dataframe
+    df_zpp_flg13=df_zpp_flg13.compute()
+    df_zpp_flg13['Unité Planif']=df_zpp_flg13['Unité Planif'].str.strip()
+    df_zpp_flg13['Unité Planif']=df_zpp_flg13['Unité Planif'].str.replace(' ','')
+    df_zpp_flg13['Unité Planif']=df_zpp_flg13['Unité Planif'].str.slice(start=5)
+    df_zpp_flg13['planif_unit']=np.where( ( df_zpp_flg13['Unité Planif'].isin(['2091','FTWZ','2092']) ), df_zpp_flg13['Unité Planif'], 0 )
 
+    df_zpp_flg13['Division']=np.where((df_zpp_flg13['planif_unit']==0),df_zpp_flg13['Division'],df_zpp_flg13['planif_unit'])
 
-    # df.to_csv('dfstock_s39.csv')
-
-
+    del df_zpp_flg13['key']
+    del df_zpp_flg13['Unité Planif']
+    del df_zpp_flg13['planif_unit']
+    df_zpp_flg13.insert(0, 'year', year)
+    df_zpp_flg13.insert(1, 'week', week)
+    #Delete space in DF
+    for column in df_zpp_flg13.columns:
+        df_zpp_flg13[column]=df_zpp_flg13[column].astype(str)
+        df_zpp_flg13[column]=df_zpp_flg13[column].str.strip()
     
-    del df['key']
-    del df['planif_unit']
-    # df.to_csv('df_inventroy_stock.csv')
-    # print(df)
+    df_zpp_flg13['standard_price'] = df_zpp_flg13['standard_price'].str.replace(',','.')
+    df_zpp_flg13['price_basis'] = df_zpp_flg13['price_basis'].str.replace(',','.')
+    df_zpp_flg13['pr_moy_pond'] = df_zpp_flg13['pr_moy_pond'].str.replace(',','.')
+    df_zpp_flg13['Stock'] = df_zpp_flg13['Stock'].str.replace(',','.')
+    df_zpp_flg13['Consign. Stock'] = df_zpp_flg13['Consign. Stock'].str.replace(',','.')
+    df_zpp_flg13['Lot QM'] = df_zpp_flg13['Lot QM'].str.replace(',','.')
+    df_zpp_flg13['Stock en Transit'] = df_zpp_flg13['Stock en Transit'].str.replace(',','.')
+    df_zpp_flg13.to_csv('df_zpp_flg13.csv')
     data = StringIO()
     #convert file to csv
-    data.write(df.to_csv( header=None, index=False ,sep=';'))
-    print(df)
+    data.write(df_zpp_flg13.to_csv( header=None, index=False ,sep=';'))
 
     # This will make the cursor at index 0
     data.seek(0)
@@ -372,10 +430,14 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
             columns=[
                 'year',
                 'week',
-                'material',
                 'division',
                 'profit_center',
+                'material',
+                'stock',
+                'returnable_stock',
+                'lot_qm',
                 'material_type',
+                'stock_transit',
                 'individual_collective',
                 'standard_price',
                 'price_basis', 
@@ -383,9 +445,6 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
                 'company',
                 'currency', 
                 'rate', 
-                'stock',
-                'lot_qm',
-                'stock_transit',
                 'stock_blocked',
             ],
             null="",

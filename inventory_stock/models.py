@@ -16,6 +16,7 @@ class MaterialSheet(models.Model):
     currency=models.CharField(max_length=30,null=True)
     rate=models.FloatField(null=True) 
     stock=models.FloatField(null=True)
+    returnable_stock=models.FloatField(null=True)
     lot_qm=models.FloatField(null=True)
     stock_transit=models.FloatField(null=True)
     stock_blocked=models.FloatField(null=True)

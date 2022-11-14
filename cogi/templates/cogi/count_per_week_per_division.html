@@ -60,7 +60,6 @@
         
                     <script>
                         var xValues = [{% for index, data in cogi_allweeks.iterrows %}  '{{data.year}}_{{data.week}}', {% endfor %}];
-                        var data = [{% for index, data in cogi_count_per_week_per_division.iterrows %} {{data.id}}, {% endfor %}];
 
 
                         function getRandomColor() {
@@ -89,7 +88,7 @@
                                         borderWidth: 1,
                                         data: [
                                             {%for index, data in cogi_count_per_week_per_division.iterrows%}
-                                                {%if data.division == div%}{{data.id}},{%endif%} 
+                                                {%if data.division == div %} {{data.id}}, {%endif%} 
                                             {%endfor%}
                                             ]
                                         },
