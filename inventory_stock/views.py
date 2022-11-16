@@ -12,6 +12,8 @@ from inventory_stock.models import MaterialSheet
 import dask.dataframe as dd
 import glob
 import os
+from io import BytesIO
+
 # Create your views here.
 def upload_files(request):
     #get current year and week
@@ -79,11 +81,16 @@ def upload_files(request):
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
-    # username=request.META['REMOTE_USER']
-    username=''
-    all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100)
-    weekavailable=all_MaterialSheet_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
-    yearavailable=all_MaterialSheet_data.values_list('year',flat=True).distinct().order_by('year') #flat=True will remove the tuples and return the list   
+    username=request.META['REMOTE_USER']
+    # username=''
+    all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100).order_by('year','week').values()
+    df=pd.DataFrame(all_MaterialSheet_data)
+    df['period']=df['year'].astype(str)+' '+df['week'].astype(str)
+    divisions=df['division'].unique()
+    periods= df['period'].unique()
+    weekavailable=df['week'].unique()
+    yearavailable=df['year'].unique()
+
     division=[]
     profit_center=[]
     week=[]
@@ -95,18 +102,8 @@ def home(request):
         profit_center=request.POST.getlist('profit_center')
     
     message_error=''
-    if len(year) > 0:
-        MaterialSheet_data=all_MaterialSheet_data.filter(year__in=year)
-        if len(week) > 0:
-            MaterialSheet_data=all_MaterialSheet_data.filter(year__in=year,week__in=week)
-            if len(division) > 0:
-                MaterialSheet_data=MaterialSheet_data.filter(division__in=division)
-            if len(profit_center) > 0:
-                MaterialSheet_data=MaterialSheet_data.filter(profit_center__in=profit_center)
-    else:
-        MaterialSheet_data=all_MaterialSheet_data.filter(week=current_week,year=current_year)
     
-    if all_MaterialSheet_data:
+    if df.shape[0] > 0:
 
         inventory_stock_results_week(all_MaterialSheet_data)
     else:
@@ -115,8 +112,8 @@ def home(request):
         inventory_stock_results_week.before_division_valuation_ps_euro_cost=None
         inventory_stock_results_week.before_division_valuation_pmp_euro_cost=None
     
-    if MaterialSheet_data:
-        inventory_stock_results(MaterialSheet_data)
+    if df.shape[0] > 0:
+        inventory_stock_results(df,year,week,division,profit_center)
     else:
         message_error='There is no data with your selected filter'
         inventory_stock_results.total_count=None
@@ -128,11 +125,14 @@ def home(request):
         inventory_stock_results.division_ps_unit_euro_cost=None
         inventory_stock_results.division_valuation_ps_euro_cost=None
         inventory_stock_results.division_valuation_pmp_euro_cost=None
+        inventory_stock_results.valuation_pmp_euro_cost_per_week_per_division=None
+        inventory_stock_results.valuation_ps_euro_cost_per_week_per_division=None
 
 
     return render(request,'inventory_stock\index.html',{
     'username':username,'current_week':current_week,'profit_center':profit_center,
     'weekavailable':weekavailable,'yearavailable':yearavailable,'message_error':message_error,'weeks':week,'years':year,'divisions':division,
+    'divisions':divisions,'periods':periods,
     'inventory_stock_results_total_count':inventory_stock_results.total_count,
     'inventory_stock_results_total_pmp_unit_euro':inventory_stock_results.total_pmp_unit_euro,
     'inventory_stock_results_total_ps_unit_euro_cost':inventory_stock_results.total_ps_unit_euro_cost,
@@ -148,6 +148,8 @@ def home(request):
     'inventory_stock_results_week_division_valuation_pmp_euro_cost':inventory_stock_results_week.division_valuation_pmp_euro_cost,
     'inventory_stock_results_week_before_division_valuation_ps_euro_cost':inventory_stock_results_week.before_division_valuation_ps_euro_cost,
     'inventory_stock_results_week_before_division_valuation_pmp_euro_cost':inventory_stock_results_week.before_division_valuation_pmp_euro_cost,
+    'inventory_stock_results_valuation_pmp_euro_cost_per_week_per_division':inventory_stock_results.valuation_pmp_euro_cost_per_week_per_division,
+    'inventory_stock_results_valuation_ps_euro_cost_per_week_per_division':inventory_stock_results.valuation_ps_euro_cost_per_week_per_division,
 
     })
 
@@ -186,12 +188,9 @@ def inventory_stock_results_week(MaterialSheet_data):
     inventory_stock_results_week.before_division_valuation_pmp_euro_cost=df_week_before.groupby(['division'])['valuation_pmp_euro'].sum().reset_index()
 
 
-def inventory_stock_results(MaterialSheet_data):
-
-    df=pd.DataFrame(MaterialSheet_data.values())
-
-    # df['ps_unit_div']=np.where((df['currency'] == 'TND'),( (df['standard_price'] / df['price_basis'])) , (df['standard_price'] / df['price_basis']))
-    # df['pmp_unit_div']=np.where((df['currency'] == 'TND'), ( (df['pr_moy_pond'] / df['price_basis']) ) , (df['pr_moy_pond'] / df['price_basis']))
+def inventory_stock_results(df,year,week,division,profit_center):
+    current_week=datetime.datetime.now().isocalendar().week
+    current_year=datetime.datetime.now().isocalendar().year
 
     df['ps_unit_div']=(df['standard_price'] / df['price_basis'])
     df['pmp_unit_div']=(df['pr_moy_pond'] / df['price_basis'])
@@ -213,7 +212,27 @@ def inventory_stock_results(MaterialSheet_data):
     df['valuation_ps_euro']=np.where( (df['currency'] == 'TND') ,df['valuation_ps_euro'] / 10 , df['valuation_ps_euro'] )
     df['valuation_pmp_euro']=np.where( (df['currency'] == 'TND') , df['valuation_pmp_euro']/ 10 , df['valuation_pmp_euro'] )
     
-    # df.to_csv('dfstock.csv')
+    inventory_stock_results.valuation_pmp_euro_cost_per_week_per_division=df.groupby(['year','week','division'])['valuation_pmp_euro'].sum().unstack().fillna(0).stack().reset_index()
+    inventory_stock_results.valuation_ps_euro_cost_per_week_per_division=df.groupby(['year','week','division'])['valuation_ps_euro'].sum().unstack().fillna(0).stack().reset_index()
+
+    
+    years = [int(i) for i in year]
+    weeks = [int(i) for i in week]
+    print(years)
+    print(weeks)
+    if len(year) > 0:
+        print('i m fucking here')
+        df=df[(df['year'].isin(years) ) & (df['week'].isin(weeks))]
+        if len(division) > 0:
+            df=df[df['division'].isin(division)]
+        if len(profit_center) > 0:
+            df=df[df['profit_center'].isin(profit_center)]
+
+    else:
+        df=df[df['year'].isin([current_year]) & df['week'].isin([current_week])]
+
+    print(df)
+
     inventory_stock_results.data= df
 
     inventory_stock_results.total_count=df.shape[0]
@@ -226,6 +245,9 @@ def inventory_stock_results(MaterialSheet_data):
     inventory_stock_results.division_ps_unit_euro_cost=df.groupby(['division'])['ps_unit_euro'].sum().reset_index()
     inventory_stock_results.division_valuation_ps_euro_cost=df.groupby(['division'])['valuation_ps_euro'].sum().reset_index()
     inventory_stock_results.division_valuation_pmp_euro_cost=df.groupby(['division'])['valuation_pmp_euro'].sum().reset_index()
+    
+
+
 
 
 
@@ -258,6 +280,29 @@ def details(request):
         return response
     return render(request,"inventory_stock/details.html",{'data':records,'message_success':message_success})
 
+def download(request):
+    data=MaterialSheet.objects.all()
+    now = datetime.datetime.now()
+    current_time = now.strftime("%d_%m_%y_%H:%M:%S")
+    if request.method == 'POST':
+        print('post passed')
+        inventory_stock_results(data)
+        data=inventory_stock_results.data
+        with BytesIO() as b:
+        # Use the StringIO object as the filehandle.
+            writer = pd.ExcelWriter(b, engine='xlsxwriter')
+            data.to_excel(writer, sheet_name='Sheet1')
+            writer.save()
+            # Set up the Http response.
+            filename = 'inventory_stock.xlsx'
+            response = HttpResponse(
+                b.getvalue(),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        return response
+
+        
 def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_file,tcurr_file,year,week,conn):
     print('Hello')
     df=pd.read_excel(material_sheet_file)
@@ -415,7 +460,7 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     df_zpp_flg13['Consign. Stock'] = df_zpp_flg13['Consign. Stock'].str.replace(',','.')
     df_zpp_flg13['Lot QM'] = df_zpp_flg13['Lot QM'].str.replace(',','.')
     df_zpp_flg13['Stock en Transit'] = df_zpp_flg13['Stock en Transit'].str.replace(',','.')
-    df_zpp_flg13.to_csv('df_zpp_flg13.csv')
+
     data = StringIO()
     #convert file to csv
     data.write(df_zpp_flg13.to_csv( header=None, index=False ,sep=';'))

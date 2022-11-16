@@ -63,17 +63,6 @@ def upload_files(request):
     return home(request)
 
 
-
-
-
-    # if file_exists:
-    #     import_files(file,year,week,conn)
-    #     home(request)
-    # else:
-    #     return render(request,'inventory_accuracy\index.html',{'message_error':message_error})    
-    # print('#'*50)
-    # print(file_exists)
-    # print('#'*50)
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
@@ -159,6 +148,7 @@ def inventory_accuracy_results(sq00_data):
     inventory_accuracy_results.count_per_week=df_gap.groupby(['year_date_cpt','week_date_cpt'])['id'].count().reset_index()
     df_gap['year_date_cpt']=df_gap['year_date_cpt'].astype(int)
     inventory_accuracy_results.cost_per_week=df_gap.groupby(['year_date_cpt','week_date_cpt'])['deviation_cost_euro'].sum().reset_index()
+    # inventory_accuracy_results.accuracy_per_week_division=df_gap.groupby(['year_date_cpt','week_date_cpt','division'])['stock_accuracy'].sum().unstack().fillna(0).stack().reset_index()
 
 def details(request):
     all_inventory_data=SQ00.objects.all()

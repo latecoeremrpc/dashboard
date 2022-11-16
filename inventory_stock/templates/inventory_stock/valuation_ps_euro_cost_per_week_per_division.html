@@ -1,0 +1,153 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block children %}
+<!-- Info Modal -->
+<div class="modal fade " id="inventory_stock_results_valuation_ps_euro_cost_per_week_per_division_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Informations</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {%include 'inventory_stock\modal_info.html' %}
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+        </div>
+    </div>
+</div>
+<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 600px;">
+    <div class="card-header">
+        <div class="card-tools" style="margin-right: -0.8rem;" >
+            <form action={%url 'homesettings' %} method='POST'>
+                {% csrf_token %}
+                <input name="kpi" type="hidden" value="inventory_stock\division_ps_unit_euro_cost"> 
+                <input name="col" type="hidden" value="6"> 
+            <ul class="list-group list-group-horizontal" style="height: 35px;">
+                <li class="list-group-item" style="padding:7px;"><i type="button"  data-toggle="modal" data-target="#inventory_stock_results_valuation_ps_euro_cost_per_week_per_division_modal" class="info fas fa-info-circle"></i></li>
+                <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" favorite fas fa-heart" {%if 'inventory_stock\\division_ps_unit_euro_cost.html' in homekpi %} style="color:red;" {%endif%} ></i></button></li>
+            </form>
+            <li class="list-group-item" style="padding:7px;"><i type="button" class="download fas fa-download" id="btn-download-inventory_stock_results_valuation_ps_euro_cost_per_week_per_division"></i></li>
+            <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+            </ul>
+        </div>
+        <h5 class="m-0">PS per Week per division <sup>Euro</sup></h5>
+        
+    </div>
+    <div class="card-body ">
+        <h6 class="card-title ">Week(s): 
+            <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
+                {%for w in weeks %} 
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">{{w}}</li>
+                {%empty%}
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">{{current_week}}</li>
+                {%endfor%}
+            </ul> 
+        </h6>  
+        {% if inventory_stock_results_valuation_ps_euro_cost_per_week_per_division.iterrows %}
+        <div style="height: 400px">
+            <canvas id="inventory_stock_results_valuation_ps_euro_cost_per_week_per_division" ></canvas>
+
+            <script>
+                function getRandomColor() {
+                    var letters = '0123456789ABCDEF'.split('');
+                    var color = '#';
+                    for (var i = 0; i < 6; i++ ) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                    }
+                const inventory_stock_results_valuation_ps_euro_cost_per_week_per_division=new Chart("inventory_stock_results_valuation_ps_euro_cost_per_week_per_division", {
+                    type: "bar",
+                    data: {
+                            labels: [{% for period in periods %} '{{period}}', {% endfor %}],
+                            
+                            datasets: [
+                                {% for div in divisions%}
+
+                                {
+                                label:'{{div}}',
+                                backgroundColor:  getRandomColor(),
+                                borderWidth: 1,
+                                data: [
+                                        
+                                        {% for index, data in inventory_stock_results_valuation_ps_euro_cost_per_week_per_division.iterrows %} 
+                                            {% if data.division == div %}
+                                                '{{data.0}}', 
+                                            {% endif %}
+                                        {% endfor %}]
+                                },
+                                {% endfor %}
+                            ]
+                            },
+                    options: {
+                        plugins: {
+                            datalabels: {
+                                // anchor: 'end',
+                                display: false,
+                                clamp: true,
+                                color: 'white',
+                                backgroundColor: '#404040',
+                            },
+                            legend: {
+                            display: true,
+                            position:'left',
+                            align:'middle',
+                            labels: {
+                            usePointStyle: true,
+                            boxWidth: 6,
+
+                            },
+                            },
+
+                            title: {
+                                display: false,
+                                text: "tile"
+                            },
+                            
+                            
+                        },
+                        scales: {
+                                x: {
+                                    stacked: true,
+                                },
+                                y: {
+                                    stacked: true
+                                }
+                                },
+                        responsive: true,
+                        maintainAspectRatio:false, 
+
+                    }
+                });
+            </script>
+        </div>
+        {% else %}
+        <center style="margin-top: 15%;"><img src="{% static 'img/nodatafound.png' %}" alt="">
+            <p class="card-text text-center">
+                No Data available for this selection
+            </p>
+            <a class="btn btn-primary" href="{% url 'inventory_stockupload' %}" role="button">Calculate now</a>
+        </center>
+        {% endif %}
+    </div>
+
+    <script>
+        var image = inventory_stock_results_valuation_ps_euro_cost_per_week_per_division.toBase64Image();
+        document.getElementById('btn-download-inventory_stock_results_valuation_ps_euro_cost_per_week_per_division').onclick = function() {
+        var a = document.createElement('a');
+        a.href = inventory_stock_results_valuation_ps_euro_cost_per_week_per_division.toBase64Image();
+        a.download = 'inventory_stock_results_valuation_ps_euro_cost_per_week_per_division.png';
+        a.click();
+        }
+    </script>
+</div>
+
+
+
+{% endblock children%}

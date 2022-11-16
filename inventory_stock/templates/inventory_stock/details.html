@@ -10,7 +10,7 @@
         <div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 550px;">
             <div class="card-header">
                 <div class="card-tools" style="margin-right: -0.8rem;" >
-                    <form method="POST" action="{% url 'inventory_stockdetails' %}">
+                    <form method="POST" action="{% url 'inventory_stockdownload' %}">
                         {% csrf_token %}
                     <ul class="list-group list-group-horizontal" style="height: 35px;">
                         <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" download fas fa-download"></i></button></li>

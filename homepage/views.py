@@ -299,18 +299,10 @@ def homeview(request):
     
     if 'inventory_stock' in themes:
 
-            all_MaterialSheet_data= MaterialSheet.objects.all()
-            if len(year) > 0:
-                MaterialSheet_data=all_MaterialSheet_data.filter(year__in=year)
-                if len(week) > 0:
-                    MaterialSheet_data=all_MaterialSheet_data.filter(year__in=year,week__in=week)
-                    if len(division) > 0:
-                        MaterialSheet_data=MaterialSheet_data.filter(division__in=division)
-                    if len(profit_center) > 0:
-                        MaterialSheet_data=MaterialSheet_data.filter(profit_center__in=profit_center)
-            else:
-                MaterialSheet_data=all_MaterialSheet_data.filter(week=current_week,year=current_year)
-            if all_MaterialSheet_data:
+            all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100).order_by('year','week').values()
+            df=pd.DataFrame(all_MaterialSheet_data)
+
+            if df.shape[0] > 0:
                 inventory_stock_results_week(all_MaterialSheet_data)
             else:
                 inventory_stock_results_week.division_valuation_ps_euro_cost=None
@@ -318,8 +310,8 @@ def homeview(request):
                 inventory_stock_results_week.before_division_valuation_ps_euro_cost=None
                 inventory_stock_results_week.before_division_valuation_pmp_euro_cost=None
             
-            if MaterialSheet_data:
-                inventory_stock_results(MaterialSheet_data)
+            if df.shape[0] > 0:
+                inventory_stock_results(df,year,week,division,profit_center)
             else:
                 inventory_stock_results.total_count=None
                 inventory_stock_results.total_pmp_unit_euro=None
