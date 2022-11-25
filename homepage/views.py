@@ -11,7 +11,7 @@ from purchasepast.models import Purchase
 from purchasepast.views import purchase_results
 from intercopurchase.views import intercopurchase_results
 from inventory_stock.models import MaterialSheet
-from inventory_stock.views import inventory_stock_results , inventory_stock_results_week
+from inventory_stock.views import inventory_stock_results
 import os
 
 def homesettings(request):

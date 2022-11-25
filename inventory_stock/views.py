@@ -19,20 +19,12 @@ def upload_files(request):
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
-    # week=39
-    # all_MaterialSheet_data= MaterialSheet.objects.all().filter(week=39).delete()
+
 
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
     material_sheet_file=r"\\centaure\Extract_SAP\SQ00-FICHE_ARTICLE\IS_FICHE_ARTICLE_"+format(year)+format(week)+".xlsx"
     zpp_flg13_file=r"\\centaure\Extract_SAP\11-ZPP_FLG13 FULL\Z13_"+format(year)+format(week)+"_2.TXT"
     mb52_file=r"\\centaure\Extract_SAP\MB52\MB52_"+format(year)+format(week)+".xlsx"
-    # t001_file= r"\\centaure\Extract_SAP\SE16N-T001\T001_"+format(year)+format(week)+".xlsx"
-    # t001k_file= r"\\centaure\Extract_SAP\SE16N-T001K\T001K_"+format(year)+format(week)+".XLSX "
-    # tcurr_file= r"\\centaure\Extract_SAP\SE16N-TCURR\TCURR_"+format(year)+format(week)+".XLSX"
-
-    # material_sheet_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\IS_FICHE_ARTICLE_202236.XLSX"
-    # zpp_flg13_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\ZFLG13.TXT"
-    # mb52_file=r"\\prfoufiler01\donnees$\Public\Input_inventory_stock\MB52_202235.XLSX"
 
     #get files with last modification
     directory_t001=glob.glob(r"\\centaure\Extract_SAP\SE16N-T001\*")
@@ -82,11 +74,11 @@ def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
     username=request.META['REMOTE_USER']
-    # username=''
     all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100).order_by('year','week').values()
     df=pd.DataFrame(all_MaterialSheet_data)
     df['period']=df['year'].astype(str)+' '+df['week'].astype(str)
     divisions=df['division'].unique()
+    divisions_list=divisions.tolist()
     periods= df['period'].unique()
     weekavailable=df['week'].unique()
     yearavailable=df['year'].unique()
@@ -102,37 +94,13 @@ def home(request):
         profit_center=request.POST.getlist('profit_center')
     
     message_error=''
-    
-    if df.shape[0] > 0:
-
-        inventory_stock_results_week(all_MaterialSheet_data)
-    else:
-        inventory_stock_results_week.division_valuation_ps_euro_cost=None
-        inventory_stock_results_week.division_valuation_pmp_euro_cost=None
-        inventory_stock_results_week.before_division_valuation_ps_euro_cost=None
-        inventory_stock_results_week.before_division_valuation_pmp_euro_cost=None
-    
-    if df.shape[0] > 0:
-        inventory_stock_results(df,year,week,division,profit_center)
-    else:
-        message_error='There is no data with your selected filter'
-        inventory_stock_results.total_count=None
-        inventory_stock_results.total_pmp_unit_euro=None
-        inventory_stock_results.total_ps_unit_euro_cost=None
-        inventory_stock_results.total_valuation_ps_euro_cost=None
-        inventory_stock_results.total_valuation_pmp_euro_cost=None
-        inventory_stock_results.division_pmp_unit_euro=None
-        inventory_stock_results.division_ps_unit_euro_cost=None
-        inventory_stock_results.division_valuation_ps_euro_cost=None
-        inventory_stock_results.division_valuation_pmp_euro_cost=None
-        inventory_stock_results.valuation_pmp_euro_cost_per_week_per_division=None
-        inventory_stock_results.valuation_ps_euro_cost_per_week_per_division=None
-
+    inventory_stock_results(df,year,week,division,profit_center)
 
     return render(request,'inventory_stock\index.html',{
     'username':username,'current_week':current_week,'profit_center':profit_center,
-    'weekavailable':weekavailable,'yearavailable':yearavailable,'message_error':message_error,'weeks':week,'years':year,'divisions':division,
+    'weekavailable':weekavailable,'yearavailable':yearavailable,'message_error':message_error,'weeks':week,'years':year,
     'divisions':divisions,'periods':periods,
+    'divisions_list':divisions_list,
     'inventory_stock_results_total_count':inventory_stock_results.total_count,
     'inventory_stock_results_total_pmp_unit_euro':inventory_stock_results.total_pmp_unit_euro,
     'inventory_stock_results_total_ps_unit_euro_cost':inventory_stock_results.total_ps_unit_euro_cost,
@@ -144,48 +112,15 @@ def home(request):
     'inventory_stock_results_division_valuation_ps_euro_cost':inventory_stock_results.division_valuation_ps_euro_cost,
     'inventory_stock_results_division_valuation_pmp_euro_cost':inventory_stock_results.division_valuation_pmp_euro_cost,
 
-    'inventory_stock_results_week_division_valuation_ps_euro_cost':inventory_stock_results_week.division_valuation_ps_euro_cost,
-    'inventory_stock_results_week_division_valuation_pmp_euro_cost':inventory_stock_results_week.division_valuation_pmp_euro_cost,
-    'inventory_stock_results_week_before_division_valuation_ps_euro_cost':inventory_stock_results_week.before_division_valuation_ps_euro_cost,
-    'inventory_stock_results_week_before_division_valuation_pmp_euro_cost':inventory_stock_results_week.before_division_valuation_pmp_euro_cost,
+
     'inventory_stock_results_valuation_pmp_euro_cost_per_week_per_division':inventory_stock_results.valuation_pmp_euro_cost_per_week_per_division,
     'inventory_stock_results_valuation_ps_euro_cost_per_week_per_division':inventory_stock_results.valuation_ps_euro_cost_per_week_per_division,
 
+    'inventory_stock_results_division_valuation_ps_pmp_euro_cost':inventory_stock_results.division_valuation_ps_pmp_euro_cost,
+    'inventory_stock_results_valuation_ps_pmp_euro_cost_per_week_per_division':inventory_stock_results.valuation_ps_pmp_euro_cost_per_week_per_division,
+    'inventory_stock_results_valuation_ps_pmp_euro_cost_per_week_per_division_json':inventory_stock_results.valuation_ps_pmp_euro_cost_per_week_per_division_json,
+
     })
-
-
-def inventory_stock_results_week(MaterialSheet_data):
-    current_week=datetime.datetime.now().isocalendar().week
-    # current_week=37
-
-    df=pd.DataFrame(MaterialSheet_data.values())
-    df['ps_unit_div']=(df['standard_price'] / df['price_basis'])
-    df['pmp_unit_div']=(df['pr_moy_pond'] / df['price_basis'])
-
-
-
-
-    df['ps_unit_euro']=np.where( (df['currency'] == 'EUR') , (df['ps_unit_div'].astype(float)) , ( df['standard_price'].astype(float) / df['price_basis'].astype(float) /df['rate'] ) )
-    df['pmp_unit_euro']=np.where( (df['currency'] == 'EUR') , (df['pmp_unit_div'].astype(float)) , ( df['pr_moy_pond'].astype(float) / df['price_basis'].astype(float) /df['rate'] ) )
-
-
-    df.replace([np.inf, -np.inf], 0, inplace=True)
-
-    df['valuation_ps_div']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_div']
-    df['valuation_pmp_div']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_div']
-    df['valuation_ps_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_euro']
-    df['valuation_pmp_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_euro']
-
-    df['valuation_ps_euro']=np.where( (df['currency'] == 'TND') ,df['valuation_ps_euro'] / 10 , df['valuation_ps_euro'] )
-    df['valuation_pmp_euro']=np.where( (df['currency'] == 'TND') , df['valuation_pmp_euro']/ 10 , df['valuation_pmp_euro'] )
-
-    df_current_week=df[df['week']==current_week]
-    inventory_stock_results_week.division_valuation_ps_euro_cost=df_current_week.groupby(['division'])['valuation_ps_euro'].sum().reset_index()
-    inventory_stock_results_week.division_valuation_pmp_euro_cost=df_current_week.groupby(['division'])['valuation_pmp_euro'].sum().reset_index()
-
-    df_week_before=df[df['week']==current_week-1]
-    inventory_stock_results_week.before_division_valuation_ps_euro_cost=df_week_before.groupby(['division'])['valuation_ps_euro'].sum().reset_index()
-    inventory_stock_results_week.before_division_valuation_pmp_euro_cost=df_week_before.groupby(['division'])['valuation_pmp_euro'].sum().reset_index()
 
 
 def inventory_stock_results(df,year,week,division,profit_center):
@@ -214,14 +149,12 @@ def inventory_stock_results(df,year,week,division,profit_center):
     
     inventory_stock_results.valuation_pmp_euro_cost_per_week_per_division=df.groupby(['year','week','division'])['valuation_pmp_euro'].sum().unstack().fillna(0).stack().reset_index()
     inventory_stock_results.valuation_ps_euro_cost_per_week_per_division=df.groupby(['year','week','division'])['valuation_ps_euro'].sum().unstack().fillna(0).stack().reset_index()
-
-    
+    inventory_stock_results.valuation_ps_pmp_euro_cost_per_week_per_division=df.groupby(['year','week','division']).agg({'valuation_pmp_euro':'sum','valuation_ps_euro':'sum'}).unstack().fillna(0).stack().reset_index()
+    inventory_stock_results.valuation_ps_pmp_euro_cost_per_week_per_division_json=inventory_stock_results.valuation_ps_pmp_euro_cost_per_week_per_division.to_json(orient="records")
     years = [int(i) for i in year]
     weeks = [int(i) for i in week]
-    print(years)
-    print(weeks)
+
     if len(year) > 0:
-        print('i m fucking here')
         df=df[(df['year'].isin(years) ) & (df['week'].isin(weeks))]
         if len(division) > 0:
             df=df[df['division'].isin(division)]
@@ -231,7 +164,6 @@ def inventory_stock_results(df,year,week,division,profit_center):
     else:
         df=df[df['year'].isin([current_year]) & df['week'].isin([current_week])]
 
-    print(df)
 
     inventory_stock_results.data= df
 
@@ -242,10 +174,12 @@ def inventory_stock_results(df,year,week,division,profit_center):
     inventory_stock_results.total_valuation_pmp_euro_cost=df['valuation_pmp_euro'].sum()
 
     inventory_stock_results.division_pmp_unit_euro=df.groupby(['division'])['pmp_unit_euro'].sum().reset_index()
+
     inventory_stock_results.division_ps_unit_euro_cost=df.groupby(['division'])['ps_unit_euro'].sum().reset_index()
     inventory_stock_results.division_valuation_ps_euro_cost=df.groupby(['division'])['valuation_ps_euro'].sum().reset_index()
     inventory_stock_results.division_valuation_pmp_euro_cost=df.groupby(['division'])['valuation_pmp_euro'].sum().reset_index()
-    
+
+    inventory_stock_results.division_valuation_ps_pmp_euro_cost=df.groupby(['division']).agg({'valuation_ps_euro':'sum','valuation_pmp_euro':'sum'}).reset_index()
 
 
 
@@ -256,7 +190,6 @@ def details(request):
     inventory_stock_results(data)
     data=inventory_stock_results.data
 
-    # data['valuation_pmp_euro']=np.where( (data['currency'] == 'TND') , data['valuation_pmp_euro']/ 10 , data['valuation_pmp_euro'] )
     message_success=''
 
     now = datetime.datetime.now()

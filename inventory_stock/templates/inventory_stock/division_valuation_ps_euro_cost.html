@@ -49,7 +49,7 @@
                 {%endfor%}
             </ul> 
         </h6>  
-        {% if inventory_stock_results_division_valuation_ps_euro_cost.iterrows %}
+        {% if inventory_stock_results_division_valuation_ps_euro_cost.iterrows|length > 0 %}
         <div style="height: 400px">
             <canvas id="inventory_stock_results_division_valuation_ps_euro_cost" ></canvas>
 

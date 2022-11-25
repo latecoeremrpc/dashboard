@@ -1,0 +1,128 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% load poll_extras %}
+{% load humanize %}
+
+{% block children %}
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h5 class="m-0">Valuation PS vs PMP per division <sup>Euro</sup></h5>
+    </div>
+    <div class="card-body ">
+        <div style=" display: flex; justify-content: space-evenly;">
+            <input class='form-control' type="week" id="period1" style="width: 30% !important;">
+            <button class='btn btn-primary' id="search" style="width: 120px !important;">Compare to</button>
+            <input class='form-control' type="week" id="period2" style="width: 30% !important;">
+        </div>
+        <table  id="example2" class="table table-hover dataTable dtr-inline" aria-describedby="example2_info">
+            <thead>
+                <th id="division"></th>
+                <th id="week1ps"></th>
+                <th id="week1pmp"></th>
+                <th id="week1difference"></th>
+                <th id="week2ps"></th>
+                <th id="week2pmp"></th>
+                <th id="week2difference"></th>
+            </thead>
+            <tbody id="tableBody">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<script>
+    const btn = document.querySelector("#search");
+
+    // Get data from back
+    let data ={{inventory_stock_results_valuation_ps_pmp_euro_cost_per_week_per_division_json|safe}};
+    let divisions = {{divisions_list|safe}};
+    //table 
+    const table = document.querySelector("#example2");
+    const tableBody = document.querySelector("#tableBody");
+    // table th 
+    const division = document.querySelector("#division");
+    const week1ps = document.querySelector("#week1ps");
+    const week1pmp = document.querySelector("#week1pmp");
+    const week2ps = document.querySelector("#week2ps");
+    const week2pmp = document.querySelector("#week2pmp");
+    const week1difference = document.querySelector("#week1difference");
+    const week2difference = document.querySelector("#week2difference");
+
+
+
+
+    btn.addEventListener('click', function(e) {
+        // Intialisation 
+        tableBody.innerHTML="";
+        // Get year and week input 
+        var year1 = document.querySelector("#period1").value.split('-W')[0];
+        var week1 = document.querySelector("#period1").value.split('-W')[1];
+        var year2 = document.querySelector("#period2").value.split('-W')[0];
+        var week2 = document.querySelector("#period2").value.split('-W')[1];
+        
+        division.innerHTML = `Division`;
+        week1ps.innerHTML = `PS ${year1}, ${week1}`;
+        week1pmp.innerHTML = `PMP ${year1}, ${week1}`;
+        week2ps.innerHTML = `PS ${year2}, ${week2} `;
+        week2pmp.innerHTML = `PMP ${year2}, ${week2}`;
+        week1difference.innerHTML = `Difference ${year1}, ${week1} `;
+        week2difference.innerHTML = `Difference ${year2}, ${week2} `;    
+        if(year2 < year1 || week2 < week1){
+            tableBody.innerHTML += `
+                                <tr >
+                                    <td colspan=7>
+                                    <div class="card bg-danger">
+                                        <div class="card-body" style="text-align:center;">
+                                            <i class="fa-regular fa-circle-xmark fa-beat"></i> 
+                                            Week right must be grated than left
+                                        </div>
+
+                                    </div>
+                                    </td>
+
+                                </tr>
+                                `;
+        }
+        else{
+            for (let div = 0; div < divisions.length; div++) {
+                tableBody.innerHTML += `<tr id='tableTr${div}'> </tr>`;
+                var tableTr = document.querySelector(`#tableTr${div}`);
+                tableTr.innerHTML +=`<td>${divisions[div]}</td>`
+        
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i]['division'] == divisions[div]) {
+                            if (data[i]['year'] == year1 && data[i]['week'] == week1) {
+                                tableTr.innerHTML +=`
+                                <td>${data[i]['valuation_ps_euro']}</td>
+                                <td>${data[i]['valuation_pmp_euro']}</td>
+                                <td>${data[i]['valuation_pmp_euro'] - data[i]['valuation_ps_euro']}</td>
+                                `
+                            };
+                            if (data[i]['year'] == year2 && data[i]['week'] == week2) {
+                                tableTr.innerHTML +=`
+                                <td>${data[i]['valuation_ps_euro']}</td>
+                                <td>${data[i]['valuation_pmp_euro']}</td>
+                                <td>${data[i]['valuation_pmp_euro'] - data[i]['valuation_ps_euro']}</td>
+                                `
+                            };
+                        };
+                    };
+            };
+        }
+
+
+
+    })
+
+
+
+
+
+</script>
+
+
+
+
+{% endblock children%}
