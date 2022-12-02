@@ -119,10 +119,6 @@ def homeview(request):
     intercopurchase_count_convert_per_week_per_division=""
 
     #"""""""""""""Inventory Stok App"""""""""""""""
-    inventory_stock_results_week.division_valuation_ps_euro_cost=None
-    inventory_stock_results_week.division_valuation_pmp_euro_cost=None
-    inventory_stock_results_week.before_division_valuation_ps_euro_cost=None
-    inventory_stock_results_week.before_division_valuation_pmp_euro_cost=None
     inventory_stock_results.total_count=None
     inventory_stock_results.total_pmp_unit_euro=None
     inventory_stock_results.total_ps_unit_euro_cost=None
@@ -302,13 +298,6 @@ def homeview(request):
             all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100).order_by('year','week').values()
             df=pd.DataFrame(all_MaterialSheet_data)
 
-            if df.shape[0] > 0:
-                inventory_stock_results_week(all_MaterialSheet_data)
-            else:
-                inventory_stock_results_week.division_valuation_ps_euro_cost=None
-                inventory_stock_results_week.division_valuation_pmp_euro_cost=None
-                inventory_stock_results_week.before_division_valuation_ps_euro_cost=None
-                inventory_stock_results_week.before_division_valuation_pmp_euro_cost=None
             
             if df.shape[0] > 0:
                 inventory_stock_results(df,year,week,division,profit_center)
@@ -360,10 +349,7 @@ def homeview(request):
     'inventory_stock_results_division_valuation_ps_euro_cost':inventory_stock_results.division_valuation_ps_euro_cost,
     'inventory_stock_results_division_valuation_pmp_euro_cost':inventory_stock_results.division_valuation_pmp_euro_cost,
 
-    'inventory_stock_results_week_division_valuation_ps_euro_cost':inventory_stock_results_week.division_valuation_ps_euro_cost,
-    'inventory_stock_results_week_division_valuation_pmp_euro_cost':inventory_stock_results_week.division_valuation_pmp_euro_cost,
-    'inventory_stock_results_week_before_division_valuation_ps_euro_cost':inventory_stock_results_week.before_division_valuation_ps_euro_cost,
-    'inventory_stock_results_week_before_division_valuation_pmp_euro_cost':inventory_stock_results_week.before_division_valuation_pmp_euro_cost,
+
 
     })
 
