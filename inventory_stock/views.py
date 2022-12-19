@@ -187,9 +187,26 @@ def inventory_stock_results(df,year,week,division,profit_center):
 
 def details(request):
     data=MaterialSheet.objects.all()
-    inventory_stock_results(data)
-    data=inventory_stock_results.data
+    df=pd.DataFrame(data.values())
 
+    division=[]
+    profit_center=[]
+    week=[]
+    year=[]
+    years = [int(i) for i in year]
+    weeks = [int(i) for i in week]
+    if len(year) > 0:
+        df=df[(df['year'].isin(years) ) & (df['week'].isin(weeks))]
+    if len(division) > 0:
+        df=df[df['division'].isin(division)]
+    if len(profit_center) > 0:
+        df=df[df['profit_center'].isin(profit_center)]
+
+    inventory_stock_results(df,year,week,division,profit_center)
+
+    data=inventory_stock_results.data
+    current_week=datetime.datetime.now().isocalendar().week
+    current_year=datetime.datetime.now().isocalendar().year
     message_success=''
 
     now = datetime.datetime.now()
@@ -204,7 +221,8 @@ def details(request):
     if request.method == 'POST':
         # Download file 
         data=MaterialSheet.objects.all()
-        inventory_stock_results(data)
+        df=pd.DataFrame(data.values())
+        inventory_stock_results(df,year,week,division,profit_center)
         data=inventory_stock_results.data
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename=inventory_stock_details_'+current_time+'.csv'
@@ -217,9 +235,15 @@ def download(request):
     data=MaterialSheet.objects.all()
     now = datetime.datetime.now()
     current_time = now.strftime("%d_%m_%y_%H:%M:%S")
+    division=[]
+    profit_center=[]
+    week=[]
+    year=[]
+    years = [int(i) for i in year]
+    weeks = [int(i) for i in week]
     if request.method == 'POST':
-        print('post passed')
-        inventory_stock_results(data)
+        df=pd.DataFrame(data.values())
+        inventory_stock_results(df,year,week,division,profit_center)
         data=inventory_stock_results.data
         with BytesIO() as b:
         # Use the StringIO object as the filehandle.

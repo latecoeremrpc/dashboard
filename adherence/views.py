@@ -1,26 +1,25 @@
-from ast import Global
-from glob import glob
-from django import db
-from django.db.models.aggregates import Sum
-from django.db.models.expressions import Case, When
-from django.http import request
-from django.http.response import HttpResponse
+# from ast import Global
+# from glob import glob
+# from django import db
+# from django.db.models.aggregates import Sum
+# from django.db.models.expressions import Case, When
+# from django.http import request
+# from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 import pandas as pd
 from pandas.core.dtypes.missing import notnull
-from pandas.core.frame import DataFrame
+# from pandas.core.frame import DataFrame
 import numpy as np 
-# from sqlalchemy import create_engine
 from .models import Zpp
 from .models import Material 
 from .models import Result 
 from .models import Coois 
-from django.db.models import Count
+# from django.db.models import Count
 from datetime import datetime, time, timedelta,date
-import time
+# import time
 import psycopg2
 from io import StringIO
-import os     
+# import os     
 
 def calcul(request):
     # Connection to db
@@ -37,25 +36,18 @@ def calcul(request):
     # holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"
     holidaysfile=r"\\prfoufiler01\donnees$\Public\input_adherence_41\CALENDRIER_SITE_2022_D.xlsx"
 
-    
     global dh #define calendar as global variable
     dh=pd.read_excel(holidaysfile)
     dh=dh.rename(columns={'FOU-2110':'2110','LAB-2000':'2000','LEC-2030':'2030','LIP-2020':'2020','COL-2010':'2010','HBG-2200':'2200','HER-2300':'2300','CAS-2400':'2400','BEL-2500':'2500','LAV-2600':'2600','QRO-2320':'2320'})
     
     for col in dh.columns:
         dh[col]= pd.to_datetime(dh[col],format='%d/%m/%Y').dt.date
+    
     #upload files
-    start_time = time.time()
-    print('start import')
     upload_zpp(conn,week,year)
     upload_coois(conn,week,year)
     upload_material(conn,week,year)
 
-    print('Time for upload files')
-    end_import=time.time()
-    print(end_import-start_time)
-
-    start_time=time.time()
     #Get data from DB
     zpp_data=Zpp.objects.all().filter(week=week)
     coois_data=Coois.objects.all().filter(week=week)
@@ -66,12 +58,11 @@ def calcul(request):
     dm=pd.DataFrame(list(material_data.values()))
 
     #Merge COOIS and ZPP
-    r1=pd.merge(dz,dc, on=["material","order","year","week"])
-    r1['division_x']=r1['division_x'].astype(np.int64,errors='ignore')
-    # r1.to_csv('r1.csv',index=False);
+    merge_coois_zpp=pd.merge(dz,dc, on=["material","order","year","week"])
+    merge_coois_zpp['division_x']=merge_coois_zpp['division_x'].astype(np.int64,errors='ignore')
+
     #Merge Material and the result betwwen COOIS and ZPP
-    merge=pd.merge(r1,dm, left_on=["material","division_x","year","week"],right_on=["material","division","year","week"])
-    # merge.to_csv('merge.csv',index=False);
+    merge=pd.merge(merge_coois_zpp,dm, left_on=["material","division_x","year","week"],right_on=["material","division","year","week"])
 
     #Apply formula 
     merge["H1_jo"]=merge["cycle_manuf"]+10
@@ -79,9 +70,6 @@ def calcul(request):
     merge["H3_jo"]=merge["cycle_manuf"]+merge["H2_jo"]
     merge["H4_jo"]=merge["H3_jo"]+30
     
-    print('end merge')
-
-    start_time = time.time()
     datalist=[]
     for index,item in merge.iterrows():
         # print(index)
@@ -222,7 +210,7 @@ def calcul(request):
             H3_15_P
             ]
         datalist.append(data)
-    end_time = time.time()
+
 
     
     dataResult=pd.DataFrame(data=datalist,columns=['year',
@@ -286,20 +274,11 @@ def calcul(request):
                                                 ])
     
     #Get the max and transform it into column
-    # dataResult["H4_global_end"]=dataResult.groupby(['division','profit_centre','planning'])['H4_end'].transform(np.max)
     dataResult["H4_global_end"]=dataResult.groupby(['profit_centre','planning'])['H4_end'].transform(np.max)
 
     dataResult.loc[dataResult["date_reference"] <= dataResult["H4_global_end"], 'H4_global'] = 1
     dataResult.loc[dataResult["date_reference"] >= dataResult["H4_global_end"], 'after_H4_global'] = 1
     dataResult.loc[(dataResult["after_H4_global"] == 1) & (dataResult["fixation"] == "X"), 'after_H4_global_fix'] = 1  
-
-    end_traitement = time.time()
-
-    print('_____Time for Traitement _________')
-    print(end_traitement - start_time)
-    print('__________________________________')  
-    start_time = time.time()
-
 
     result = StringIO()
     result.write(dataResult.to_csv(index=None, header=None))
@@ -372,16 +351,6 @@ def calcul(request):
             sep=","
         )
     conn.commit()
-
-
-
-    global total_time
-    end_time = time.time()
-    total_time = end_time - start_time
-    print('_____Time for save Result_________')
-    print("Time: ", total_time,' secondes')
-    print('__________________________________')  
-
 
     return home(request)
 
@@ -504,10 +473,6 @@ def home(request):
     'overview':overview,'indicator':indicator,
     'indicatorweek':indicatorweek,'indicator_list_weeks':indicator_list_weeks,'indicator_list_year_weeks':indicator_list_year_weeks,'indicator_list_division':indicator_list_division
     }) 
-
-
-
-
 
 
 def add_working_days(start_date, added_days,division):
