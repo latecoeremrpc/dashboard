@@ -21,6 +21,9 @@ def upload_files(request):
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
+
+    if week < 10:
+        week='0'+str(week)
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
 
     list_inv_file= r"\\centaure\Extract_SAP\SQ00-ZLIST_INV\ZLIST_INV_"+format(year)+format(week)+".xlsx"

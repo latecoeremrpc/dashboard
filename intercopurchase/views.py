@@ -70,7 +70,7 @@ def home(request):
 
 
     #Count per week per devision
-    all_intercopurchase_data=Purchase.objects.all().filter(purchasing_group__startswith='MR')
+    all_intercopurchase_data=Purchase.objects.all().filter(purchasing_group__startswith='MR').exclude(store__startswith='209')
     weekavailable=all_intercopurchase_data.values_list('week',flat=True).distinct().order_by('week') #flat=True will remove the tuples and return the list   
     yearavailable=all_intercopurchase_data.values_list('year',flat=True).distinct() #flat=True will remove the tuples and return the list  
 
@@ -198,6 +198,7 @@ def import_purchase(file,year,week,conn):
                 'purchasing_group',
                 'material',
                 'division',
+                'store',
                 'transferring_division',
                 'qte_requested',
                 'requisition_date',

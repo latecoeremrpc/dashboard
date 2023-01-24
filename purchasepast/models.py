@@ -12,6 +12,7 @@ class Purchase(models.Model):
     purchasing_group=models.CharField(null=True,max_length=20)
     material=models.CharField(null=True,max_length=20)
     division=models.CharField(null=True,max_length=20)
+    store=models.CharField(null=True,max_length=20)
     transferring_division=models.CharField(null=True,max_length=20)
     qte_requested=models.FloatField(null=True)
     requisition_date=models.DateField(null=True)

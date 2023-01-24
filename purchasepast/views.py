@@ -258,6 +258,7 @@ def import_purchase(file,t001_file,t001k_file,tcurr_file,year,week,conn):
                 'purchasing_group',
                 'material',
                 'division',
+                'store',
                 'transferring_division',
                 'qte_requested',
                 'requisition_date',

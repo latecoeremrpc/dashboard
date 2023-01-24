@@ -16,6 +16,9 @@
             <img src="{% static 'img/arrow-gradient.gif' %}" alt="" style="height:40px ;"> 
             <input class='form-control' type="week" id="period2" style="width: 30% !important;">
         </div>
+        <br>
+        <button class='btn btn-outline-primary' onclick="exportTableToExcel('example2')">Export Data To Excel File <img src="{% static 'img/download.gif' %}" alt="" style="height:35px; transform: rotate(90deg);"> </button>
+
         <table  id="example2" class="table table-hover dataTable dtr-inline" aria-describedby="example2_info">
             <thead>
                 <th id="division"></th>
@@ -69,23 +72,26 @@
         week1pmp.innerHTML = `PMP ${year1}, ${week1}`;
         week2ps.innerHTML = `PS ${year2}, ${week2} `;
         week2pmp.innerHTML = `PMP ${year2}, ${week2}`;
-        week1difference.innerHTML = `Difference ${year1}, ${week1} `;
-        week2difference.innerHTML = `Difference ${year2}, ${week2} `;    
-        if(year2 < year1 || week2 < week1){
-            tableBody.innerHTML += `
-                                <tr >
-                                    <td colspan=7>
-                                    <div class="card bg-danger">
-                                        <div class="card-body" style="text-align:center;">
-                                            <i class="fa-regular fa-circle-xmark fa-beat"></i> 
-                                            Week right must be grated than left
+        week1difference.innerHTML = `PMP-PS ${year1}, ${week1} `;
+        week2difference.innerHTML = `PMP-PS ${year2}, ${week2} `;    
+        if(year2 < year1) {
+            if(week2 < week1)
+            {
+                tableBody.innerHTML += `
+                                    <tr >
+                                        <td colspan=7>
+                                        <div class="card bg-danger">
+                                            <div class="card-body" style="text-align:center;">
+                                                <i class="fa-regular fa-circle-xmark fa-beat"></i> 
+                                                Week right must be grated than left
+                                            </div>
+
                                         </div>
+                                        </td>
 
-                                    </div>
-                                    </td>
-
-                                </tr>
-                                `;
+                                    </tr>
+                                    `;
+            }
         }
         else{
             for (let div = 0; div < divisions.length; div++) {
@@ -97,16 +103,16 @@
                         if (data[i]['division'] == divisions[div]) {
                             if (data[i]['year'] == year1 && data[i]['week'] == week1) {
                                 tableTr.innerHTML +=`
-                                <td>${data[i]['valuation_ps_euro']}</td>
-                                <td>${data[i]['valuation_pmp_euro']}</td>
-                                <td>${data[i]['valuation_pmp_euro'] - data[i]['valuation_ps_euro']}</td>
+                                <td>${data[i]['valuation_ps_euro'].toFixed(2)}</td>
+                                <td>${data[i]['valuation_pmp_euro'].toFixed(2)}</td>
+                                <td>${(data[i]['valuation_pmp_euro'] - data[i]['valuation_ps_euro']).toFixed(2)}</td>
                                 `
                             };
                             if (data[i]['year'] == year2 && data[i]['week'] == week2) {
                                 tableTr.innerHTML +=`
-                                <td>${data[i]['valuation_ps_euro']}</td>
-                                <td>${data[i]['valuation_pmp_euro']}</td>
-                                <td>${data[i]['valuation_pmp_euro'] - data[i]['valuation_ps_euro']}</td>
+                                <td>${data[i]['valuation_ps_euro'].toFixed(2)}</td>
+                                <td>${data[i]['valuation_pmp_euro'].toFixed(2)}</td>
+                                <td>${(data[i]['valuation_pmp_euro'] - data[i]['valuation_ps_euro']).toFixed(2)}</td>
                                 `
                             };
                         };
@@ -124,7 +130,39 @@
 
 </script>
 
-
+<!-- Download to Excel   -->
+<script>
+function exportTableToExcel(tableID, filename = ''){
+    var downloadLink;
+    var dataType = 'application/vnd.ms-excel';
+    var tableSelect = document.getElementById(tableID);
+    var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+    
+    // Specify file name
+    filename = filename?filename+'.xls':'excel_data.xls';
+    
+    // Create download link element
+    downloadLink = document.createElement("a");
+    
+    document.body.appendChild(downloadLink);
+    
+    if(navigator.msSaveOrOpenBlob){
+        var blob = new Blob(['\ufeff', tableHTML], {
+            type: dataType
+        });
+        navigator.msSaveOrOpenBlob( blob, filename);
+    }else{
+        // Create a link to the file
+        downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+    
+        // Setting the file name
+        downloadLink.download = filename;
+        
+        //triggering the function
+        downloadLink.click();
+    }
+}
+</script>
 
 
 {% endblock children%}

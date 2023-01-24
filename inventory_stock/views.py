@@ -19,12 +19,18 @@ def upload_files(request):
     #get current year and week
     year=datetime.datetime.today().isocalendar()[0]
     week=datetime.datetime.today().isocalendar()[1]
+    if week < 10:
+        week='0'+str(week)
+
 
 
     conn = psycopg2.connect(host='localhost',dbname='latecoere',user='postgres',password='054Ibiza',port='5432')
     material_sheet_file=r"\\centaure\Extract_SAP\SQ00-FICHE_ARTICLE\IS_FICHE_ARTICLE_"+format(year)+format(week)+".xlsx"
     zpp_flg13_file=r"\\centaure\Extract_SAP\11-ZPP_FLG13 FULL\Z13_"+format(year)+format(week)+"_2.TXT"
-    mb52_file=r"\\centaure\Extract_SAP\MB52\MB52_"+format(year)+format(week)+".xlsx"
+
+
+    
+    mb52_file=r"\\centaure\Extract_SAP\MB52\MB52_202301.xlsx"
 
     #get files with last modification
     directory_t001=glob.glob(r"\\centaure\Extract_SAP\SE16N-T001\*")
@@ -73,12 +79,16 @@ def upload_files(request):
 def home(request):
     current_week=datetime.datetime.now().isocalendar().week
     current_year=datetime.datetime.now().isocalendar().year
-    username=request.META['REMOTE_USER']
+    try:
+        username=request.META['REMOTE_USER']
+    except:
+        username=''
     all_MaterialSheet_data= MaterialSheet.objects.all().exclude(division=2100).order_by('year','week').values()
     df=pd.DataFrame(all_MaterialSheet_data)
+    # df.to_csv('df_inventory_stock.csv')
     df['period']=df['year'].astype(str)+' '+df['week'].astype(str)
     divisions=df['division'].unique()
-    divisions_list=divisions.tolist()
+    divisions_list=sorted(divisions.tolist())
     periods= df['period'].unique()
     weekavailable=df['week'].unique()
     yearavailable=df['year'].unique()
@@ -133,8 +143,8 @@ def inventory_stock_results(df,year,week,division,profit_center):
 
 
 
-    df['ps_unit_euro']=np.where( (df['currency'] == 'EUR') , (df['ps_unit_div'].astype(float)) , ( df['standard_price'].astype(float) / df['price_basis'].astype(float) /df['rate'] ) )
-    df['pmp_unit_euro']=np.where( (df['currency'] == 'EUR') , (df['pmp_unit_div'].astype(float)) , ( df['pr_moy_pond'].astype(float) / df['price_basis'].astype(float) /df['rate'] ) )
+    df['ps_unit_euro']=np.where( (df['currency'] == 'EUR') , (df['ps_unit_div'].astype(float)) , ( df['standard_price'].astype(float) / df['price_basis'].astype(float) /df['rate_budget'] ) )
+    df['pmp_unit_euro']=np.where( (df['currency'] == 'EUR') , (df['pmp_unit_div'].astype(float)) , ( df['pr_moy_pond'].astype(float) / df['price_basis'].astype(float) /df['rate_last'] ) )
 
 
     df.replace([np.inf, -np.inf], 0, inplace=True)
@@ -144,8 +154,8 @@ def inventory_stock_results(df,year,week,division,profit_center):
     df['valuation_ps_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['ps_unit_euro']
     df['valuation_pmp_euro']=(df['returnable_stock'].astype(float)+df['stock'].astype(float)+df['lot_qm'].astype(float)+df['stock_transit'].astype(float)+ df['stock_blocked'].astype(float) ) * df['pmp_unit_euro']
 
-    df['valuation_ps_euro']=np.where( (df['currency'] == 'TND') ,df['valuation_ps_euro'] / 10 , df['valuation_ps_euro'] )
-    df['valuation_pmp_euro']=np.where( (df['currency'] == 'TND') , df['valuation_pmp_euro']/ 10 , df['valuation_pmp_euro'] )
+    df['valuation_ps_euro']=np.where( (df['currency'] == 'TND') ,df['valuation_ps_euro'] / 100 , df['valuation_ps_euro'] )
+    df['valuation_pmp_euro']=np.where( (df['currency'] == 'TND') , df['valuation_pmp_euro']/ 100 , df['valuation_pmp_euro'] )
     
     inventory_stock_results.valuation_pmp_euro_cost_per_week_per_division=df.groupby(['year','week','division'])['valuation_pmp_euro'].sum().unstack().fillna(0).stack().reset_index()
     inventory_stock_results.valuation_ps_euro_cost_per_week_per_division=df.groupby(['year','week','division'])['valuation_ps_euro'].sum().unstack().fillna(0).stack().reset_index()
@@ -272,7 +282,7 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     print('End df_t001k')
     df_tcurr=pd.read_excel(tcurr_file)
     print('End df_tcurr')
-    df_zpp_flg13=dd.read_csv(zpp_flg13_file,encoding='ANSI',sep=';', header=0, dtype={'Division': 'object','Gestionnaire':'object','Type article':'object','Taille de lot maxi':'object'})
+    df_zpp_flg13=dd.read_csv(zpp_flg13_file,encoding='ANSI',sep=';', header=0, dtype={'Division': 'object','Gestionnaire':'object','Ty':'object','Type article':'object','Taille de lot maxi':'object'})
     print('End ZPP FLG13')
     new_columns = [
     "Division",
@@ -362,11 +372,14 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
     df_t001.rename(columns={'Société':'company','Devise':'currency'},  inplace = True)
 
     df_tcurr=df_tcurr[ ( df_tcurr['Type de cours'].isin(['M','P']) ) & (df_tcurr['Devise cible']=='EUR') ]
-    # df_tcurr=df_tcurr.iloc[:, [2,3,4]]
     df_tcurr.rename(columns={'Dev. source':'target_currency','Début validité':'date','Taux':'rate'},  inplace = True)
     df_tcurr['date']=pd.to_datetime( df_tcurr['date'])
     df_tcurr=df_tcurr.sort_values(['target_currency', 'date'],ascending = [True, False])
-    df_tcurr=df_tcurr.groupby(['target_currency'])['rate'].first().reset_index() 
+    df_tcurr_budget=df_tcurr[df_tcurr['Type de cours']=='P']
+    df_tcurr_last=df_tcurr[df_tcurr['Type de cours']=='M']
+
+    df_tcurr_budget=df_tcurr_budget.groupby(['target_currency'])['rate'].first().reset_index() 
+    df_tcurr_last=df_tcurr_last.groupby(['target_currency'])['rate'].first().reset_index() 
 
         # Get company from t0001k
     df_t001k_dict=dict(zip(df_t001k['division'],df_t001k['company']))
@@ -374,13 +387,20 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
         # Get currency from t001
     df_t001_dict=dict(zip(df_t001['company'],df_t001['currency']))
     df_zpp_flg13['currency']=df_zpp_flg13['company'].map(df_t001_dict)
-        # Get rate  from tcurr
-    df_tcurr_dict=dict(zip(df_tcurr['target_currency'],df_tcurr['rate']))
-    df_zpp_flg13['rate']=df_zpp_flg13['currency'].map(df_tcurr_dict)
-    df_zpp_flg13['rate'] = df_zpp_flg13['rate'].str.replace(',','.')
-    df_zpp_flg13['rate'] = df_zpp_flg13['rate'].str.lstrip('/').str[0:]
-    df_zpp_flg13['rate']=df_zpp_flg13['rate'].fillna(1)
-    df_zpp_flg13['rate']=df_zpp_flg13['rate'].astype(float)
+        # Get rate budget from tcurr
+    df_tcurr_dict_budget=dict(zip(df_tcurr['target_currency'],df_tcurr['rate']))
+    df_zpp_flg13['rate_budget']=df_zpp_flg13['currency'].map(df_tcurr_dict_budget)
+    df_zpp_flg13['rate_budget'] = df_zpp_flg13['rate_budget'].str.replace(',','.')
+    df_zpp_flg13['rate_budget'] = df_zpp_flg13['rate_budget'].str.lstrip('/').str[0:]
+    df_zpp_flg13['rate_budget']=df_zpp_flg13['rate_budget'].fillna(1)
+    df_zpp_flg13['rate_budget']=df_zpp_flg13['rate_budget'].astype(float)
+            # Get rate last from tcurr
+    df_tcurr_dict_last=dict(zip(df_tcurr['target_currency'],df_tcurr['rate']))
+    df_zpp_flg13['rate_last']=df_zpp_flg13['currency'].map(df_tcurr_dict_last)
+    df_zpp_flg13['rate_last'] = df_zpp_flg13['rate_last'].str.replace(',','.')
+    df_zpp_flg13['rate_last'] = df_zpp_flg13['rate_last'].str.lstrip('/').str[0:]
+    df_zpp_flg13['rate_last']=df_zpp_flg13['rate_last'].fillna(1)
+    df_zpp_flg13['rate_last']=df_zpp_flg13['rate_last'].astype(float)
 
     df_mb52=df_mb52.iloc[:,[0,1,14]]
     df_mb52.columns =['Material', 'Division', 'bloqued']
@@ -446,7 +466,8 @@ def import_files(material_sheet_file,zpp_flg13_file,mb52_file,t001_file,t001k_fi
                 'pr_moy_pond',
                 'company',
                 'currency', 
-                'rate', 
+                'rate_budget', 
+                'rate_last',
                 'stock_blocked',
             ],
             null="",

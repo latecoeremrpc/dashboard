@@ -32,6 +32,8 @@ def calcul(request):
     if week==0:
         week=52
         year=year-1
+    if week < 10:
+        week='0'+str(week)
 
     # holidaysfile=r"\\sp-is.lat.corp\sites\PlanifProd\MasterDataPDP\CALENDRIER_SITE_2022_C.xlsx"
     holidaysfile=r"\\prfoufiler01\donnees$\Public\input_adherence_41\CALENDRIER_SITE_2022_D.xlsx"
