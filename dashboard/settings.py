@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'intercopurchase',
     'inventory_accuracy',
     'inventory_stock',
+    'customer_order_past',
 ]
 
 MIDDLEWARE = [

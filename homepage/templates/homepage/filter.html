@@ -9,6 +9,7 @@
 
 <div class="card-body">
     {% csrf_token %}
+    
     <div class="row">
         <div class="col-lg- col-6">
             <label for=" inputEmail4">Years: 
@@ -465,7 +466,12 @@ $(document).ready(function() {
             }) ; 
             return false;
           }
-    
+
+        // Get Data from Range 
+        data=mySlider.getValue();
+        document.getElementById('dateRange').value = data;
+        console.log(data);
+
         });
     });
     

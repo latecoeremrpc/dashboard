@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        {% if message_error %}
+            {%include 'homepage\error_msg.html'%}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">  
+                    <div class="card-header">
+                        <h5 class="m-0">Filter</h5> 
+                    </div>
+                    <form action={% url 'CustomerOrderPastHome' %} method="post">
+                        {%include 'homepage/filter.html' %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                {% include 'customer_order_past\count.html' %}
+            </div>
+            <div class="col-6">
+                {% include 'customer_order_past\cost.html' %}
+            </div>
+
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col-lg-6">
+                {% include 'customer_order_past\count_customer_order_per_division.html' %}
+            </div>
+            <div class="col-lg-6">
+                {% include 'customer_order_past\cost_customer_order_per_division.html' %}
+                
+            </div>   
+            <div class="col-lg-6">
+                {% include 'customer_order_past\count_customer_order_per_cp.html' %}
+            </div>   
+            <div class="col-lg-6">
+                {% include 'customer_order_past\cost_customer_order_per_cp.html' %}
+                
+            </div>  
+            <div class="col-lg-6">
+                {% include 'customer_order_past\count_customer_order_per_organisme.html' %}
+            </div>  
+            <div class="col-lg-6">
+                {% include 'customer_order_past\cost_customer_order_per_organisme.html' %}
+            </div>  
+            <div class="col-lg-6">
+                {% include 'customer_order_past\count_customer_order_per_errors.html' %}
+            </div> 
+            <div class="col-lg-6">
+                {% include 'customer_order_past\cost_customer_order_per_errors.html' %}
+            </div> 
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function selectAllDivision(){
+        var items=document.getElementsByName('division');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=true;
+        }
+        document.getElementById('selectdivision').style.display = "none";
+        document.getElementById('unselectdivision').style.display = "block";
+    }
+    
+    function UnSelectAllDivision(){
+        var items=document.getElementsByName('division');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=false;
+        }
+        document.getElementById('selectdivision').style.display = "block";
+        document.getElementById('unselectdivision').style.display = "none";
+    }			
+</script>
+
+
+<script type="text/javascript">
+    function selectAllWeek(){
+        var items=document.getElementsByName('week');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=true;
+        }
+        document.getElementById('selectweek').style.display = "none";
+        document.getElementById('unselectweek').style.display = "block";
+    }
+    
+    function UnSelectAllWeek(){
+        var items=document.getElementsByName('week');
+        for(var i=0; i<items.length; i++){
+            if(items[i].type=='checkbox')
+                items[i].checked=false;
+        }
+        document.getElementById('selectweek').style.display = "block";
+        document.getElementById('unselectweek').style.display = "none";
+    }			
+</script>
+{% endblock %}
+

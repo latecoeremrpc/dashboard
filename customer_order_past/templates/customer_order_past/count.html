@@ -1,0 +1,19 @@
+{% extends 'base2.html' %}
+{% block children %}
+
+    <!-- small box -->
+    <div class="small-box bg-success" style="margin-bottom:0 !important; background: rgb(0,0,0);
+    background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(11,38,89,1) 0%);" >
+        <div class="inner">
+        <h3>{{details_order_past_per_divsion.count__sum}}<sup style="font-size: 15px"></sup></h3>
+        <p>Cutomer Orders in the past </p>
+        </div>
+        <div class="icon" style='color:rgb(248 249 250 / 49%) !important'>
+            <i class="far fa-chart-bar"></i>
+        </div>
+        <a href='{% url 'CustomerOrderPastHome' %}' class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+
+    </div>
+
+
+{% endblock children%}

@@ -1,0 +1,148 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block children %}
+<!-- Info Modal -->
+<div class="modal fade " id="cost_order_past_per_errors_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Informations</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><b>Documentation</b> : TBD  </li>
+                <li class="list-group-item"><b>Input</b> : SQ00-CUSTOMER_ORDERING_BOOK_RAE , SE16N-CEPC, SE16N-TCURR </li>
+                <li class="list-group-item"><b>Filter</b> :  </li>
+                <li class="list-group-item"><b>Rule</b> : 
+                    <ul>
+                        <li>Designation CP = CCCLIENT!CtrPr & "-" & CEPC!Déign. centre de pro. ON CCCLIENT!CtrPr = CEPC!Centre de profit</li>
+                        <li>Program responsible = CEPEC!Respnsable centre de profit ON CCCLIENT!CtrPr = CEPC!Centre de profit</li>
+                        <li>Rate = TCURR!Taux ON TCURR!Devise source = CCCLIENT!Dev. and TCURR!Type de cours = "M"</li>
+                        <li>Gt than 1 month in the past = if De Lv.Souh < Monday extract weel less 1 month</li>
+                        <li>Less than 1 month in the past = if De Lv.Souh > Monday extract weel less 1 month</li>
+                        <li>Error Bill vs price = if (CCCLIENT!Non Fact = "" and CCCLIENT!Prix net = 0) or (CCCLIENT!Non Fact = "X" and CCCLIENT:Prix net <> 00)</li>
+                        <li>Error Routes = if CCCLIENT!ltin = "" and CCCLIENT!Article Interne start with "IS" </li>
+                        
+                    </ul>                
+                </li>
+            </ul>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+        </div>
+    </div>
+</div>
+<div class="card card-primary card-outline" style="overflow-x:scroll;overflow-y:scroll;height: 600px !important; ">
+                    
+    <div class="card-header">
+        <div class="card-tools" style="margin-right: -0.8rem;" >
+            <form action={%url 'homesettings' %} method='POST'>
+                {% csrf_token %}
+                <input name="kpi" type="hidden" value="customer_order_past\cost_order_past_per_errors"> 
+                <input name="col" type="hidden" value="6"> 
+            <ul class="list-group list-group-horizontal" style="height: 35px;">
+                <li class="list-group-item" style="padding:7px;"><i type="button"  data-toggle="modal" data-target="#cost_order_past_per_errors_modal" class="info fas fa-info-circle"></i></li>
+                <li class="list-group-item" style="padding:7px;"><button type="submit" style="border: none;background: none;padding: 0;"><i class=" favorite fas fa-heart" {%if 'customer_order_past\\cost_order_past_per_errors.html' in homekpi %} style="color:red;" {%endif%} ></i></button></li>
+            </form>
+            <li class="list-group-item" style="padding:7px;"><i type="button" class="download fas fa-download" id="btn-download-order_past_per_errors"></i></li>
+            <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></button></i></li>
+            </ul>
+        </div>
+        <h5 class="m-0">Cost Customer order per error (Euro)</h5>
+    </div>
+    <div class="card-body" style="display: block;">
+        <h6 class="card-title ">Week(s):
+            <ul class="list-group list-group-horizontal" style="margin-top: 10px; margin-bottom: 10px;">
+                {%for index, data  in intercopurchase_allweeks %} 
+                <li class="list-group-item" style="padding:0.4rem 0.6rem">{{data.year}}_{{data.week}}</li>
+                {%endfor%}
+            </ul> 
+            
+        </h6> 
+        {% if order_past_per_errors %}
+        <div style="height: 400px" >
+            <canvas id="cost_order_past_per_errors" ></canvas>
+        
+            <script>
+
+                const cost_order_past_per_errors=new Chart("cost_order_past_per_errors", {
+                // plugins: [ChartDataLabels],
+                type: "bar",
+                data: {
+                        labels: [{% for data in order_past_per_errors %}  '{{data.error}}', {% endfor %}],
+                        datasets: [
+                                {
+                                label: 'Count',
+                                backgroundColor:   ['#845EC2','#D65DB1','#FF6F91','#FF9671','#FFC75F','#008F7A','#4E8397','#C34A36'],
+                                // borderColor:  ["#" + randomColor],
+                                borderWidth: 1,
+                                data: [
+                                    {% for data in order_past_per_errors %}  {{data.price}}, {% endfor %}
+                                    ]
+                                },
+                            
+                        ]
+                        },
+                options: {
+                    plugins: {
+                            datalabels: {
+                                // anchor: 'end',
+                                display: false,
+                                clamp: true,
+                                color: 'white',
+                                backgroundColor: '#404040',
+                            },
+                            legend: {
+                            display: false,
+                            position:'left',
+                            align:'middle',
+                            labels: {
+                            usePointStyle: true,
+                            boxWidth: 6,
+
+                            },
+                            },
+
+                            title: {
+                                display: false,
+                                text: "tile"
+                            },
+                            
+                            
+                        },
+
+                        responsive: true,
+                        maintainAspectRatio:false, 
+                }
+            });
+            var image =cost_order_past_per_errors.toBase64Image();
+            document.getElementById('btn-download-cost_order_past_per_errors').onclick = function() {
+            var a = document.createElement('a');
+            a.href =cost_order_past_per_errors.toBase64Image();
+            a.download = 'Interco intercopurchase count to receive per week per division';
+            a.click();
+            }
+
+            </script>
+
+
+        </div>
+        {% else %}
+        <center style="margin-top: 15%;"><img src="{% static 'img/nodatafound.png' %}" alt="">
+            <p class="card-text text-center">
+                No Data available for this selection
+            </p>
+            <a class="btn btn-primary" href="{% url 'CustomerOrdercalcul' %}" role="button">Calculate now</a>
+        </center>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock children%}

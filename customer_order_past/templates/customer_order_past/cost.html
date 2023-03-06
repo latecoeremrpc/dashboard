@@ -1,0 +1,18 @@
+{% extends 'base2.html' %}
+{% block children %}
+{% load humanize %}
+
+        <!-- small box -->
+        <div class="small-box bg-danger"  style="margin-bottom:0 !important; background-color:#FF9671 !important;">
+            <div class="inner">
+            <h3>{{details_order_past_per_divsion.price__sum|intword}}<sup style="font-size: 15px"> euro</sup></h3>
+            <p>Real cost</p>
+            </div>
+            <div class="icon" style='color:rgb(248 249 250 / 49%) !important'>
+                <i class="fas fa-euro-sign"></i>
+            </div>
+            <a href='{% url 'CustomerOrderPastHome' %}' class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+
+
+{% endblock children%}

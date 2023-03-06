@@ -28,5 +28,9 @@ urlpatterns = [
     path('dashboard/convertpdf/', include('convertpdf.urls')),
     path('dashboard/logistics/inventory_accuracy/', include('inventory_accuracy.urls')),
     path('dashboard/logistics/inventory_stock/', include('inventory_stock.urls')),
+    path('dashboard/program/customer_order_past/', include('customer_order_past.urls')),
+
+
+    
 
 ]

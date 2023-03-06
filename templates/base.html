@@ -24,6 +24,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css'%}">
   <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css'%}">
   
+  <!-- Range -->
+  <link rel="stylesheet" href="{% static 'css/rSlider.min.css'%}">
+  <script type="text/javascript" src="{% static 'rSlider.min.js' %}"></script> 
+
+
 
   <!-- Theme style (Admin LTE)-->
   <link rel="stylesheet" href="{% static 'css/adminlte.css' %}">
@@ -448,6 +453,31 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 > 
                   <i class="far fa-circle nav-icon"></i>
                   <p>Supplier PR in the past</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item               
+          {% if '/dashboard/program' in request.get_full_path  %} menu-open 
+          {% endif %}">
+            <a href="#" class="nav-link
+            {% if '/dashboard/program' in request.get_full_path  %} active 
+            {% endif %}">
+              <i class="nav-icon fas fa-solid fa-receipt"></i>
+              <p>
+                Program
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href={% url 'CustomerOrderPastHome' %} class="nav-link 
+                {% if request.get_full_path == '/dashboard/program/customer_order_past/' %} active 
+                {% endif %}"
+                > 
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Customer order past</p>
                 </a>
               </li>
             </ul>
